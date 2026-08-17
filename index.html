@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AegisGuard | Next-Gen Cyber Security Intelligence & Defense Portal</title>
+  <meta name="description" content="Enterprise cybersecurity intelligence portal featuring live threat vectors, security header diagnostics, password entropy analysis, CVE vulnerability explorer, and incident playbooks.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+</head>
+<body>
+
+  <!-- Sticky Top Navigation -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="#" class="logo-group" id="nav-logo">
+        <div class="logo-icon">🛡️</div>
+        <div class="logo-text">Aegis<span>Guard</span></div>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#threat-map" class="nav-link">Threat Map</a></li>
+          <li><a href="#toolkit" class="nav-link">Security Toolkit</a></li>
+          <li><a href="#cve-feed" class="nav-link">CVE Intel</a></li>
+          <li><a href="#playbooks" class="nav-link">Incident Playbooks</a></li>
+          <li><a href="#audit-calculator" class="nav-link">Audit Score</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-controls">
+        <div class="status-badge">
+          <span class="pulse-dot"></span>
+          <span>DEFCON 4 • OPERATIONAL</span>
+        </div>
+        <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme" aria-label="Toggle Theme">🌙</button>
+        <button class="btn btn-primary" id="openEmergencyModalBtn">🚨 Emergency Incident</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Live Threat Feed Ticker -->
+  <div class="ticker-bar" aria-label="Live Threat Stream">
+    <div class="ticker-label">LIVE THREAT FEED</div>
+    <div class="ticker-content" id="threatTickerContent">
+      <span><strong class="highlight">[CRITICAL]</strong> CVE-2026-21840 Remote Code Execution in Apache HTTP Server (CVSS 9.8)</span>
+      <span><strong class="highlight">[RANSOMWARE]</strong> LockBit 4.0 variant detected targeting automotive supply chain networks</span>
+      <span><strong class="highlight">[DDOS]</strong> Active 1.2 Tbps SYN Flood scrubbing initiated for APAC Cloud region</span>
+      <span><strong class="highlight">[ZERO-DAY]</strong> Chrome V8 JIT compiler memory corruption bug patch released (UPDATE NOW)</span>
+      <span><strong class="highlight">[PHISHING]</strong> Spear-phishing campaign impersonating Microsoft Entra ID SSO portal detected</span>
+    </div>
+  </div>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="hero-badge">⚡ ACTIVE DEFENSE PROTOCOL ACTIVE</div>
+          <h1 class="hero-title">Continuous Cyber Threat <span>Intelligence & Diagnostics</span></h1>
+          <p class="hero-subtitle">Empowering security teams with real-time domain header diagnostics, cryptographic entropy analysis, live CVE vulnerability telemetry, and automated response playbooks.</p>
+          
+          <div class="hero-actions">
+            <a href="#toolkit" class="btn btn-primary">Launch Diagnostic Tools 🛠️</a>
+            <a href="#threat-map" class="btn btn-secondary">Explore Live Threat Map 🌐</a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-value" id="statScannedDomains">24,819</div>
+              <div class="stat-label">Scanned Domains</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statMonitoredCVEs">8,410</div>
+              <div class="stat-label">Indexed CVEs</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" style="color: var(--accent-emerald);">99.98%</div>
+              <div class="stat-label">Defense Uptime</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-media">
+          <img src="assets/security_hero.jpg" alt="AegisGuard Security Operations Center Visualization" width="600" height="340">
+          <div class="hero-overlay-card">
+            <div class="hero-overlay-info">
+              <div class="hero-overlay-icon">✓</div>
+              <div>
+                <strong style="display:block; font-size: 0.9rem;">Real-Time Telemetry Node</strong>
+                <span style="font-size: 0.75rem; color: var(--text-secondary);">Latency: 14ms • Packet Loss: 0%</span>
+              </div>
+            </div>
+            <button class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" id="refreshTelemetryBtn">Refresh</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Global Cyber Threat Map Canvas -->
+    <section class="section" id="threat-map">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">// GLOBAL TELEMETRY</span>
+          <h2 class="section-title">Live Cyber Attack Vector Map</h2>
+          <p class="section-desc">Simulated real-time tracking of global cyber attack traffic, malware command & control nodes, and scrubbing center telemetry.</p>
+        </div>
+
+        <div class="map-container">
+          <canvas id="threatCanvas"></canvas>
+          <div class="map-legend">
+            <div class="legend-item"><span class="legend-dot" style="background: var(--accent-cyan);"></span> C2 Ping</div>
+            <div class="legend-item"><span class="legend-dot" style="background: var(--accent-rose);"></span> Ransomware / Exploit</div>
+            <div class="legend-item"><span class="legend-dot" style="background: var(--accent-amber);"></span> DDoS Scrubbing</div>
+            <div class="legend-item"><span class="legend-dot" style="background: var(--accent-emerald);"></span> Protected Node</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Security Toolkit Section -->
+    <section class="section" id="toolkit">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">// INTERACTIVE DIAGNOSTICS</span>
+          <h2 class="section-title">Cyber Security Toolkit Hub</h2>
+          <p class="section-desc">Instant client-side security auditing tools designed for DevOps, SOC analysts, and system administrators.</p>
+        </div>
+
+        <div class="tools-grid">
+          <!-- Sidebar Navigation -->
+          <ul class="tool-nav-list" role="tablist">
+            <li>
+              <button class="tool-nav-btn active" data-target="panel-headers" role="tab" id="tab-headers">
+                <span>🌐</span> Domain Security Headers
+              </button>
+            </li>
+            <li>
+              <button class="tool-nav-btn" data-target="panel-entropy" role="tab" id="tab-entropy">
+                <span>🔑</span> Password & Hash Entropy
+              </button>
+            </li>
+            <li>
+              <button class="tool-nav-btn" data-target="panel-phishing" role="tab" id="tab-phishing">
+                <span>🔍</span> Phishing Link Inspector
+              </button>
+            </li>
+            <li>
+              <button class="tool-nav-btn" data-target="panel-darkweb" role="tab" id="tab-darkweb">
+                <span>🕵️</span> Dark Web Exposure Check
+              </button>
+            </li>
+          </ul>
+
+          <!-- Tool Panel Contents -->
+          <div class="tool-content-area">
+            
+            <!-- Panel 1: Security Headers Scanner -->
+            <div class="tool-panel active card" id="panel-headers" role="tabpanel">
+              <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;">HTTP Security Headers & SSL Scanner</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Evaluate your web application's defense posture against clickjacking, XSS, MIME sniffing, and SSL downgrade vectors.</p>
+              
+              <form id="headerScanForm" onsubmit="return false;">
+                <div class="form-group">
+                  <label class="form-label" for="domainInput">Target Domain or URL</label>
+                  <div class="input-row">
+                    <input type="text" id="domainInput" class="form-input" placeholder="e.g. secure-portal.company.com" required>
+                    <button type="submit" class="btn btn-primary" id="runHeaderScanBtn">Run Audit ⚡</button>
+                  </div>
+                </div>
+              </form>
+
+              <div class="results-container" id="headerResultsContainer" style="display: none;">
+                <div class="gauge-row">
+                  <div>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); display: block;">OVERALL SECURITY GRADE</span>
+                    <strong id="headerScoreLabel" style="font-size: 1.2rem; color: var(--accent-cyan);">A+ SECURE</strong>
+                  </div>
+                  <div class="gauge-score" id="headerScoreNumber" style="color: var(--accent-emerald);">94 / 100</div>
+                </div>
+
+                <div class="header-checks-grid" id="headerChecksGrid">
+                  <!-- Dynamically populated by app.js -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel 2: Password Entropy Engine & Hash Generator -->
+            <div class="tool-panel card" id="panel-entropy" role="tabpanel">
+              <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;">Password Entropy & Crypto Hash Engine</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Test credential entropy against quantum cracking hardware and generate client-side SHA-256 hashes.</p>
+
+              <div class="form-group">
+                <label class="form-label" for="passInput">Enter Test Password / Secret Phrase</label>
+                <input type="password" id="passInput" class="form-input" placeholder="Type password here..." autocomplete="off">
+              </div>
+
+              <div class="entropy-meter">
+                <div class="entropy-bar" id="entropyBar"></div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 1.25rem;">
+                <span>Entropy Rating: <strong id="entropyRatingText" style="color: var(--accent-rose);">None</strong></span>
+                <span class="mono" id="entropyBitsText">0 bits</span>
+              </div>
+
+              <div class="entropy-stats-grid">
+                <div class="mini-stat-card">
+                  <div class="mini-stat-val" id="crackTimeGpu">0s</div>
+                  <div class="mini-stat-lbl">NVIDIA RTX 4090 Cluster</div>
+                </div>
+                <div class="mini-stat-card">
+                  <div class="mini-stat-val" id="crackTimeCloud">0s</div>
+                  <div class="mini-stat-lbl">Distributed Cloud Botnet</div>
+                </div>
+                <div class="mini-stat-card">
+                  <div class="mini-stat-val" id="passCharacterCount">0</div>
+                  <div class="mini-stat-lbl">Character Length</div>
+                </div>
+              </div>
+
+              <div style="margin-top: 1.75rem;">
+                <label class="form-label">Client-Side SHA-256 Hash</label>
+                <div class="hash-output-box">
+                  <span id="sha256HashOutput">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
+                  <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" id="copyHashBtn">Copy</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel 3: Phishing Link Inspector -->
+            <div class="tool-panel card" id="panel-phishing" role="tabpanel">
+              <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;">Phishing & Typosquatting Link Inspector</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Deconstruct suspicious URLs, identify homograph attacks, lookalike domains, and suspicious IP redirects.</p>
+
+              <form id="phishingForm" onsubmit="return false;">
+                <div class="form-group">
+                  <label class="form-label" for="phishingUrlInput">Suspicious URL to Inspect</label>
+                  <div class="input-row">
+                    <input type="text" id="phishingUrlInput" class="form-input" placeholder="e.g. http://login-paypalls-update.com/signin" required>
+                    <button type="submit" class="btn btn-primary" id="inspectUrlBtn">Inspect URL</button>
+                  </div>
+                </div>
+              </form>
+
+              <div id="phishingResults" style="display: none; margin-top: 1.5rem;" class="results-container">
+                <!-- Dynamically updated -->
+              </div>
+            </div>
+
+            <!-- Panel 4: Dark Web Exposure Check Simulator -->
+            <div class="tool-panel card" id="panel-darkweb" role="tabpanel">
+              <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;">Dark Web Exposure Search Simulator</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Check if enterprise email accounts or domains exist in public breach corpuses or dark web stealer log archives.</p>
+
+              <form id="darkwebForm" onsubmit="return false;">
+                <div class="form-group">
+                  <label class="form-label" for="darkwebEmailInput">Email Address or Enterprise Domain</label>
+                  <div class="input-row">
+                    <input type="email" id="darkwebEmailInput" class="form-input" placeholder="employee@company.com" required>
+                    <button type="submit" class="btn btn-primary" id="checkDarkwebBtn">Check Exposure</button>
+                  </div>
+                </div>
+              </form>
+
+              <div id="darkwebResults" style="display: none; margin-top: 1.5rem;" class="results-container">
+                <!-- Dynamically updated -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CVE & Threat Intelligence Explorer -->
+    <section class="section" id="cve-feed">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">// VULNERABILITY TELEMETRY</span>
+          <h2 class="section-title">CVE Threat Intelligence Explorer</h2>
+          <p class="section-desc">Search and filter active Common Vulnerabilities and Exposures (CVEs) curated from NVD and CISA KEV catalogs.</p>
+        </div>
+
+        <div class="cve-toolbar">
+          <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <input type="text" id="cveSearchInput" class="form-input" placeholder="Search by CVE ID, software (e.g., Linux, Apache, Chrome), or keyword...">
+          </div>
+          <ul class="filter-pills">
+            <li><button class="filter-btn active" data-severity="ALL">All Severities</button></li>
+            <li><button class="filter-btn" data-severity="CRITICAL">Critical</button></li>
+            <li><button class="filter-btn" data-severity="HIGH">High</button></li>
+            <li><button class="filter-btn" data-severity="MEDIUM">Medium</button></li>
+          </ul>
+        </div>
+
+        <div class="cve-list" id="cveListContainer">
+          <!-- Dynamically populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Incident Response Playbooks -->
+    <section class="section" id="playbooks">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">// CONTAINMENT DRILLS</span>
+          <h2 class="section-title">Incident Response Playbooks</h2>
+          <p class="section-desc">Interactive SOP workflows for SOC analysts during live cyber security incidents.</p>
+        </div>
+
+        <div class="playbook-accordion" id="playbookAccordion">
+          
+          <!-- Playbook 1 -->
+          <div class="playbook-item open">
+            <div class="playbook-header">
+              <div class="playbook-title-group">
+                <div class="playbook-icon">🦠</div>
+                <div>
+                  <strong style="font-size: 1.1rem; display: block;">Ransomware Outbreak & Containment Protocol</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">SOP-SEC-0104 • Severity Level 1</span>
+                </div>
+              </div>
+              <span class="mono" style="color: var(--accent-cyan);">Click to toggle ▾</span>
+            </div>
+            <div class="playbook-content">
+              <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Execute these steps immediately upon discovering unauthorized file encryption or volume shadow copy deletion.</p>
+              
+              <div class="checklist">
+                <label class="checklist-step">
+                  <input type="checkbox">
+                  <div>
+                    <strong>1. Isolate Affected Subnet VLANs</strong>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Disable switch ports, sever WiFi SSIDs, and isolate virtual hosts in hypervisor to halt worm propagation.</p>
+                  </div>
+                </label>
+                <label class="checklist-step">
+                  <input type="checkbox">
+                  <div>
+                    <strong>2. Preserve Memory Dump & Volatile Artifacts</strong>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Extract RAM image using WinPmem/LiME prior to powering off hosts to capture encryption keys.</p>
+                  </div>
+                </label>
+                <label class="checklist-step">
+                  <input type="checkbox">
+                  <div>
+                    <strong>3. Revoke Domain Admin & Service Credentials</strong>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Reset Kerberos Ticket Granting Ticket (KRBTGT) twice in Active Directory.</p>
+                  </div>
+                </label>
+                <label class="checklist-step">
+                  <input type="checkbox">
+                  <div>
+                    <strong>4. Verify Offline Backup Integrity</strong>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Confirm air-gapped immutable backup snapshot health prior to initiating host re-imaging.</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Playbook 2 -->
+          <div class="playbook-item">
+            <div class="playbook-header">
+              <div class="playbook-title-group">
+                <div class="playbook-icon">🌊</div>
+                <div>
+                  <strong style="font-size: 1.1rem; display: block;">Volumetric & Application Layer DDoS Scrubbing</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">SOP-SEC-0209 • Severity Level 2</span>
+                </div>
+              </div>
+              <span class="mono" style="color: var(--accent-cyan);">Click to toggle ▾</span>
+            </div>
+            <div class="playbook-content">
+              <div class="checklist">
+                <label class="checklist-step">
+                  <input type="checkbox">
+                  <div>
+                    <strong>1. Enable Cloudflare / Akamai Under Attack Mode</strong>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Enforce JavaScript challenges and rate-limiting rules at edge proxies.</p>
+                  </div>
+                </label>
+                <label class="checklist-step">
+                  <input type="checkbox">
+                  <div>
+                    <strong>2. Activate BGP Anycast Scrubbing Route</strong>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Reroute autonomous system (AS) incoming traffic through upstream ISP cleaning centers.</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Security Maturity Audit Calculator -->
+    <section class="section" id="audit-calculator">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">// ENTERPRISE READINESS</span>
+          <h2 class="section-title">Security Posture Maturity Calculator</h2>
+          <p class="section-desc">Answer 5 quick strategic questions to benchmark your organization's cybersecurity defense score.</p>
+        </div>
+
+        <div class="card audit-quiz-card">
+          <div id="quizWizard">
+            
+            <!-- Step 1 -->
+            <div class="quiz-step active" data-step="1">
+              <span style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.8rem;">QUESTION 1 OF 5</span>
+              <h3 style="margin: 0.5rem 0 1rem;">How is Multi-Factor Authentication (MFA) enforced across your infrastructure?</h3>
+              <div class="quiz-options">
+                <button class="quiz-opt-btn" data-score="30">
+                  <span>Enforced everywhere with FIDO2 / Passkeys / Hardware Tokens</span>
+                  <span class="mono">+30 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="20">
+                  <span>Enforced for remote & admin users using Authenticator Push Apps</span>
+                  <span class="mono">+20 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="10">
+                  <span>SMS / Email OTP codes used optionally</span>
+                  <span class="mono">+10 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="0">
+                  <span>No MFA or passwords only</span>
+                  <span class="mono">+0 pts</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="quiz-step" data-step="2">
+              <span style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.8rem;">QUESTION 2 OF 5</span>
+              <h3 style="margin: 0.5rem 0 1rem;">What Endpoint Detection & Response (EDR) telemetry is deployed?</h3>
+              <div class="quiz-options">
+                <button class="quiz-opt-btn" data-score="25">
+                  <span>Managed EDR / XDR active on 100% endpoints with 24/7 SOC monitoring</span>
+                  <span class="mono">+25 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="15">
+                  <span>Standard Anti-Virus installed with centralized log collection</span>
+                  <span class="mono">+15 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="0">
+                  <span>Default OS Windows Defender with no central monitoring</span>
+                  <span class="mono">+0 pts</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="quiz-step" data-step="3">
+              <span style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.8rem;">QUESTION 3 OF 5</span>
+              <h3 style="margin: 0.5rem 0 1rem;">How frequently are backups tested and air-gapped?</h3>
+              <div class="quiz-options">
+                <button class="quiz-opt-btn" data-score="25">
+                  <span>Daily automated immutable air-gapped backups with quarterly bare-metal recovery tests</span>
+                  <span class="mono">+25 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="15">
+                  <span>Regular cloud backups without periodic recovery testing</span>
+                  <span class="mono">+15 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="0">
+                  <span>Manual or local external drive backups</span>
+                  <span class="mono">+0 pts</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="quiz-step" data-step="4">
+              <span style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.8rem;">QUESTION 4 OF 5</span>
+              <h3 style="margin: 0.5rem 0 1rem;">What is your patching SLA for Critical / High severity CVEs?</h3>
+              <div class="quiz-options">
+                <button class="quiz-opt-btn" data-score="10">
+                  <span>Patched within 24 to 72 hours of publication</span>
+                  <span class="mono">+10 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="5">
+                  <span>Patched within 30 days</span>
+                  <span class="mono">+5 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="0">
+                  <span>Ad-hoc / Unscheduled patching</span>
+                  <span class="mono">+0 pts</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="quiz-step" data-step="5">
+              <span style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.8rem;">QUESTION 5 OF 5</span>
+              <h3 style="margin: 0.5rem 0 1rem;">Are phishing simulations and incident drills conducted?</h3>
+              <div class="quiz-options">
+                <button class="quiz-opt-btn" data-score="10">
+                  <span>Monthly phishing tests & annual tabletop incident response exercises</span>
+                  <span class="mono">+10 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="5">
+                  <span>Annual compliance security training video</span>
+                  <span class="mono">+5 pts</span>
+                </button>
+                <button class="quiz-opt-btn" data-score="0">
+                  <span>No security awareness training</span>
+                  <span class="mono">+0 pts</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Final Result Step -->
+            <div class="quiz-step" id="quizResultStep">
+              <div style="text-align: center; padding: 1rem 0;">
+                <span style="font-size: 3rem; display: block; margin-bottom: 0.5rem;">🏆</span>
+                <h3 style="font-size: 1.75rem; margin-bottom: 0.5rem;">Audit Score Analysis Complete</h3>
+                <div style="font-size: 3.5rem; font-weight: 800; font-family: var(--font-mono); color: var(--accent-cyan);" id="quizFinalScore">0 / 100</div>
+                <p id="quizTierBadge" style="font-weight: 700; color: var(--accent-emerald); margin-bottom: 1rem; font-size: 1.2rem;">TIER 4: ENTERPRISE SENTINEL</p>
+                <p id="quizRecommendation" style="color: var(--text-secondary); max-width: 540px; margin: 0 auto 1.5rem;">Your security posture demonstrates robust defense-in-depth controls.</p>
+                <button class="btn btn-primary" onclick="window.print()">Download / Print Security Assessment Report 📄</button>
+                <button class="btn btn-secondary" id="restartQuizBtn" style="margin-left: 0.5rem;">Restart Audit</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo-group">
+            <div class="logo-icon">🛡️</div>
+            <div class="logo-text">Aegis<span>Guard</span></div>
+          </div>
+          <p>Enterprise Cyber Threat Telemetry, Vulnerability Diagnostics, and Incident Containment Platform.</p>
+        </div>
+
+        <div class="footer-column">
+          <h5>Core Tools</h5>
+          <ul class="footer-links">
+            <li><a href="#toolkit">Headers Scanner</a></li>
+            <li><a href="#toolkit">Entropy Engine</a></li>
+            <li><a href="#toolkit">Phishing Inspector</a></li>
+            <li><a href="#toolkit">Dark Web Checker</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h5>Advisories</h5>
+          <ul class="footer-links">
+            <li><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener">CISA KEV Catalog</a></li>
+            <li><a href="https://nvd.nist.gov" target="_blank" rel="noopener">NIST NVD Database</a></li>
+            <li><a href="https://www.first.org" target="_blank" rel="noopener">FIRST Incident Response</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h5>Emergency Support</h5>
+          <ul class="footer-links">
+            <li><a href="#" id="footerHotlineLink">SOC Hotline: +1 (800) 555-AEGIS</a></li>
+            <li><a href="#" id="footerEncryptedEmail">PGP Key: 0x8F921A2B</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 AegisGuard Cyber Security. All rights reserved. Built for security professionals.</div>
+        <div style="font-family: var(--font-mono);">SEC-VER: 3.8.1-RELEASE</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Emergency Incident Modal -->
+  <div class="modal-overlay" id="emergencyModal">
+    <div class="modal-card">
+      <button class="modal-close" id="closeEmergencyModalBtn">&times;</button>
+      <h3 style="color: var(--accent-rose); font-size: 1.5rem; margin-bottom: 0.5rem;">🚨 Declare Emergency Incident</h3>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Notify on-call Incident Commander and isolate compromise scope immediately.</p>
+      
+      <form id="emergencyForm" onsubmit="return false;">
+        <div class="form-group">
+          <label class="form-label" for="incidentType">Incident Category</label>
+          <select id="incidentType" class="form-input" style="width: 100%;">
+            <option>Active Ransomware / File Encryption</option>
+            <option>Unauthorized Cloud / Active Directory Breach</option>
+            <option>Volumetric DDoS Outage</option>
+            <option>Data Exfiltration / Insider Threat</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reporterContact">On-Call Phone / Slack Handle</label>
+          <input type="text" id="reporterContact" class="form-input" placeholder="@security-lead or +1 555-0199" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" id="cancelEmergencyBtn">Cancel</button>
+          <button type="submit" class="btn btn-danger" id="triggerEmergencyAlertBtn">Dispatch Emergency Alert 🚨</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
