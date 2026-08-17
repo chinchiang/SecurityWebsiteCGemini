@@ -215,6 +215,23 @@ document.addEventListener('DOMContentLoaded', () => {
   setLanguage(currentLang);
 });
 
+/* Translation Lookup Helper */
+function t(key) {
+  const dictionary = TRANSLATIONS[currentLang] || TRANSLATIONS['zh-TW'];
+  return dictionary[key] || '';
+}
+
+/**
+ * Escape a value before interpolating it into an HTML template string.
+ * Required for any user-controlled value: note that new URL() permits `"`
+ * and `=` inside hostname, so parsed URL parts are NOT safe by themselves.
+ */
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
 /* Toast Notification Utility */
 function showToast(message, type = 'info') {
   const container = document.getElementById('toastContainer');
@@ -224,7 +241,18 @@ function showToast(message, type = 'info') {
   toast.className = 'toast';
   
   const icon = type === 'success' ? '✅' : type === 'error' ? '🚨' : 'ℹ️';
-  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+
+  // Built via textContent, never innerHTML: toast messages embed raw user
+  // input (scanned domain, inspected URL, breach query) and would otherwise
+  // be a DOM XSS sink.
+  const iconEl = document.createElement('span');
+  iconEl.setAttribute('aria-hidden', 'true');
+  iconEl.textContent = icon;
+
+  const messageEl = document.createElement('span');
+  messageEl.textContent = message;
+
+  toast.append(iconEl, messageEl);
   
   container.appendChild(toast);
 
@@ -543,17 +571,20 @@ function initPhishingInspector() {
       riskColor = riskLevel.includes('HIGH') || riskLevel.includes('高') ? 'var(--accent-rose)' : 'var(--accent-amber)';
     }
 
+    const safeHost = escapeHtml(host);
+    const safeProtocol = escapeHtml(parsed.protocol);
+
     results.innerHTML = `
       <div style="background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-          <strong style="font-size: 1.1rem;">${isZh ? '網址拆解分析:' : 'URL Breakdown:'} ${host}</strong>
+          <strong style="font-size: 1.1rem;">${isZh ? '網址拆解分析:' : 'URL Breakdown:'} ${safeHost}</strong>
           <span style="background: ${riskColor}22; color: ${riskColor}; padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-weight: 700; font-family: var(--font-mono); font-size: 0.8rem;">
             ${isZh ? '風險等級:' : 'RISK LEVEL:'} ${riskLevel}
           </span>
         </div>
         <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
-          <li>🌐 <strong>${isZh ? '目標網域 Host:' : 'Host Domain:'}</strong> <span class="mono">${host}</span></li>
-          <li>🔒 <strong>${isZh ? '連線協定 Protocol:' : 'Protocol:'}</strong> <span class="mono">${parsed.protocol}</span></li>
+          <li>🌐 <strong>${isZh ? '目標網域 Host:' : 'Host Domain:'}</strong> <span class="mono">${safeHost}</span></li>
+          <li>🔒 <strong>${isZh ? '連線協定 Protocol:' : 'Protocol:'}</strong> <span class="mono">${safeProtocol}</span></li>
           <li>⚠️ <strong>${isZh ? 'IP 網址檢測:' : 'IP Host Detection:'}</strong> ${isIP ? (isZh ? '❌ 偵測到純 IP 位址 (高度可疑)' : '❌ Raw IP Address detected (Suspicious)') : (isZh ? '✅ 標準網域名稱' : '✅ Standard Domain Name')}</li>
           <li>🚩 <strong>${isZh ? '釣魚關鍵字匹配:' : 'Suspicious Keyword Matching:'}</strong> ${matchKeywords.length ? `⚠️ ${isZh ? '命中關鍵字:' : 'Found:'} ${matchKeywords.join(', ')}` : (isZh ? '✅ 未發現常見釣魚詞彙' : '✅ None detected')}</li>
           <li>🔗 <strong>${isZh ? '連字號密度分析:' : 'Hyphenation Density:'}</strong> ${hyphensCount > 2 ? `⚠️ ${isZh ? '密度過高' : 'High'} (${hyphensCount} ${isZh ? '個連字號' : 'hyphens'})` : (isZh ? '✅ 數量正常' : '✅ Normal')}</li>
