@@ -43,7 +43,7 @@ const TRANSLATIONS = {
     p1Label: '目標網域或 URL',
     p1Placeholder: '例如：secure-portal.company.com',
     p1Btn: '開始健檢 ⚡',
-    gaugeLbl: '整體安全評級',
+    gaugeLbl: '整體安全評級（示範值，非真實檢測）',
     p2Title: '密碼熵值強度與密碼學雜湊引擎',
     p2Desc: '測試憑證密碼對抗超級電腦與 GPU 叢集的破解時間，並即時計算 SHA-256 雜湊。',
     p2Label: '輸入測試密碼 / 密鑰字串',
@@ -65,7 +65,7 @@ const TRANSLATIONS = {
     p4Placeholder: 'employee@company.com',
     p4Btn: '查詢外洩紀錄',
     cveTitle: 'CVE 漏洞情報資料庫',
-    cveDesc: '整合 NVD 與 CISA KEV 目錄的最新高危險漏洞數據，支援即時搜尋與嚴重度篩選。',
+    cveDesc: '以虛構的範例漏洞條目，示範 CVE 情報的即時搜尋與嚴重度篩選介面。',
     cveSearchPh: '搜尋 CVE 編號、軟體名稱 (如 Linux, Apache, Chrome) 或關鍵字...',
     filterAll: '全部等級',
     filterCrit: '嚴重 Critical',
@@ -89,7 +89,16 @@ const TRANSLATIONS = {
     modalContactLabel: '通報人電話 / Slack 帳號',
     modalContactPh: '@security-lead 或 +886 912-345-678',
     btnCancel: '取消',
-    btnSubmitEmergency: '發送緊急通報 🚨'
+    btnSubmitEmergency: '發送緊急通報 🚨',
+    demoBanner: '⚠️ 示範網站聲明：本站為前端技術示範專案，不連線任何外部服務。威脅地圖、CVE 情報、統計數字與所有掃描結果皆為虛構的模擬資料，請勿作為實際安全決策的依據。',
+    noteHeaders: '⚠️ 模擬工具：受瀏覽器同源政策限制，前端 JavaScript 無法讀取其他網站的回應標頭。本工具未發出任何請求，分數與檢查結果純為示範，不代表目標網站的真實設定。實際檢測請使用 Mozilla HTTP Observatory 或 curl -I。',
+    notePassword: '🔒 安全提醒：請勿輸入您的真實密碼。所有運算（含 SHA-256）皆在您的瀏覽器本機完成，不會傳送至任何伺服器。但下方熵值模型假設密碼為均勻隨機字串，會明顯高估常見密碼（例如 Password123! 會被評為「高度安全」），僅供教學參考。',
+    notePhishing: 'ℹ️ 啟發式分析：本工具僅檢查關鍵字、連字號數量與純 IP 格式，尚未實作同形異義字 (IDN homograph) 與 punycode 偵測，也不檢查 path、query 與 userinfo。合法網域（如 accounts.google.com）可能被誤判，真實的釣魚網址也可能被漏判，結果僅供初步參考。',
+    noteDarkweb: '⚠️ 模擬工具：本工具未連線任何外洩資料庫，結果由輸入字串的長度決定，與真實外洩狀況完全無關。查詢真實外洩紀錄請使用 Have I Been Pwned (haveibeenpwned.com)。',
+    noteDarkwebInline: '⚠️ 以下為虛構的示範輸出，未查詢任何外洩資料庫，與此帳號的真實狀況無關。',
+    noteDarkwebAction: '請注意：以上為示範情境，並非針對此帳號的查詢結果。若需確認真實外洩狀況，請至 haveibeenpwned.com 查詢。',
+    noteCVE: 'ℹ️ 範例資料：以下 CVE 條目為教學用的虛構內容，並非來自 NVD 或 CISA KEV，其編號、影響版本與日期均不可信（版本號與揭露年份實際上互相矛盾）。真實漏洞資訊請查詢 nvd.nist.gov 或 CISA KEV 目錄。',
+    noteAudit: 'ℹ️ 關於此評分：本評估的配分與級距為本專案自訂，未對應 NIST CSF、CIS Controls 或 ISO 27001 等公認框架，且 5 道題目無法涵蓋完整的資安成熟度。結果僅供自我檢視與討論起點，不可作為稽核或合規證明。'
   },
   'en': {
     navThreatMap: 'Threat Map',
@@ -122,13 +131,13 @@ const TRANSLATIONS = {
     tabHeaders: 'Domain Security Headers',
     tabEntropy: 'Password & Hash Entropy',
     tabPhishing: 'Phishing Link Inspector',
-    tabDarkweb: 'Dark Web Exposure Check',
+    tabDarkweb: 'Dark Web Check (Simulated)',
     p1Title: 'HTTP Security Headers & SSL Scanner',
     p1Desc: 'Evaluate your web application\'s defense posture against clickjacking, XSS, MIME sniffing, and SSL downgrade vectors.',
     p1Label: 'Target Domain or URL',
     p1Placeholder: 'e.g. secure-portal.company.com',
     p1Btn: 'Run Audit ⚡',
-    gaugeLbl: 'OVERALL SECURITY GRADE',
+    gaugeLbl: 'OVERALL GRADE (DEMO VALUE, NOT A REAL SCAN)',
     p2Title: 'Password Entropy & Crypto Hash Engine',
     p2Desc: 'Test credential entropy against quantum cracking hardware and generate client-side SHA-256 hashes.',
     p2Label: 'Enter Test Password / Secret Phrase',
@@ -150,7 +159,7 @@ const TRANSLATIONS = {
     p4Placeholder: 'employee@company.com',
     p4Btn: 'Check Exposure',
     cveTitle: 'CVE Threat Intelligence Explorer',
-    cveDesc: 'Search and filter active Common Vulnerabilities and Exposures (CVEs) curated from NVD and CISA KEV catalogs.',
+    cveDesc: 'A CVE search and severity-filter interface, demonstrated with fictional sample vulnerability records.',
     cveSearchPh: 'Search by CVE ID, software (e.g. Linux, Apache, Chrome), or keyword...',
     filterAll: 'All Severities',
     filterCrit: 'Critical',
@@ -174,7 +183,16 @@ const TRANSLATIONS = {
     modalContactLabel: 'On-Call Phone / Slack Handle',
     modalContactPh: '@security-lead or +1 555-0199',
     btnCancel: 'Cancel',
-    btnSubmitEmergency: 'Dispatch Emergency Alert 🚨'
+    btnSubmitEmergency: 'Dispatch Emergency Alert 🚨',
+    demoBanner: '⚠️ Demo site notice: this is a front-end technical demo that connects to no external service. The threat map, CVE feed, statistics and all scan results are fictional simulated data. Do not rely on them for real security decisions.',
+    noteHeaders: '⚠️ Simulated tool: the same-origin policy prevents browser JavaScript from reading another site\'s response headers. This tool issues no request — the grade and checks are illustrative only and do not reflect the target site\'s real configuration. For a real assessment use Mozilla HTTP Observatory or curl -I.',
+    notePassword: '🔒 Safety note: do not enter a real password. All computation (including SHA-256) happens locally in your browser and is never transmitted. However, the entropy model below assumes a uniformly random string and so significantly overestimates common passwords (Password123! is rated "Strong"). Educational use only.',
+    notePhishing: 'ℹ️ Heuristic analysis: this tool only checks keywords, hyphen count and raw-IP format. It does not detect IDN homographs / punycode, and does not inspect the path, query string or userinfo. Legitimate domains (e.g. accounts.google.com) may be flagged and real phishing URLs may be missed. Treat results as indicative only.',
+    noteDarkweb: '⚠️ Simulated tool: no breach database is queried. The result is derived from the length of your input and bears no relation to any actual exposure. For real breach data use Have I Been Pwned (haveibeenpwned.com).',
+    noteDarkwebInline: '⚠️ The output below is fictional sample data. No breach database was queried and it says nothing about this account.',
+    noteDarkwebAction: 'Note: the above is an illustrative scenario, not a lookup result for this account. To check real exposure, visit haveibeenpwned.com.',
+    noteCVE: 'ℹ️ Sample data: the CVE entries below are fictional teaching examples. They are NOT sourced from NVD or CISA KEV, and their IDs, affected versions and dates are not trustworthy (the version numbers in fact contradict the stated disclosure years). For real advisories consult nvd.nist.gov or the CISA KEV catalog.',
+    noteAudit: 'ℹ️ About this score: the weightings and tiers are specific to this project and are not mapped to NIST CSF, CIS Controls, ISO 27001 or any recognised framework. Five questions cannot characterise security maturity. Use the result as a discussion starting point, not as audit or compliance evidence.'
   }
 };
 
@@ -383,9 +401,15 @@ function initHeaderScanner() {
     const domain = input.value.trim().toLowerCase().replace(/^(https?:\/\/)/, '');
     if (!domain) return;
 
-    showToast(currentLang === 'zh-TW' ? `正在分析網域 ${domain}...` : `Scanning domain ${domain}...`, 'info');
+    showToast(currentLang === 'zh-TW' ? `正在產生 ${domain} 的示範評分...` : `Generating demo grade for ${domain}...`, 'info');
 
     setTimeout(() => {
+      // NOTE: no request is made. Same-origin policy prevents browser JS from
+      // reading cross-origin response headers, so this score is derived from
+      // substring matches on the domain name and is illustrative only.
+      // A real implementation needs a server-side proxy or the Mozilla HTTP
+      // Observatory API. Descriptions below therefore explain what each header
+      // DOES, and must never assert what the scanned site actually returned.
       let score = 88;
       if (domain.includes('bank') || domain.includes('gov') || domain.includes('secure')) score = 96;
       if (domain.includes('test') || domain.includes('demo')) score = 64;
@@ -396,32 +420,32 @@ function initHeaderScanner() {
         {
           name: 'Strict-Transport-Security (HSTS)',
           status: score >= 80 ? 'pass' : 'warn',
-          desc: isZh ? '強制執行 HTTPS 加密連線，防止 SSL 降級與中間人攻擊 (max-age=31536000; includeSubDomains)。' : 'Enforces HTTPS connections and prevents SSL stripping attacks (max-age=31536000; includeSubDomains).'
+          desc: isZh ? '作用：強制瀏覽器僅以 HTTPS 連線，防止 SSL 降級與中間人攻擊。建議值 max-age 至少一年並加上 includeSubDomains。' : 'Purpose: forces browsers to connect over HTTPS only, preventing SSL stripping and MITM attacks. Recommended max-age of at least one year plus includeSubDomains.'
         },
         {
           name: 'Content-Security-Policy (CSP)',
           status: score >= 90 ? 'pass' : score >= 70 ? 'warn' : 'fail',
-          desc: isZh ? '限制腳本執行來源，有效抵禦跨站腳本攻擊 (XSS) 與資料注入。' : 'Restricts script execution sources to prevent Cross-Site Scripting (XSS) and data injection.'
+          desc: isZh ? '作用：限制腳本可執行的來源，抵禦跨站腳本攻擊 (XSS) 與資料注入。建議避免 unsafe-inline。' : 'Purpose: restricts which sources may execute scripts, mitigating XSS and data injection. Avoid unsafe-inline where possible.'
         },
         {
           name: 'X-Frame-Options',
           status: 'pass',
-          desc: isZh ? '設定為 SAMEORIGIN。保護網站不被嵌入外頁發動 Clickjacking 點擊劫持。' : 'Set to SAMEORIGIN. Protects site against clickjacking attacks.'
+          desc: isZh ? '作用：控制網頁是否可被嵌入 iframe，用於防禦 Clickjacking 點擊劫持。現代作法建議改用 CSP frame-ancestors。' : 'Purpose: controls whether the page may be framed, defending against clickjacking. Modern equivalent is the CSP frame-ancestors directive.'
         },
         {
           name: 'X-Content-Type-Options',
           status: 'pass',
-          desc: isZh ? '設定為 nosniff。防止瀏覽器猜測與誤判 MIME 檔案類型。' : 'Set to nosniff. Prevents browser MIME-type sniffing.'
+          desc: isZh ? '作用：關閉瀏覽器的 MIME 類型猜測，避免上傳內容被誤判為可執行腳本。建議值 nosniff。' : 'Purpose: disables browser MIME-type sniffing so uploaded content is not reinterpreted as executable script. Recommended value nosniff.'
         },
         {
           name: 'Referrer-Policy',
           status: score >= 75 ? 'pass' : 'warn',
-          desc: isZh ? '設定為 strict-origin-when-cross-origin。避免外洩敏感 URL 參數數據。' : 'Set to strict-origin-when-cross-origin. Limits referrer data exposure.'
+          desc: isZh ? '作用：控制 Referer 標頭的傳送範圍，避免外洩敏感 URL 參數。建議值 strict-origin-when-cross-origin。' : 'Purpose: controls how much referrer information is sent, avoiding leakage of sensitive URL parameters. Recommended value strict-origin-when-cross-origin.'
         },
         {
           name: 'Permissions-Policy',
           status: score >= 85 ? 'pass' : 'fail',
-          desc: isZh ? '限制攝影機、麥克風、地理位置與支付 API 之未授權調用。' : 'Restricts camera, microphone, geolocation, and payment API access.'
+          desc: isZh ? '作用：限制攝影機、麥克風、地理位置與支付 API 的未授權調用。' : 'Purpose: restricts unauthorized use of camera, microphone, geolocation, and payment APIs.'
         }
       ];
 
@@ -437,10 +461,10 @@ function initHeaderScanner() {
 
       scoreNum.textContent = `${score} / 100`;
       scoreNum.style.color = score >= 90 ? 'var(--accent-emerald)' : score >= 70 ? 'var(--accent-amber)' : 'var(--accent-rose)';
-      scoreLbl.textContent = score >= 90 ? (isZh ? 'A+ 安全極佳' : 'A+ EXCELLENT') : score >= 70 ? (isZh ? 'B 尚可接受' : 'B ACCEPTABLE') : (isZh ? 'C 需立即改善' : 'C ACTION REQUIRED');
+      scoreLbl.textContent = score >= 90 ? (isZh ? 'A+（示範值）' : 'A+ (DEMO VALUE)') : score >= 70 ? (isZh ? 'B（示範值）' : 'B (DEMO VALUE)') : (isZh ? 'C（示範值）' : 'C (DEMO VALUE)');
 
       resultsContainer.style.display = 'block';
-      showToast(isZh ? `網域 ${domain} 健檢完成` : `Scan complete for ${domain}`, 'success');
+      showToast(isZh ? `${domain} 的示範評分已產生` : `Demo grade generated for ${domain}`, 'success');
     }, 600);
   });
 }
@@ -612,42 +636,51 @@ function initDarkWebChecker() {
 
     const isZh = currentLang === 'zh-TW';
 
-    showToast(isZh ? `正在查詢外洩索引庫 ${query}...` : `Querying breach index for ${query}...`, 'info');
+    showToast(isZh ? `正在產生 ${query} 的模擬查詢結果...` : `Generating simulated result for ${query}...`, 'info');
 
     setTimeout(() => {
+      // NOTE: this is a deterministic stub, not a lookup. No breach database is
+      // queried (app.js makes zero network requests). Results are meaningless
+      // and must always be rendered alongside simNotice below.
       const isBreached = query.includes('test') || query.includes('admin') || query.length % 2 === 0;
+
+      const safeQuery = escapeHtml(query);
+      const simNotice = `<div class="demo-note demo-note-inline">${escapeHtml(t('noteDarkwebInline'))}</div>`;
 
       if (!isBreached) {
         results.innerHTML = `
+          ${simNotice}
           <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1.25rem; border-radius: var(--radius-md); text-align: center;">
             <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">🛡️</span>
-            <strong style="color: var(--accent-emerald); font-size: 1.1rem; display: block;">${isZh ? '未發現已知外洩紀錄' : 'NO KNOWN BREACH EXPOSURE FOUND'}</strong>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.35rem;">${isZh ? `公開竊密檔案與數據庫中未查獲 <strong>${query}</strong> 之憑證。` : `No record of <strong>${query}</strong> was detected in public stealer logs or credential leaks.`}</p>
+            <strong style="color: var(--accent-emerald); font-size: 1.1rem; display: block;">${isZh ? '示範結果：未發現外洩紀錄' : 'SAMPLE RESULT: NO EXPOSURE FOUND'}</strong>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.35rem;">${isZh ? `此為示範輸出，並未實際查詢 <strong>${safeQuery}</strong>。` : `This is sample output. No lookup was performed for <strong>${safeQuery}</strong>.`}</p>
           </div>
         `;
       } else {
         results.innerHTML = `
+          ${simNotice}
           <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1.25rem; border-radius: var(--radius-md);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <strong style="color: var(--accent-rose); font-size: 1.1rem;">⚠️ ${isZh ? '偵測到 2 筆數據庫外洩紀錄' : 'EXPOSURE DETECTED IN 2 DATASETS'}</strong>
-              <span class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${isZh ? '查詢目標:' : 'TARGET:'} ${query}</span>
+              <strong style="color: var(--accent-rose); font-size: 1.1rem;">⚠️ ${isZh ? '示範情境：虛構的 2 筆外洩紀錄' : 'SAMPLE SCENARIO: 2 FICTIONAL RECORDS'}</strong>
+              <span class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${isZh ? '查詢目標:' : 'TARGET:'} ${safeQuery}</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
               <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">1. RedLine Stealer 惡意軟體日誌庫 (2025)</strong>
-                <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '外洩欄位：明文密碼, 瀏覽器 Cookie, 登入 IP (185.220.x.x)' : 'Exposed: Plaintext Passwords, Browser Cookies, IP Log (185.220.x.x)'}</span>
+                <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">${isZh ? '1.〔範例〕Stealer 惡意軟體日誌庫' : '1. [EXAMPLE] Stealer Malware Log Corpus'}</strong>
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '此類外洩通常包含：明文密碼、瀏覽器 Cookie、登入來源 IP' : 'This breach class typically exposes: plaintext passwords, browser cookies, source IP'}</span>
               </div>
               <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">2. 電商平台 SQL 資料庫洩漏 (2024)</strong>
-                <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '外洩欄位：Email, Bcrypt 密碼雜湊, 帳單地址' : 'Exposed: Email, Bcrypt Password Hash, Billing Address'}</span>
+                <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">${isZh ? '2.〔範例〕電商平台資料庫洩漏' : '2. [EXAMPLE] E-commerce Database Leak'}</strong>
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '此類外洩通常包含：Email、密碼雜湊、帳單地址' : 'This breach class typically exposes: email, password hashes, billing address'}</span>
               </div>
             </div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.85rem;">${escapeHtml(t('noteDarkwebAction'))}</p>
           </div>
         `;
       }
 
       results.style.display = 'block';
-      showToast(isZh ? '暗網掃描模擬數據已更新' : 'Dark web scan results updated', 'success');
+      showToast(isZh ? '模擬的暗網查詢結果已更新' : 'Simulated dark web result updated', 'success');
     }, 500);
   });
 }

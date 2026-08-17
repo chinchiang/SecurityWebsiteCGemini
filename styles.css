@@ -256,6 +256,34 @@ h1, h2, h3, h4, h5, h6 {
   100% { transform: translateX(-50%); }
 }
 
+/* Simulated Data Disclosure — site-wide banner */
+.demo-banner {
+  display: block;
+  background: rgba(245, 158, 11, 0.12);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+  color: var(--accent-amber);
+  padding: 0.7rem 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* Simulated Data Disclosure — per-tool inline notice */
+.demo-note {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-left: 4px solid var(--accent-amber);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.demo-note-inline {
+  margin-bottom: 1rem;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;

@@ -48,6 +48,13 @@
     </div>
   </div>
 
+  <!-- Site-wide Simulated Data Disclosure -->
+  <aside class="demo-banner" role="note">
+    <div class="container">
+      <span data-i18n="demoBanner">⚠️ 示範網站聲明：本站為前端技術示範專案，不連線任何外部服務。威脅地圖、CVE 情報、統計數字與所有掃描結果皆為虛構的模擬資料，請勿作為實際安全決策的依據。</span>
+    </div>
+  </aside>
+
   <main>
     <!-- Hero Section -->
     <section class="hero-section" id="hero">
@@ -156,7 +163,10 @@
             <div class="tool-panel active card" id="panel-headers" role="tabpanel">
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p1Title">HTTP 安全標頭與 SSL 體檢</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p1Desc">評估 Web 應用程式對抗 Clickjacking、XSS、MIME 偽造與 SSL 降級攻擊的防禦能力。</p>
-              
+
+              <div class="demo-note" data-i18n="noteHeaders">⚠️ 模擬工具：受瀏覽器同源政策限制，前端 JavaScript 無法讀取其他網站的回應標頭。本工具未發出任何請求，分數與檢查結果純為示範，不代表目標網站的真實設定。實際檢測請使用 Mozilla HTTP Observatory 或 curl -I。</div>
+
+
               <form id="headerScanForm" onsubmit="return false;">
                 <div class="form-group">
                   <label class="form-label" for="domainInput" data-i18n="p1Label">目標網域或 URL</label>
@@ -186,6 +196,8 @@
             <div class="tool-panel card" id="panel-entropy" role="tabpanel">
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p2Title">密碼熵值強度與密碼學雜湊引擎</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p2Desc">測試憑證密碼對抗超級電腦與 GPU 叢集的破解時間，並即時計算 SHA-256 雜湊。</p>
+
+              <div class="demo-note" data-i18n="notePassword">🔒 安全提醒：請勿輸入您的真實密碼。所有運算（含 SHA-256）皆在您的瀏覽器本機完成，不會傳送至任何伺服器。但下方熵值模型假設密碼為均勻隨機字串，會明顯高估常見密碼（例如 Password123! 會被評為「高度安全」），僅供教學參考。</div>
 
               <div class="form-group">
                 <label class="form-label" for="passInput" data-i18n="p2Label">輸入測試密碼 / 密鑰字串</label>
@@ -230,6 +242,8 @@
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p3Title">網絡釣魚與同形異義字 URL 檢查器</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p3Desc">拆解可疑 URL 結構，自動比對假冒網域、多重連字號與可疑 IP 重定向。</p>
 
+              <div class="demo-note" data-i18n="notePhishing">ℹ️ 啟發式分析：本工具僅檢查關鍵字、連字號數量與純 IP 格式，尚未實作同形異義字 (IDN homograph) 與 punycode 偵測，也不檢查 path、query 與 userinfo。合法網域（如 accounts.google.com）可能被誤判，真實的釣魚網址也可能被漏判，結果僅供初步參考。</div>
+
               <form id="phishingForm" onsubmit="return false;">
                 <div class="form-group">
                   <label class="form-label" for="phishingUrlInput" data-i18n="p3Label">要檢測的可疑 URL</label>
@@ -249,6 +263,8 @@
             <div class="tool-panel card" id="panel-darkweb" role="tabpanel">
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p4Title">暗網外洩紀錄模擬查詢</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p4Desc">查詢企業 Email 或網域是否曾出現在公開洩漏資料庫或暗網竊密軟體 (Stealer Log) 檔案庫中。</p>
+
+              <div class="demo-note" data-i18n="noteDarkweb">⚠️ 模擬工具：本工具未連線任何外洩資料庫，結果由輸入字串的長度決定，與真實外洩狀況完全無關。查詢真實外洩紀錄請使用 Have I Been Pwned (haveibeenpwned.com)。</div>
 
               <form id="darkwebForm" onsubmit="return false;">
                 <div class="form-group">
@@ -276,8 +292,10 @@
         <div class="section-header">
           <span class="section-tag">// VULNERABILITY TELEMETRY</span>
           <h2 class="section-title" data-i18n="cveTitle">CVE 漏洞情報資料庫</h2>
-          <p class="section-desc" data-i18n="cveDesc">整合 NVD 與 CISA KEV 目錄的最新高危險漏洞數據，支援即時搜尋與嚴重度篩選。</p>
+          <p class="section-desc" data-i18n="cveDesc">以虛構的範例漏洞條目，示範 CVE 情報的即時搜尋與嚴重度篩選介面。</p>
         </div>
+
+        <div class="demo-note" data-i18n="noteCVE">ℹ️ 範例資料：以下 CVE 條目為教學用的虛構內容，並非來自 NVD 或 CISA KEV，其編號、影響版本與日期均不可信（版本號與揭露年份實際上互相矛盾）。真實漏洞資訊請查詢 nvd.nist.gov 或 CISA KEV 目錄。</div>
 
         <div class="cve-toolbar">
           <div class="form-group" style="flex: 1; margin-bottom: 0;">
