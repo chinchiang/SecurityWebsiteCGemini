@@ -1,0 +1,19 @@
+version: 2
+
+updates:
+  # Workflows pin actions to a commit SHA, which is safe but invisible to a
+  # human reading the file. Dependabot is what keeps those pins current, and it
+  # updates the trailing version comment along with the SHA.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(actions)'
+    labels:
+      - dependencies
+
+  # No npm ecosystem entry: package.json declares no dependencies and exists
+  # only to expose the test runner. Add one here if that ever changes.
