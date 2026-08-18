@@ -12,19 +12,19 @@ const TRANSLATIONS = {
     navCVE: 'CVE 情報 Intel',
     navPlaybooks: '應變劇本 Playbooks',
     navAudit: '成熟度評估 Audit',
-    sysStatus: 'DEFCON 4 • 系統正常運作',
+    sysStatus: 'DEMO MODE • 模擬介面',
     btnEmergency: '🚨 緊急通報 Emergency',
-    tickerLabel: '即時威脅快訊',
+    tickerLabel: '模擬威脅快訊',
     heroBadge: '⚡ 主動防禦協定已啟用 ACTIVE DEFENSE PROTOCOL',
     heroTitle: '新世代資安 <span>威脅情報與診斷指揮中心</span>',
-    heroSubtitle: '為資安團隊提供即時網域安全標頭診斷、密碼熵強度分析、CVE 漏洞情報追蹤與自動化事件應變劇本。',
+    heroSubtitle: '以前端模擬介面展示網域安全標頭、密碼熵值、CVE 情報與事件應變劇本；不提供即時監控或真實掃描。',
     heroBtnTools: '啟動診斷工具 Hub 🛠️',
     heroBtnMap: '探索全球威脅地圖 🌐',
-    statScanned: '已檢測網域',
-    statCVEs: '收錄 CVE 漏洞',
-    statUptime: '防禦運作率',
-    telemetryTitle: '即時遙測節點運作中',
-    telemetrySub: '網路延遲: 14ms • 封包丟失率: 0%',
+    statScanned: '模擬網域計數',
+    statCVEs: '範例 CVE 計數',
+    statUptime: '模擬運作率',
+    telemetryTitle: '模擬遙測介面',
+    telemetrySub: '範例延遲: 14ms • 範例封包丟失率: 0%',
     btnRefresh: '重新整理',
     mapTitle: '全球網路攻擊即時動態地圖',
     mapDesc: '模擬追蹤全球網路攻擊流量、惡意程式 C2 中繼站連線與 DDoS 洗流量中心動態。',
@@ -38,8 +38,8 @@ const TRANSLATIONS = {
     tabEntropy: '密碼熵值與雜湊計算',
     tabPhishing: '釣魚與偽造連結檢測',
     tabDarkweb: '暗網外洩紀錄模擬',
-    p1Title: 'HTTP 安全標頭與 SSL 體檢',
-    p1Desc: '評估 Web 應用程式對抗 Clickjacking、XSS、MIME 偽造與 SSL 降級攻擊的防禦能力。',
+    p1Title: 'HTTP 安全標頭與 SSL 評分示範',
+    p1Desc: '示範 Web 安全標頭評分介面；不會連線或檢測輸入的網站。',
     p1Label: '目標網域或 URL',
     p1Placeholder: '例如：secure-portal.company.com',
     p1Btn: '開始健檢 ⚡',
@@ -55,12 +55,12 @@ const TRANSLATIONS = {
     p2ShaLabel: '前端純 Hash 計算 (SHA-256)',
     p2Copy: '複製 Hash',
     p3Title: '網絡釣魚與同形異義字 URL 檢查器',
-    p3Desc: '拆解可疑 URL 結構，自動比對假冒網域、多重連字號與可疑 IP 重定向。',
+    p3Desc: '以前端啟發式規則拆解 URL，僅檢查關鍵字、連字號與純 IP 格式。',
     p3Label: '要檢測的可疑 URL',
     p3Placeholder: '例如：http://login-paypalls-update.com/signin',
     p3Btn: '分析 URL 結構',
     p4Title: '暗網外洩紀錄模擬查詢',
-    p4Desc: '查詢企業 Email 或網域是否曾出現在公開洩漏資料庫或暗網竊密軟體 (Stealer Log) 檔案庫中。',
+    p4Desc: '以虛構結果示範企業 Email 或網域的外洩查詢介面；不會查詢任何真實資料庫。',
     p4Label: '企業 Email 或 網域名稱',
     p4Placeholder: 'employee@company.com',
     p4Btn: '查詢外洩紀錄',
@@ -80,7 +80,7 @@ const TRANSLATIONS = {
     footerCol2: '國際權威機構',
     footerCol3: '緊急事件求助',
     modalTitle: '🚨 宣告重大資安事件 (Emergency)',
-    modalSub: '即時通報值班指揮官並啟動應變隔離程序。',
+    modalSub: '示範重大資安事件通報流程；不會聯絡值班指揮官或啟動任何應變程序。',
     modalTypeLabel: '事件類別 Category',
     optRansom: '受勒索軟體感染 / 檔案大規模加密',
     optCloud: '雲端或 Active Directory 未授權侵入',
@@ -89,7 +89,7 @@ const TRANSLATIONS = {
     modalContactLabel: '通報人電話 / Slack 帳號',
     modalContactPh: '@security-lead 或 +886 912-345-678',
     btnCancel: '取消',
-    btnSubmitEmergency: '發送緊急通報 🚨',
+    btnSubmitEmergency: '模擬送出（不會實際通報）🚨',
     demoBanner: '⚠️ 示範網站聲明：本站為前端技術示範專案，不連線任何外部服務。威脅地圖、CVE 情報、統計數字與所有掃描結果皆為虛構的模擬資料，請勿作為實際安全決策的依據。',
     noteHeaders: '⚠️ 模擬工具：受瀏覽器同源政策限制，前端 JavaScript 無法讀取其他網站的回應標頭。本工具未發出任何請求，分數與檢查結果純為示範，不代表目標網站的真實設定。實際檢測請使用 Mozilla HTTP Observatory 或 curl -I。',
     notePassword: '🔒 安全提醒：請勿輸入您的真實密碼。所有運算（含 SHA-256）皆在您的瀏覽器本機完成，不會傳送至任何伺服器。但下方熵值模型假設密碼為均勻隨機字串，會明顯高估常見密碼（例如 Password123! 會被評為「高度安全」），僅供教學參考。',
@@ -98,7 +98,8 @@ const TRANSLATIONS = {
     noteDarkwebInline: '⚠️ 以下為虛構的示範輸出，未查詢任何外洩資料庫，與此帳號的真實狀況無關。',
     noteDarkwebAction: '請注意：以上為示範情境，並非針對此帳號的查詢結果。若需確認真實外洩狀況，請至 haveibeenpwned.com 查詢。',
     noteCVE: 'ℹ️ 範例資料：以下 CVE 條目為教學用的虛構內容，並非來自 NVD 或 CISA KEV，其編號、影響版本與日期均不可信（版本號與揭露年份實際上互相矛盾）。真實漏洞資訊請查詢 nvd.nist.gov 或 CISA KEV 目錄。',
-    noteAudit: 'ℹ️ 關於此評分：本評估的配分與級距為本專案自訂，未對應 NIST CSF、CIS Controls 或 ISO 27001 等公認框架，且 5 道題目無法涵蓋完整的資安成熟度。結果僅供自我檢視與討論起點，不可作為稽核或合規證明。'
+    noteAudit: 'ℹ️ 關於此評分：本評估的配分與級距為本專案自訂，未對應 NIST CSF、CIS Controls 或 ISO 27001 等公認框架，且 5 道題目無法涵蓋完整的資安成熟度。結果僅供自我檢視與討論起點，不可作為稽核或合規證明。',
+    noteEmergency: '⚠️ 示範功能：本表單不會傳送資料、通知 SOC、聯絡任何人員或建立事件單。若發生真實事件，請使用貴組織正式核准的緊急通報管道。'
   },
   'en': {
     navThreatMap: 'Threat Map',
@@ -106,19 +107,19 @@ const TRANSLATIONS = {
     navCVE: 'CVE Intel',
     navPlaybooks: 'Playbooks',
     navAudit: 'Audit Score',
-    sysStatus: 'DEFCON 4 • OPERATIONAL',
+    sysStatus: 'DEMO MODE • SIMULATED UI',
     btnEmergency: '🚨 Emergency Incident',
-    tickerLabel: 'LIVE THREAT FEED',
+    tickerLabel: 'SIMULATED THREAT FEED',
     heroBadge: '⚡ ACTIVE DEFENSE PROTOCOL ACTIVE',
     heroTitle: 'Next-Gen Cyber <span>Intelligence & Diagnostics</span>',
-    heroSubtitle: 'Empowering security teams with real-time domain header diagnostics, cryptographic entropy analysis, live CVE vulnerability telemetry, and automated response playbooks.',
+    heroSubtitle: 'A front-end demonstration of security-header scoring, password entropy, CVE intelligence, and incident-response playbooks; it provides no live monitoring or real scanning.',
     heroBtnTools: 'Launch Diagnostic Tools 🛠️',
     heroBtnMap: 'Explore Threat Map 🌐',
-    statScanned: 'Scanned Domains',
-    statCVEs: 'Indexed CVEs',
-    statUptime: 'Defense Uptime',
-    telemetryTitle: 'Real-Time Telemetry Node',
-    telemetrySub: 'Latency: 14ms • Packet Loss: 0%',
+    statScanned: 'Simulated Domain Count',
+    statCVEs: 'Sample CVE Count',
+    statUptime: 'Simulated Uptime',
+    telemetryTitle: 'Simulated Telemetry UI',
+    telemetrySub: 'Sample latency: 14ms • Sample packet loss: 0%',
     btnRefresh: 'Refresh',
     mapTitle: 'Live Cyber Attack Vector Map',
     mapDesc: 'Simulated real-time tracking of global cyber attack traffic, malware command & control nodes, and scrubbing center telemetry.',
@@ -132,8 +133,8 @@ const TRANSLATIONS = {
     tabEntropy: 'Password & Hash Entropy',
     tabPhishing: 'Phishing Link Inspector',
     tabDarkweb: 'Dark Web Check (Simulated)',
-    p1Title: 'HTTP Security Headers & SSL Scanner',
-    p1Desc: 'Evaluate your web application\'s defense posture against clickjacking, XSS, MIME sniffing, and SSL downgrade vectors.',
+    p1Title: 'HTTP Security Headers & SSL Scoring Demo',
+    p1Desc: 'Demonstrates a web security-header scoring interface; it does not connect to or inspect the entered site.',
     p1Label: 'Target Domain or URL',
     p1Placeholder: 'e.g. secure-portal.company.com',
     p1Btn: 'Run Audit ⚡',
@@ -149,12 +150,12 @@ const TRANSLATIONS = {
     p2ShaLabel: 'Client-Side SHA-256 Hash',
     p2Copy: 'Copy Hash',
     p3Title: 'Phishing & Typosquatting Link Inspector',
-    p3Desc: 'Deconstruct suspicious URLs, identify homograph attacks, lookalike domains, and suspicious IP redirects.',
+    p3Desc: 'Applies basic client-side heuristics limited to keywords, hyphen count, and raw-IP format.',
     p3Label: 'Suspicious URL to Inspect',
     p3Placeholder: 'e.g. http://login-paypalls-update.com/signin',
     p3Btn: 'Inspect URL',
     p4Title: 'Dark Web Exposure Search Simulator',
-    p4Desc: 'Check if enterprise email accounts or domains exist in public breach corpuses or dark web stealer log archives.',
+    p4Desc: 'Demonstrates an exposure-search interface with fictional results; no real breach database is queried.',
     p4Label: 'Email Address or Enterprise Domain',
     p4Placeholder: 'employee@company.com',
     p4Btn: 'Check Exposure',
@@ -174,7 +175,7 @@ const TRANSLATIONS = {
     footerCol2: 'Advisories',
     footerCol3: 'Emergency Support',
     modalTitle: '🚨 Declare Emergency Incident',
-    modalSub: 'Notify on-call Incident Commander and isolate compromise scope immediately.',
+    modalSub: 'Demonstrates an emergency-reporting workflow; it does not contact an Incident Commander or start any response action.',
     modalTypeLabel: 'Incident Category',
     optRansom: 'Active Ransomware / File Encryption',
     optCloud: 'Unauthorized Cloud / Active Directory Breach',
@@ -183,7 +184,7 @@ const TRANSLATIONS = {
     modalContactLabel: 'On-Call Phone / Slack Handle',
     modalContactPh: '@security-lead or +1 555-0199',
     btnCancel: 'Cancel',
-    btnSubmitEmergency: 'Dispatch Emergency Alert 🚨',
+    btnSubmitEmergency: 'Simulate submission (not dispatched) 🚨',
     demoBanner: '⚠️ Demo site notice: this is a front-end technical demo that connects to no external service. The threat map, CVE feed, statistics and all scan results are fictional simulated data. Do not rely on them for real security decisions.',
     noteHeaders: '⚠️ Simulated tool: the same-origin policy prevents browser JavaScript from reading another site\'s response headers. This tool issues no request — the grade and checks are illustrative only and do not reflect the target site\'s real configuration. For a real assessment use Mozilla HTTP Observatory or curl -I.',
     notePassword: '🔒 Safety note: do not enter a real password. All computation (including SHA-256) happens locally in your browser and is never transmitted. However, the entropy model below assumes a uniformly random string and so significantly overestimates common passwords (Password123! is rated "Strong"). Educational use only.',
@@ -192,7 +193,8 @@ const TRANSLATIONS = {
     noteDarkwebInline: '⚠️ The output below is fictional sample data. No breach database was queried and it says nothing about this account.',
     noteDarkwebAction: 'Note: the above is an illustrative scenario, not a lookup result for this account. To check real exposure, visit haveibeenpwned.com.',
     noteCVE: 'ℹ️ Sample data: the CVE entries below are fictional teaching examples. They are NOT sourced from NVD or CISA KEV, and their IDs, affected versions and dates are not trustworthy (the version numbers in fact contradict the stated disclosure years). For real advisories consult nvd.nist.gov or the CISA KEV catalog.',
-    noteAudit: 'ℹ️ About this score: the weightings and tiers are specific to this project and are not mapped to NIST CSF, CIS Controls, ISO 27001 or any recognised framework. Five questions cannot characterise security maturity. Use the result as a discussion starting point, not as audit or compliance evidence.'
+    noteAudit: 'ℹ️ About this score: the weightings and tiers are specific to this project and are not mapped to NIST CSF, CIS Controls, ISO 27001 or any recognised framework. Five questions cannot characterise security maturity. Use the result as a discussion starting point, not as audit or compliance evidence.',
+    noteEmergency: '⚠️ Demo only: this form does not transmit data, notify a SOC, contact anyone, or create an incident ticket. For a real incident, use your organization\'s formally approved emergency-reporting channel.'
   }
 };
 
@@ -1311,7 +1313,7 @@ function initEmergencyModal() {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       closeModal();
-      showToast(currentLang === 'zh-TW' ? '🚨 緊急通報已發送至 SOC 值班指揮中心' : '🚨 EMERGENCY ALERT DISPATCHED TO SOC COMMAND TEAM', 'error');
+      showToast(currentLang === 'zh-TW' ? '示範完成：未傳送資料，也未發出任何緊急通報。' : 'Demo complete: no data was transmitted and no emergency alert was dispatched.', 'info');
     });
   }
 }
@@ -1333,7 +1335,7 @@ function initCounters() {
   const refreshBtn = document.getElementById('refreshTelemetryBtn');
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
-      showToast(currentLang === 'zh-TW' ? '正在刷新 SOC 遙測數據流...' : 'Refreshing SOC telemetry feeds...', 'info');
+      showToast(currentLang === 'zh-TW' ? '正在重新產生模擬遙測畫面...' : 'Regenerating the simulated telemetry display...', 'info');
     });
   }
 }
