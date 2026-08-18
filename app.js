@@ -257,9 +257,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initEmergencyModal();
   initCounters();
 
-  // Playbooks and the audit quiz are rendered (and bound) by setLanguage() ->
-  // renderPlaybooks() / renderAuditQuiz(). Calling their init functions here as
-  // well would bind a second set of listeners to the same containers.
+  // Everything whose markup depends on the language is rendered by
+  // setLanguage(): playbooks, the audit quiz, the password panel, and the CVE
+  // list. The quiz and the playbooks are also *bound* there, so calling their
+  // init functions here as well would bind a second set of listeners to the
+  // same containers.
   setLanguage(currentLang);
 });
 
@@ -376,6 +378,7 @@ function setLanguage(lang) {
   renderPlaybooks();
   renderAuditQuiz();
   renderPasswordStrength();
+  renderCVEs();
 }
 
 /* Theme Toggle */
@@ -1113,6 +1116,58 @@ const CVE_DATABASE = [
   }
 ];
 
+/**
+ * Filter state lives at module scope, not inside initCVEExplorer's closure.
+ *
+ * renderCVEs() has to be callable from setLanguage(), and the search text and
+ * severity filter have to survive that call — a language switch must not
+ * silently reset the list the user narrowed down.
+ */
+let cveActiveSeverity = 'ALL';
+let cveSearchQuery = '';
+
+function renderCVEs() {
+  const container = document.getElementById('cveListContainer');
+  if (!container) return;
+
+  const isZh = currentLang === 'zh-TW';
+
+  const filtered = CVE_DATABASE.filter(item => {
+    const matchesSev = cveActiveSeverity === 'ALL' || item.severity === cveActiveSeverity;
+    const title = isZh ? item.titleZh : item.titleEn;
+    const desc = isZh ? item.descZh : item.descEn;
+    const matchesText = item.id.toLowerCase().includes(cveSearchQuery) ||
+                        title.toLowerCase().includes(cveSearchQuery) ||
+                        desc.toLowerCase().includes(cveSearchQuery) ||
+                        item.software.toLowerCase().includes(cveSearchQuery);
+    return matchesSev && matchesText;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+        ${isZh ? '沒有找到符合搜尋條件的 CVE 漏洞紀錄。' : 'No CVE records matched your search query.'}
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(c => `
+    <div class="cve-card">
+      <div class="cve-header">
+        <span class="cve-id">${c.id}</span>
+        <span class="severity-tag sev-${c.severity.toLowerCase()}">${c.severity} • CVSS ${c.cvss}</span>
+      </div>
+      <h4 class="cve-title">${isZh ? c.titleZh : c.titleEn}</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.35rem;">${isZh ? c.descZh : c.descEn}</p>
+      <div class="cve-meta">
+        <span>📦 ${isZh ? '影響軟體:' : 'Software:'} ${c.software}</span>
+        <span>📅 ${isZh ? '揭露日期:' : 'Disclosed:'} ${c.date}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
 function initCVEExplorer() {
   const container = document.getElementById('cveListContainer');
   const searchInput = document.getElementById('cveSearchInput');
@@ -1120,65 +1175,25 @@ function initCVEExplorer() {
 
   if (!container) return;
 
-  let activeSeverity = 'ALL';
-  let searchQuery = '';
-
-  function renderCVEs() {
-    const isZh = currentLang === 'zh-TW';
-
-    const filtered = CVE_DATABASE.filter(item => {
-      const matchesSev = activeSeverity === 'ALL' || item.severity === activeSeverity;
-      const title = isZh ? item.titleZh : item.titleEn;
-      const desc = isZh ? item.descZh : item.descEn;
-      const matchesText = item.id.toLowerCase().includes(searchQuery) ||
-                          title.toLowerCase().includes(searchQuery) ||
-                          desc.toLowerCase().includes(searchQuery) ||
-                          item.software.toLowerCase().includes(searchQuery);
-      return matchesSev && matchesText;
-    });
-
-    if (filtered.length === 0) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-          ${isZh ? '沒有找到符合搜尋條件的 CVE 漏洞紀錄。' : 'No CVE records matched your search query.'}
-        </div>
-      `;
-      return;
-    }
-
-    container.innerHTML = filtered.map(c => `
-      <div class="cve-card">
-        <div class="cve-header">
-          <span class="cve-id">${c.id}</span>
-          <span class="severity-tag sev-${c.severity.toLowerCase()}">${c.severity} • CVSS ${c.cvss}</span>
-        </div>
-        <h4 class="cve-title">${isZh ? c.titleZh : c.titleEn}</h4>
-        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.35rem;">${isZh ? c.descZh : c.descEn}</p>
-        <div class="cve-meta">
-          <span>📦 ${isZh ? '影響軟體:' : 'Software:'} ${c.software}</span>
-          <span>📅 ${isZh ? '揭露日期:' : 'Disclosed:'} ${c.date}</span>
-        </div>
-      </div>
-    `).join('');
-  }
-
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      activeSeverity = btn.getAttribute('data-severity');
+      cveActiveSeverity = btn.getAttribute('data-severity');
       renderCVEs();
     });
   });
 
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
-      searchQuery = e.target.value.toLowerCase().trim();
+      cveSearchQuery = e.target.value.toLowerCase().trim();
       renderCVEs();
     });
   }
 
-  renderCVEs();
+  // No initial render here: setLanguage() does it, for whichever language is
+  // active. The filter buttons live in the static markup, so binding them once
+  // is enough.
 }
 
 /* Incident Response Playbooks Dynamic Rendering */
