@@ -31,7 +31,7 @@
       <div class="nav-controls">
         <div class="status-badge">
           <span class="pulse-dot"></span>
-          <span id="sysStatusText" data-i18n="sysStatus">DEFCON 4 • 系統正常運作</span>
+          <span id="sysStatusText" data-i18n="sysStatus">DEMO MODE • 模擬介面</span>
         </div>
         <button class="btn btn-outline" id="langToggleBtn" style="padding: 0.35rem 0.75rem; font-family: var(--font-mono); font-size: 0.8rem;" aria-label="Toggle Language">🌐 EN / 繁中</button>
         <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme" aria-label="Toggle Theme">🌙</button>
@@ -42,7 +42,7 @@
 
   <!-- Live Threat Feed Ticker -->
   <div class="ticker-bar" aria-label="Live Threat Stream">
-    <div class="ticker-label" data-i18n="tickerLabel">即時威脅快訊</div>
+    <div class="ticker-label" data-i18n="tickerLabel">模擬威脅快訊</div>
     <div class="ticker-content" id="threatTickerContent">
       <!-- Dynamically rendered via app.js -->
     </div>
@@ -62,7 +62,7 @@
         <div class="hero-content">
           <div class="hero-badge" data-i18n="heroBadge">⚡ 主動防禦協定已啟用 ACTIVE DEFENSE PROTOCOL</div>
           <h1 class="hero-title" data-i18n="heroTitle">新世代資安 <span>威脅情報與診斷指揮中心</span></h1>
-          <p class="hero-subtitle" data-i18n="heroSubtitle">為資安團隊提供即時網域安全標頭診斷、密碼熵強度分析、CVE 漏洞情報追蹤與自動化事件應變劇本。</p>
+          <p class="hero-subtitle" data-i18n="heroSubtitle">以前端模擬介面展示網域安全標頭、密碼熵值、CVE 情報與事件應變劇本；不提供即時監控或真實掃描。</p>
           
           <div class="hero-actions">
             <a href="#toolkit" class="btn btn-primary" data-i18n="heroBtnTools">啟動診斷工具 Hub 🛠️</a>
@@ -72,15 +72,15 @@
           <div class="hero-stats">
             <div class="stat-item">
               <div class="stat-value" id="statScannedDomains">24,819</div>
-              <div class="stat-label" data-i18n="statScanned">已檢測網域</div>
+              <div class="stat-label" data-i18n="statScanned">模擬網域計數</div>
             </div>
             <div class="stat-item">
               <div class="stat-value" id="statMonitoredCVEs">8,410</div>
-              <div class="stat-label" data-i18n="statCVEs">收錄 CVE 漏洞</div>
+              <div class="stat-label" data-i18n="statCVEs">範例 CVE 計數</div>
             </div>
             <div class="stat-item">
               <div class="stat-value" style="color: var(--accent-emerald);">99.98%</div>
-              <div class="stat-label" data-i18n="statUptime">防禦運作率</div>
+              <div class="stat-label" data-i18n="statUptime">模擬運作率</div>
             </div>
           </div>
         </div>
@@ -91,8 +91,8 @@
             <div class="hero-overlay-info">
               <div class="hero-overlay-icon">✓</div>
               <div>
-                <strong style="display:block; font-size: 0.9rem;" data-i18n="telemetryTitle">即時遙測節點運作中</strong>
-                <span style="font-size: 0.75rem; color: var(--text-secondary);" data-i18n="telemetrySub">網路延遲: 14ms • 封包丟失率: 0%</span>
+                <strong style="display:block; font-size: 0.9rem;" data-i18n="telemetryTitle">模擬遙測介面</strong>
+                <span style="font-size: 0.75rem; color: var(--text-secondary);" data-i18n="telemetrySub">範例延遲: 14ms • 範例封包丟失率: 0%</span>
               </div>
             </div>
             <button class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" id="refreshTelemetryBtn" data-i18n="btnRefresh">重新整理</button>
@@ -161,8 +161,8 @@
             
             <!-- Panel 1: Security Headers Scanner -->
             <div class="tool-panel active card" id="panel-headers" role="tabpanel">
-              <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p1Title">HTTP 安全標頭與 SSL 體檢</h3>
-              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p1Desc">評估 Web 應用程式對抗 Clickjacking、XSS、MIME 偽造與 SSL 降級攻擊的防禦能力。</p>
+              <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p1Title">HTTP 安全標頭與 SSL 評分示範</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p1Desc">示範 Web 安全標頭評分介面；不會連線或檢測輸入的網站。</p>
 
               <div class="demo-note" data-i18n="noteHeaders">⚠️ 模擬工具：受瀏覽器同源政策限制，前端 JavaScript 無法讀取其他網站的回應標頭。本工具未發出任何請求，分數與檢查結果純為示範，不代表目標網站的真實設定。實際檢測請使用 Mozilla HTTP Observatory 或 curl -I。</div>
 
@@ -240,7 +240,7 @@
             <!-- Panel 3: Phishing Link Inspector -->
             <div class="tool-panel card" id="panel-phishing" role="tabpanel">
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p3Title">網絡釣魚與同形異義字 URL 檢查器</h3>
-              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p3Desc">拆解可疑 URL 結構，自動比對假冒網域、多重連字號與可疑 IP 重定向。</p>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p3Desc">以前端啟發式規則拆解 URL，僅檢查關鍵字、連字號與純 IP 格式。</p>
 
               <div class="demo-note" data-i18n="notePhishing">ℹ️ 啟發式分析：本工具僅檢查關鍵字、連字號數量與純 IP 格式，尚未實作同形異義字 (IDN homograph) 與 punycode 偵測，也不檢查 path、query 與 userinfo。合法網域（如 accounts.google.com）可能被誤判，真實的釣魚網址也可能被漏判，結果僅供初步參考。</div>
 
@@ -262,7 +262,7 @@
             <!-- Panel 4: Dark Web Exposure Check Simulator -->
             <div class="tool-panel card" id="panel-darkweb" role="tabpanel">
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p4Title">暗網外洩紀錄模擬查詢</h3>
-              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p4Desc">查詢企業 Email 或網域是否曾出現在公開洩漏資料庫或暗網竊密軟體 (Stealer Log) 檔案庫中。</p>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p4Desc">以虛構結果示範企業 Email 或網域的外洩查詢介面；不會查詢任何真實資料庫。</p>
 
               <div class="demo-note" data-i18n="noteDarkweb">⚠️ 模擬工具：本工具未連線任何外洩資料庫，結果由輸入字串的長度決定，與真實外洩狀況完全無關。查詢真實外洩紀錄請使用 Have I Been Pwned (haveibeenpwned.com)。</div>
 
@@ -401,7 +401,9 @@
     <div class="modal-card">
       <button class="modal-close" id="closeEmergencyModalBtn">&times;</button>
       <h3 style="color: var(--accent-rose); font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="modalTitle">🚨 宣告重大資安事件 (Emergency)</h3>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="modalSub">即時通報值班指揮官並啟動應變隔離程序。</p>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="modalSub">示範重大資安事件通報流程；不會聯絡值班指揮官或啟動任何應變程序。</p>
+
+      <div class="demo-note" data-i18n="noteEmergency">⚠️ 示範功能：本表單不會傳送資料、通知 SOC、聯絡任何人員或建立事件單。若發生真實事件，請使用貴組織正式核准的緊急通報管道。</div>
       
       <form id="emergencyForm" onsubmit="return false;">
         <div class="form-group">
@@ -421,7 +423,7 @@
 
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
           <button type="button" class="btn btn-secondary" id="cancelEmergencyBtn" data-i18n="btnCancel">取消</button>
-          <button type="submit" class="btn btn-danger" id="triggerEmergencyAlertBtn" data-i18n="btnSubmitEmergency">發送緊急通報 🚨</button>
+          <button type="submit" class="btn btn-danger" id="triggerEmergencyAlertBtn" data-i18n="btnSubmitEmergency">模擬送出（不會實際通報）🚨</button>
         </div>
       </form>
     </div>
