@@ -167,7 +167,7 @@
               <div class="demo-note" data-i18n="noteHeaders">⚠️ 模擬工具：受瀏覽器同源政策限制，前端 JavaScript 無法讀取其他網站的回應標頭。本工具未發出任何請求，分數與檢查結果純為示範，不代表目標網站的真實設定。實際檢測請使用 Mozilla HTTP Observatory 或 curl -I。</div>
 
 
-              <form id="headerScanForm" onsubmit="return false;">
+              <form id="headerScanForm">
                 <div class="form-group">
                   <label class="form-label" for="domainInput" data-i18n="p1Label">目標網域或 URL</label>
                   <div class="input-row">
@@ -244,7 +244,7 @@
 
               <div class="demo-note" data-i18n="notePhishing">ℹ️ 啟發式分析：本工具僅檢查關鍵字、連字號數量與純 IP 格式，尚未實作同形異義字 (IDN homograph) 與 punycode 偵測，也不檢查 path、query 與 userinfo。合法網域（如 accounts.google.com）可能被誤判，真實的釣魚網址也可能被漏判，結果僅供初步參考。</div>
 
-              <form id="phishingForm" onsubmit="return false;">
+              <form id="phishingForm">
                 <div class="form-group">
                   <label class="form-label" for="phishingUrlInput" data-i18n="p3Label">要檢測的可疑 URL</label>
                   <div class="input-row">
@@ -266,7 +266,7 @@
 
               <div class="demo-note" data-i18n="noteDarkweb">⚠️ 模擬工具：本工具未連線任何外洩資料庫，結果由輸入字串的長度決定，與真實外洩狀況完全無關。查詢真實外洩紀錄請使用 Have I Been Pwned (haveibeenpwned.com)。</div>
 
-              <form id="darkwebForm" onsubmit="return false;">
+              <form id="darkwebForm">
                 <div class="form-group">
                   <label class="form-label" for="darkwebEmailInput" data-i18n="p4Label">企業 Email 或 網域名稱</label>
                   <div class="input-row">
@@ -405,7 +405,7 @@
 
       <div class="demo-note" data-i18n="noteEmergency">⚠️ 示範功能：本表單不會傳送資料、通知 SOC、聯絡任何人員或建立事件單。若發生真實事件，請使用貴組織正式核准的緊急通報管道。</div>
       
-      <form id="emergencyForm" onsubmit="return false;">
+      <form id="emergencyForm">
         <div class="form-group">
           <label class="form-label" for="incidentType" data-i18n="modalTypeLabel">事件類別 Category</label>
           <select id="incidentType" class="form-input" style="width: 100%;">
