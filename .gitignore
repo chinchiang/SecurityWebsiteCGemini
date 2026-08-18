@@ -1,0 +1,23 @@
+# OS metadata
+.DS_Store
+._*
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# The site ships no runtime dependencies. This entry exists so that a stray
+# `npm install` can never be committed. package-lock.json is deliberately NOT
+# ignored: if a dependency is ever added, the lockfile is what pins it.
+node_modules/
+npm-debug.log*
+
+# Local scratch and secrets
+.env
+.env.*
+*.local
