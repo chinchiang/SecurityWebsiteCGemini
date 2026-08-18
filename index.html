@@ -194,10 +194,10 @@
 
             <!-- Panel 2: Password Entropy Engine & Hash Generator -->
             <div class="tool-panel card" id="panel-entropy" role="tabpanel">
-              <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p2Title">密碼熵值強度與密碼學雜湊引擎</h3>
-              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p2Desc">測試憑證密碼對抗超級電腦與 GPU 叢集的破解時間，並即時計算 SHA-256 雜湊。</p>
+              <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p2Title">密碼強度與密碼學雜湊引擎</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p2Desc">估算密碼在離線暴力破解下可撐多久，並在瀏覽器本機計算 SHA-256 雜湊。</p>
 
-              <div class="demo-note" data-i18n="notePassword">🔒 安全提醒：請勿輸入您的真實密碼。所有運算（含 SHA-256）皆在您的瀏覽器本機完成，不會傳送至任何伺服器。但下方熵值模型假設密碼為均勻隨機字串，會明顯高估常見密碼（例如 Password123! 會被評為「高度安全」），僅供教學參考。</div>
+              <div class="demo-note" data-i18n="notePassword">🔒 安全提醒：請勿輸入您的真實密碼。所有運算（含 SHA-256）皆在您的瀏覽器本機完成，不會傳送至任何伺服器。破解時間假設攻擊者已取得密碼雜湊並於離線環境暴力破解，且雜湊為快速演算法（如本頁計算的 SHA-256）；若改用 bcrypt 或 Argon2id，實際時間會長上好幾個數量級。本頁字典僅為常見密碼的取樣，真實破解工具的字典有數百萬筆，因此在此得到高分仍不代表安全。</div>
 
               <div class="form-group">
                 <label class="form-label" for="passInput" data-i18n="p2Label">輸入測試密碼 / 密鑰字串</label>
@@ -209,18 +209,18 @@
               </div>
 
               <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 1.25rem;">
-                <span><span data-i18n="p2RatingLbl">熵值評級:</span> <strong id="entropyRatingText" style="color: var(--accent-rose);">無</strong></span>
+                <span><span data-i18n="p2RatingLbl">強度評級:</span> <strong id="entropyRatingText" style="color: var(--accent-rose);" data-i18n="p2RatingNone">無</strong></span>
                 <span class="mono" id="entropyBitsText">0 bits</span>
               </div>
 
               <div class="entropy-stats-grid">
                 <div class="mini-stat-card">
-                  <div class="mini-stat-val" id="crackTimeGpu">0s</div>
-                  <div class="mini-stat-lbl" data-i18n="p2GpuCluster">NVIDIA RTX 4090 算力叢集</div>
+                  <div class="mini-stat-val" id="crackTimeGpu">—</div>
+                  <div class="mini-stat-lbl" data-i18n="p2GpuCluster">GPU 叢集（每秒 10^11 次猜測）</div>
                 </div>
                 <div class="mini-stat-card">
-                  <div class="mini-stat-val" id="crackTimeCloud">0s</div>
-                  <div class="mini-stat-lbl" data-i18n="p2CloudBotnet">分佈式雲端殭屍網路</div>
+                  <div class="mini-stat-val" id="crackTimeCloud">—</div>
+                  <div class="mini-stat-lbl" data-i18n="p2CloudBotnet">大型雲端叢集（每秒 10^13 次猜測）</div>
                 </div>
                 <div class="mini-stat-card">
                   <div class="mini-stat-val" id="passCharacterCount">0</div>

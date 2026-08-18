@@ -26,7 +26,8 @@ const EXPOSED = [
   'quizCurrentStep', 'quizTotalScore',
   'cveActiveSeverity', 'cveSearchQuery',
   'initCVEExplorer', 'initPasswordEntropyEngine', 'initAuditQuiz',
-  'estimatePasswordStrength', 'formatCrackTime', 'crackTimeSeconds'
+  'estimatePasswordStrength', 'formatCrackTime', 'crackTimeSeconds',
+  'strengthTier', 'renderPasswordStrength', 'ATTACK_RATES', 'COMMON_PASSWORDS'
 ];
 
 function readSource() {

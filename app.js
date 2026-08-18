@@ -44,13 +44,27 @@ const TRANSLATIONS = {
     p1Placeholder: '例如：secure-portal.company.com',
     p1Btn: '開始健檢 ⚡',
     gaugeLbl: '整體安全評級（示範值，非真實檢測）',
-    p2Title: '密碼熵值強度與密碼學雜湊引擎',
-    p2Desc: '測試憑證密碼對抗超級電腦與 GPU 叢集的破解時間，並即時計算 SHA-256 雜湊。',
+    p2Title: '密碼強度與密碼學雜湊引擎',
+    p2Desc: '估算密碼在離線暴力破解下可撐多久，並在瀏覽器本機計算 SHA-256 雜湊。',
     p2Label: '輸入測試密碼 / 密鑰字串',
     p2Placeholder: '請在此輸入密碼...',
-    p2RatingLbl: '熵值評級:',
-    p2GpuCluster: 'NVIDIA RTX 4090 算力叢集',
-    p2CloudBotnet: '分佈式雲端殭屍網路',
+    p2RatingLbl: '強度評級:',
+    p2GpuCluster: 'GPU 叢集（每秒 10^11 次猜測）',
+    p2CloudBotnet: '大型雲端叢集（每秒 10^13 次猜測）',
+    p2RatingNone: '無',
+    p2RatingVeryWeak: '極度脆弱',
+    p2RatingWeak: '脆弱',
+    p2RatingModerate: '中等強度',
+    p2RatingStrong: '良好',
+    p2RatingVeryStrong: '非常強',
+    timeInstant: '瞬間破解',
+    timeSeconds: '{n} 秒',
+    timeMinutes: '{n} 分鐘',
+    timeHours: '{n} 小時',
+    timeDays: '{n} 天',
+    timeMonths: '{n} 個月',
+    timeYears: '{n} 年',
+    timeCenturies: '{n} 世紀',
     p2CharLength: '字元總長度',
     p2ShaLabel: '前端純 Hash 計算 (SHA-256)',
     p2Copy: '複製 Hash',
@@ -92,7 +106,7 @@ const TRANSLATIONS = {
     btnSubmitEmergency: '模擬送出（不會實際通報）🚨',
     demoBanner: '⚠️ 示範網站聲明：本站為前端技術示範專案，不連線任何外部服務。威脅地圖、CVE 情報、統計數字與所有掃描結果皆為虛構的模擬資料，請勿作為實際安全決策的依據。',
     noteHeaders: '⚠️ 模擬工具：受瀏覽器同源政策限制，前端 JavaScript 無法讀取其他網站的回應標頭。本工具未發出任何請求，分數與檢查結果純為示範，不代表目標網站的真實設定。實際檢測請使用 Mozilla HTTP Observatory 或 curl -I。',
-    notePassword: '🔒 安全提醒：請勿輸入您的真實密碼。所有運算（含 SHA-256）皆在您的瀏覽器本機完成，不會傳送至任何伺服器。但下方熵值模型假設密碼為均勻隨機字串，會明顯高估常見密碼（例如 Password123! 會被評為「高度安全」），僅供教學參考。',
+    notePassword: '🔒 安全提醒：請勿輸入您的真實密碼。所有運算（含 SHA-256）皆在您的瀏覽器本機完成，不會傳送至任何伺服器。破解時間假設攻擊者已取得密碼雜湊並於離線環境暴力破解，且雜湊為快速演算法（如本頁計算的 SHA-256）；若改用 bcrypt 或 Argon2id，實際時間會長上好幾個數量級。本頁字典僅為常見密碼的取樣，真實破解工具的字典有數百萬筆，因此在此得到高分仍不代表安全。',
     notePhishing: 'ℹ️ 啟發式分析：本工具僅檢查關鍵字、連字號數量與純 IP 格式，尚未實作同形異義字 (IDN homograph) 與 punycode 偵測，也不檢查 path、query 與 userinfo。合法網域（如 accounts.google.com）可能被誤判，真實的釣魚網址也可能被漏判，結果僅供初步參考。',
     noteDarkweb: '⚠️ 模擬工具：本工具未連線任何外洩資料庫，結果由輸入字串的長度決定，與真實外洩狀況完全無關。查詢真實外洩紀錄請使用 Have I Been Pwned (haveibeenpwned.com)。',
     noteDarkwebInline: '⚠️ 以下為虛構的示範輸出，未查詢任何外洩資料庫，與此帳號的真實狀況無關。',
@@ -139,13 +153,27 @@ const TRANSLATIONS = {
     p1Placeholder: 'e.g. secure-portal.company.com',
     p1Btn: 'Run Audit ⚡',
     gaugeLbl: 'OVERALL GRADE (DEMO VALUE, NOT A REAL SCAN)',
-    p2Title: 'Password Entropy & Crypto Hash Engine',
-    p2Desc: 'Test credential entropy against quantum cracking hardware and generate client-side SHA-256 hashes.',
+    p2Title: 'Password Strength & Crypto Hash Engine',
+    p2Desc: 'Estimate how long a password survives offline guessing, and compute its SHA-256 hash locally in your browser.',
     p2Label: 'Enter Test Password / Secret Phrase',
     p2Placeholder: 'Type password here...',
-    p2RatingLbl: 'Entropy Rating:',
-    p2GpuCluster: 'NVIDIA RTX 4090 Cluster',
-    p2CloudBotnet: 'Distributed Cloud Botnet',
+    p2RatingLbl: 'Strength Rating:',
+    p2GpuCluster: 'GPU cluster (10^11 guesses/sec)',
+    p2CloudBotnet: 'Large cloud fleet (10^13 guesses/sec)',
+    p2RatingNone: 'None',
+    p2RatingVeryWeak: 'Very Weak',
+    p2RatingWeak: 'Weak',
+    p2RatingModerate: 'Moderate',
+    p2RatingStrong: 'Good',
+    p2RatingVeryStrong: 'Very Strong',
+    timeInstant: 'Instantly',
+    timeSeconds: '{n} seconds',
+    timeMinutes: '{n} minutes',
+    timeHours: '{n} hours',
+    timeDays: '{n} days',
+    timeMonths: '{n} months',
+    timeYears: '{n} years',
+    timeCenturies: '{n} centuries',
     p2CharLength: 'Character Length',
     p2ShaLabel: 'Client-Side SHA-256 Hash',
     p2Copy: 'Copy Hash',
@@ -187,7 +215,7 @@ const TRANSLATIONS = {
     btnSubmitEmergency: 'Simulate submission (not dispatched) 🚨',
     demoBanner: '⚠️ Demo site notice: this is a front-end technical demo that connects to no external service. The threat map, CVE feed, statistics and all scan results are fictional simulated data. Do not rely on them for real security decisions.',
     noteHeaders: '⚠️ Simulated tool: the same-origin policy prevents browser JavaScript from reading another site\'s response headers. This tool issues no request — the grade and checks are illustrative only and do not reflect the target site\'s real configuration. For a real assessment use Mozilla HTTP Observatory or curl -I.',
-    notePassword: '🔒 Safety note: do not enter a real password. All computation (including SHA-256) happens locally in your browser and is never transmitted. However, the entropy model below assumes a uniformly random string and so significantly overestimates common passwords (Password123! is rated "Strong"). Educational use only.',
+    notePassword: '🔒 Safety note: do not enter a real password. All computation (including SHA-256) happens locally in your browser and is never transmitted. Crack times assume an attacker already holds the hash and is guessing offline against a fast algorithm — the same SHA-256 this page computes; bcrypt or Argon2id would take orders of magnitude longer. The wordlist here is only a sample of common passwords, while real cracking tools carry millions of entries, so a good score here is still not proof of safety.',
     notePhishing: 'ℹ️ Heuristic analysis: this tool only checks keywords, hyphen count and raw-IP format. It does not detect IDN homographs / punycode, and does not inspect the path, query string or userinfo. Legitimate domains (e.g. accounts.google.com) may be flagged and real phishing URLs may be missed. Treat results as indicative only.',
     noteDarkweb: '⚠️ Simulated tool: no breach database is queried. The result is derived from the length of your input and bears no relation to any actual exposure. For real breach data use Have I Been Pwned (haveibeenpwned.com).',
     noteDarkwebInline: '⚠️ The output below is fictional sample data. No breach database was queried and it says nothing about this account.',
@@ -342,9 +370,12 @@ function setLanguage(lang) {
     langBtn.textContent = lang === 'zh-TW' ? '🌐 繁中 / EN' : '🌐 EN / 繁中';
   }
 
-  // Re-render playbooks and audit quiz for active language
+  // Re-render everything whose text is built in JavaScript rather than sitting
+  // in the markup behind a data-i18n attribute. Miss one and it silently stays
+  // in the previous language until the user interacts with it again.
   renderPlaybooks();
   renderAuditQuiz();
+  renderPasswordStrength();
 }
 
 /* Theme Toggle */
@@ -471,8 +502,348 @@ function initHeaderScanner() {
   });
 }
 
-/* Tool 2: Password Entropy & Crypto Hash Engine */
-function initPasswordEntropyEngine() {
+/* ------------------------------------------------------------------------- *
+ * Password strength estimation
+ *
+ * The previous model was `length x log2(charset)`, which is only correct for a
+ * uniformly random string. Real passwords are not random, so that formula rated
+ * "Password123!" and "aaaaaaaaaaaaaaaa" as strong. This is a small, dependency-
+ * free implementation of the approach zxcvbn popularised: find the patterns an
+ * attacker's cracker already knows about, then charge the cheapest way of
+ * assembling the whole password out of those patterns.
+ *
+ * Deliberate limitations, stated in the UI rather than hidden:
+ * - The wordlist below is a sample. A real cracker carries millions of entries,
+ *   so a password that scores well here can still fall to a bigger dictionary.
+ * - Everything runs locally. Nothing is looked up over the network, because the
+ *   page promises it makes no requests.
+ * ------------------------------------------------------------------------- */
+
+/**
+ * Sampled from the leaks that cracking wordlists are built out of, roughly in
+ * frequency order. Position matters: rank is used as the guess count, so the
+ * first entry costs an attacker a single guess.
+ */
+const COMMON_PASSWORDS = [
+  'password', '123456', '123456789', 'qwerty', '12345678', '111111', '1234567890',
+  '1234567', 'password1', '12345', '123123', '000000', 'iloveyou', '1234',
+  'admin', 'letmein', 'monkey', 'dragon', 'sunshine', 'princess', 'football',
+  'welcome', 'abc123', 'qwerty123', 'trustno1', 'passw0rd', 'shadow', 'master',
+  'baseball', 'superman', 'batman', 'starwars', 'whatever', 'cheese', 'ninja',
+  'freedom', 'computer', 'michael', 'jennifer', 'jordan', 'hunter', 'ranger',
+  'buster', 'soccer', 'harley', 'thomas', 'summer', 'ashley', 'bailey',
+  'love', 'secret', 'god', 'sex', 'money', 'internet', 'server', 'root',
+  'toor', 'test', 'guest', 'user', 'oracle', 'changeme', 'default', 'access',
+  'login', 'pass', 'secure', 'security', 'cyber', 'hacker', 'firewall',
+  'january', 'february', 'march', 'april', 'august', 'september', 'october',
+  'november', 'december', 'monday', 'friday', 'taiwan', 'taipei', 'china',
+  'google', 'facebook', 'youtube', 'amazon', 'apple', 'samsung', 'microsoft',
+  'aegis', 'aegisguard', 'company', 'corporate', 'office', 'work'
+];
+
+const COMMON_RANK = new Map(COMMON_PASSWORDS.map((word, i) => [word, i + 1]));
+
+// Adjacent runs a cracker walks for free. Reversed runs are checked too.
+const KEYBOARD_ROWS = ['1234567890', 'qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+
+// One canonical letter per substitute. '1' could be l or i; picking one keeps
+// the search linear and only ever *under*-credits the attacker slightly.
+const LEET_MAP = {
+  '4': 'a', '@': 'a', '8': 'b', '(': 'c', '3': 'e', '6': 'g', '1': 'l',
+  '!': 'i', '|': 'l', '0': 'o', '9': 'q', '5': 's', '$': 's', '7': 't',
+  '+': 't', '2': 'z'
+};
+
+function charsetSize(str) {
+  let size = 0;
+  if (/[a-z]/.test(str)) size += 26;
+  if (/[A-Z]/.test(str)) size += 26;
+  if (/[0-9]/.test(str)) size += 10;
+  if (/[^A-Za-z0-9]/.test(str)) size += 33;   // printable ASCII symbols + space
+  return size || 1;
+}
+
+function unleet(str) {
+  return str.replace(/[4@8(3619!|0592$7+]/g, ch => LEET_MAP[ch] || ch);
+}
+
+function binomial(n, k) {
+  let result = 1;
+  for (let i = 1; i <= k; i++) result = (result * (n - k + i)) / i;
+  return Math.round(result);
+}
+
+/**
+ * How many capitalisation variants of a known word an attacker must try.
+ * "password" is free; "pAsSwOrD" is not.
+ */
+function capitalisationVariants(token) {
+  if (!/[A-Z]/.test(token)) return 1;
+  if (/^[A-Z][^A-Z]*$/.test(token)) return 2;    // Password
+  if (/^[A-Z]+$/.test(token)) return 2;          // PASSWORD
+  if (/^[^A-Z]*[A-Z]$/.test(token)) return 2;    // passworD
+  const upper = (token.match(/[A-Z]/g) || []).length;
+  const lower = token.length - upper;
+  let variants = 0;
+  for (let i = 1; i <= Math.min(upper, lower); i++) variants += binomial(token.length, i);
+  return Math.max(variants, 2);
+}
+
+/** Every match is { i, j, guesses, kind } with j inclusive. */
+function dictionaryMatches(password) {
+  const lower = password.toLowerCase();
+  const matches = [];
+  for (let i = 0; i < password.length; i++) {
+    for (let j = i; j < password.length; j++) {
+      const slice = lower.slice(i, j + 1);
+      const plain = COMMON_RANK.get(slice);
+      const leet = plain ? null : COMMON_RANK.get(unleet(slice));
+      if (!plain && !leet) continue;
+      const raw = password.slice(i, j + 1);
+      // Substitutions are a rule every cracker applies, so they multiply the
+      // cost by a small constant rather than by the size of the symbol space.
+      const guesses = (plain || leet) * capitalisationVariants(raw) * (plain ? 1 : 2);
+      matches.push({ i, j, guesses, kind: 'dictionary' });
+    }
+  }
+  return matches;
+}
+
+function repeatMatches(password) {
+  const matches = [];
+  for (let unitLen = 1; unitLen <= Math.floor(password.length / 2); unitLen++) {
+    for (let i = 0; i + unitLen * 2 <= password.length; i++) {
+      const unit = password.slice(i, i + unitLen);
+      let end = i + unitLen;
+      while (password.slice(end, end + unitLen) === unit) end += unitLen;
+      const repeats = (end - i) / unitLen;
+      if (repeats < 2) continue;
+      // Guess the unit once, then guess how many times it repeats.
+      const unitGuesses = Math.pow(charsetSize(unit), unit.length);
+      matches.push({ i, j: end - 1, guesses: unitGuesses * repeats, kind: 'repeat' });
+    }
+  }
+  return matches;
+}
+
+function sequenceMatches(password) {
+  const matches = [];
+  for (let i = 0; i + 2 < password.length; i++) {
+    const delta = password.charCodeAt(i + 1) - password.charCodeAt(i);
+    if (Math.abs(delta) !== 1) continue;
+    let j = i + 1;
+    while (j + 1 < password.length &&
+           password.charCodeAt(j + 1) - password.charCodeAt(j) === delta) j++;
+    if (j - i + 1 < 3) continue;
+    // Guess the starting character, the direction, and the length.
+    const alphabet = /[0-9]/.test(password[i]) ? 10 : 26;
+    matches.push({ i, j, guesses: alphabet * 2 * (j - i + 1), kind: 'sequence' });
+  }
+  return matches;
+}
+
+function keyboardMatches(password) {
+  const lower = password.toLowerCase();
+  const matches = [];
+  for (let i = 0; i + 2 < lower.length; i++) {
+    for (let j = lower.length - 1; j - i >= 2; j--) {
+      const slice = lower.slice(i, j + 1);
+      const reversed = slice.split('').reverse().join('');
+      const onRow = KEYBOARD_ROWS.some(row => row.includes(slice) || row.includes(reversed));
+      if (!onRow) continue;
+      // Guess the row, the direction, the start key, and the length.
+      matches.push({
+        i, j,
+        guesses: KEYBOARD_ROWS.length * 2 * 10 * slice.length,
+        kind: 'keyboard'
+      });
+      break;   // longest run from this start position wins
+    }
+  }
+  return matches;
+}
+
+function yearMatches(password) {
+  const matches = [];
+  for (const m of password.matchAll(/(?:19|20)\d\d/g)) {
+    // ~120 plausible years is a rounding error next to a 4-digit brute force.
+    matches.push({ i: m.index, j: m.index + 3, guesses: 120, kind: 'year' });
+  }
+  return matches;
+}
+
+/**
+ * Pattern-aware strength estimate.
+ *
+ * Works in bits (log2 of the guess count) throughout: a 40-character random
+ * password needs more guesses than a double can hold, and adding logarithms
+ * cannot overflow the way multiplying counts does.
+ *
+ * Returns { bits, length, segments } where segments is the cheapest cover the
+ * search found — useful for explaining the score and for testing it.
+ */
+function estimatePasswordStrength(password) {
+  if (!password) return { bits: 0, length: 0, segments: [] };
+
+  // Pattern search is quadratic; past this length the tail is brute force
+  // anyway, and this keeps a paste of a 10 KB string from freezing the tab.
+  const ANALYSIS_LIMIT = 64;
+  const analysed = password.slice(0, ANALYSIS_LIMIT);
+  const overflow = password.slice(ANALYSIS_LIMIT);
+
+  const n = analysed.length;
+  const byRange = new Map();
+  const all = [
+    ...dictionaryMatches(analysed), ...repeatMatches(analysed),
+    ...sequenceMatches(analysed), ...keyboardMatches(analysed),
+    ...yearMatches(analysed)
+  ];
+  for (const m of all) {
+    const key = `${m.i}:${m.j}`;
+    const existing = byRange.get(key);
+    if (!existing || m.guesses < existing.guesses) byRange.set(key, m);
+  }
+
+  // Brute force is priced off the charset of the WHOLE password, not of each
+  // chunk. Per-chunk pricing would let the search cut a random password into
+  // digits-only and letters-only runs and charge each at its own smaller
+  // alphabet, making "9f3Kd8sPq2m" look cheaper than it is.
+  const bruteforceBitsPerChar = Math.log2(charsetSize(analysed));
+
+  // best[k] = cheapest cover of the first k characters.
+  const best = new Array(n + 1).fill(null);
+  best[0] = { bits: 0, segments: [] };
+
+  for (let k = 1; k <= n; k++) {
+    for (let start = 0; start < k; start++) {
+      const prefix = best[start];
+      if (!prefix) continue;
+      const token = analysed.slice(start, k);
+      const options = [{
+        bits: token.length * bruteforceBitsPerChar,
+        kind: 'bruteforce'
+      }];
+      const match = byRange.get(`${start}:${k - 1}`);
+      if (match) options.push({ bits: Math.log2(match.guesses), kind: match.kind });
+
+      for (const option of options) {
+        const candidate = {
+          bits: prefix.bits + option.bits,
+          segments: prefix.segments.concat({ token, kind: option.kind, bits: option.bits })
+        };
+        if (!best[k] || scoreOf(candidate) < scoreOf(best[k])) best[k] = candidate;
+      }
+    }
+  }
+
+  const cover = best[n] || { bits: 0, segments: [] };
+  // Merge before scoring: fewer segments means a smaller ordering penalty, so
+  // the merged cover is the genuinely cheapest one of the two.
+  cover.segments = mergeBruteforceRuns(cover.segments);
+  let bits = scoreOf(cover);
+
+  // Anything past the analysis window is credited as pure brute force.
+  if (overflow) bits += overflow.length * Math.log2(charsetSize(overflow));
+
+  return { bits, length: password.length, segments: cover.segments };
+}
+
+/**
+ * Two adjacent brute-forced runs cost exactly what one run of their combined
+ * length costs, so the search picks between them arbitrarily. Joining them
+ * makes the explanation readable without changing the score.
+ */
+function mergeBruteforceRuns(segments) {
+  return segments.reduce((acc, segment) => {
+    const previous = acc[acc.length - 1];
+    if (previous && previous.kind === 'bruteforce' && segment.kind === 'bruteforce') {
+      previous.token += segment.token;
+      previous.bits += segment.bits;
+      return acc;
+    }
+    return acc.concat({ ...segment });
+  }, []);
+}
+
+/**
+ * A multi-part password also costs the attacker the choice of *how* to split
+ * it, which zxcvbn charges as (segments - 1)! extra guesses. Folded into the
+ * comparison so the search prefers few large patterns over many small ones.
+ */
+function scoreOf(cover) {
+  let orderingBits = 0;
+  for (let i = 2; i < cover.segments.length; i++) orderingBits += Math.log2(i);
+  return cover.bits + orderingBits;
+}
+
+/**
+ * Offline guessing rates, guesses per second, for a FAST unsalted hash — which
+ * is exactly what the SHA-256 field below computes. A password stored with
+ * bcrypt or Argon2id costs an attacker orders of magnitude more per guess, so
+ * these are a worst case for the defender rather than a universal figure.
+ */
+const ATTACK_RATES = {
+  gpuCluster: 1e11,    // a small rig of consumer GPUs against SHA-256
+  cloudBotnet: 1e13    // a large rented or compromised fleet
+};
+
+/** log10 of the expected time to crack, in seconds. */
+function crackTimeSeconds(bits, guessesPerSecond) {
+  // Expected work is half the keyspace, hence the -1 bit.
+  return (bits - 1) * Math.log10(2) - Math.log10(guessesPerSecond);
+}
+
+const TIME_UNITS = [
+  { key: 'timeSeconds', seconds: 1 },
+  { key: 'timeMinutes', seconds: 60 },
+  { key: 'timeHours', seconds: 3600 },
+  { key: 'timeDays', seconds: 86400 },
+  { key: 'timeMonths', seconds: 2629800 },       // average Gregorian month
+  { key: 'timeYears', seconds: 31557600 },       // Julian year
+  { key: 'timeCenturies', seconds: 3155760000 }
+];
+
+/** Renders a quantity without needing plural forms in either language. */
+function formatQuantity(value) {
+  if (value < 10) return value.toFixed(1);
+  if (value < 1e6) return Math.round(value).toLocaleString('en-US');
+  const exponent = Math.floor(Math.log10(value));
+  return `${(value / Math.pow(10, exponent)).toFixed(1)} × 10^${exponent}`;
+}
+
+/** Takes the log10 seconds from crackTimeSeconds() and localises it. */
+function formatCrackTime(log10Seconds) {
+  if (log10Seconds < 0) return t('timeInstant');
+
+  const seconds = Math.pow(10, log10Seconds);
+  if (!Number.isFinite(seconds)) {
+    const centuries = log10Seconds - Math.log10(3155760000);
+    return t('timeCenturies').replace('{n}', `10^${Math.round(centuries)}`);
+  }
+
+  let unit = TIME_UNITS[0];
+  for (const candidate of TIME_UNITS) if (seconds >= candidate.seconds) unit = candidate;
+  return t(unit.key).replace('{n}', formatQuantity(seconds / unit.seconds));
+}
+
+/** Five bands over the guess count, not over a charset assumption. */
+function strengthTier(bits) {
+  if (bits < 28) return { key: 'p2RatingVeryWeak', colour: 'var(--accent-rose)' };
+  if (bits < 40) return { key: 'p2RatingWeak', colour: 'var(--accent-rose)' };
+  if (bits < 60) return { key: 'p2RatingModerate', colour: 'var(--accent-amber)' };
+  if (bits < 80) return { key: 'p2RatingStrong', colour: '#60a5fa' };
+  return { key: 'p2RatingVeryStrong', colour: 'var(--accent-emerald)' };
+}
+
+const EMPTY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+
+/**
+ * Paints the strength panel from the current input value. Split out of the
+ * input listener so setLanguage() can repaint it — the rating and the crack
+ * times are translated strings, and they used to stay in the old language
+ * (and, before that, were hardcoded Chinese in both).
+ */
+function renderPasswordStrength() {
   const passInput = document.getElementById('passInput');
   const bar = document.getElementById('entropyBar');
   const bitsText = document.getElementById('entropyBitsText');
@@ -480,64 +851,60 @@ function initPasswordEntropyEngine() {
   const countText = document.getElementById('passCharacterCount');
   const gpuText = document.getElementById('crackTimeGpu');
   const cloudText = document.getElementById('crackTimeCloud');
+  if (!passInput || !bar) return;
+
+  const val = passInput.value;
+  if (countText) countText.textContent = val.length;
+
+  if (!val) {
+    bar.style.width = '0%';
+    if (bitsText) bitsText.textContent = '0 bits';
+    if (ratingText) {
+      ratingText.textContent = t('p2RatingNone');
+      ratingText.style.color = 'var(--accent-rose)';
+    }
+    if (gpuText) gpuText.textContent = '—';
+    if (cloudText) cloudText.textContent = '—';
+    return;
+  }
+
+  const strength = estimatePasswordStrength(val);
+  const tier = strengthTier(strength.bits);
+
+  if (bitsText) bitsText.textContent = `${strength.bits.toFixed(1)} bits`;
+  // 100 bits fills the bar; beyond that the difference stops being meaningful.
+  bar.style.width = `${Math.min(100, Math.round(strength.bits))}%`;
+  bar.style.backgroundColor = tier.colour;
+
+  if (ratingText) {
+    ratingText.textContent = t(tier.key);
+    ratingText.style.color = tier.colour;
+  }
+  if (gpuText) {
+    gpuText.textContent = formatCrackTime(crackTimeSeconds(strength.bits, ATTACK_RATES.gpuCluster));
+  }
+  if (cloudText) {
+    cloudText.textContent = formatCrackTime(crackTimeSeconds(strength.bits, ATTACK_RATES.cloudBotnet));
+  }
+}
+
+/* Tool 2: Password Entropy & Crypto Hash Engine */
+function initPasswordEntropyEngine() {
+  const passInput = document.getElementById('passInput');
   const sha256Output = document.getElementById('sha256HashOutput');
   const copyBtn = document.getElementById('copyHashBtn');
 
   if (!passInput) return;
 
   passInput.addEventListener('input', async () => {
-    const val = passInput.value;
-    countText.textContent = val.length;
+    renderPasswordStrength();
 
-    const isZh = currentLang === 'zh-TW';
+    const val = passInput.value;
+    if (!sha256Output) return;
 
     if (!val) {
-      bar.style.width = '0%';
-      bitsText.textContent = '0 bits';
-      ratingText.textContent = isZh ? '無' : 'None';
-      ratingText.style.color = 'var(--accent-rose)';
-      gpuText.textContent = '0s';
-      cloudText.textContent = '0s';
-      sha256Output.textContent = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+      sha256Output.textContent = EMPTY_SHA256;
       return;
-    }
-
-    let poolSize = 0;
-    if (/[a-z]/.test(val)) poolSize += 26;
-    if (/[A-Z]/.test(val)) poolSize += 26;
-    if (/[0-9]/.test(val)) poolSize += 10;
-    if (/[^a-zA-Z0-9]/.test(val)) poolSize += 32;
-
-    const entropyBits = Math.round(val.length * (Math.log2(poolSize || 1)));
-    bitsText.textContent = `${entropyBits} bits`;
-
-    const pct = Math.min(100, Math.round((entropyBits / 110) * 100));
-    bar.style.width = `${pct}%`;
-
-    if (entropyBits < 40) {
-      bar.style.backgroundColor = 'var(--accent-rose)';
-      ratingText.textContent = isZh ? '極度脆弱' : 'Very Weak';
-      ratingText.style.color = 'var(--accent-rose)';
-      gpuText.textContent = '< 0.01 秒';
-      cloudText.textContent = '< 0.001 秒';
-    } else if (entropyBits < 65) {
-      bar.style.backgroundColor = 'var(--accent-amber)';
-      ratingText.textContent = isZh ? '中等強度' : 'Moderate';
-      ratingText.style.color = 'var(--accent-amber)';
-      gpuText.textContent = '4.2 分鐘';
-      cloudText.textContent = '12 秒';
-    } else if (entropyBits < 90) {
-      bar.style.backgroundColor = '#60a5fa';
-      ratingText.textContent = isZh ? '高度安全' : 'Strong';
-      ratingText.style.color = '#60a5fa';
-      gpuText.textContent = '18.4 年';
-      cloudText.textContent = '42 天';
-    } else {
-      bar.style.backgroundColor = 'var(--accent-emerald)';
-      ratingText.textContent = isZh ? '量子抗性強' : 'Quantum Resistant';
-      ratingText.style.color = 'var(--accent-emerald)';
-      gpuText.textContent = '3,400+ 世紀';
-      cloudText.textContent = '120+ 世紀';
     }
 
     try {
