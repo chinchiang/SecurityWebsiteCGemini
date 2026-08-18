@@ -223,13 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initPhishingInspector();
   initDarkWebChecker();
   initCVEExplorer();
-  initPlaybookAccordion();
-  initAuditQuiz();
   initThreatMapCanvas();
   initEmergencyModal();
   initCounters();
 
-  // Apply initial language
+  // Playbooks and the audit quiz are rendered (and bound) by setLanguage() ->
+  // renderPlaybooks() / renderAuditQuiz(). Calling their init functions here as
+  // well would bind a second set of listeners to the same containers.
   setLanguage(currentLang);
 });
 
@@ -1009,12 +1009,24 @@ const QUIZ_QUESTIONS = {
   ]
 };
 
+/**
+ * Audit quiz progress is held at module scope on purpose.
+ * renderAuditQuiz() replaces #quizWizard's innerHTML on every language switch
+ * and restart but leaves the container element itself in place. Keeping the
+ * step/score in a per-call closure meant old listeners survived with stale
+ * state, so after a restart the first click jumped straight to the result step
+ * with an accumulated score.
+ */
+let quizCurrentStep = 1;
+let quizTotalScore = 0;
+
 function renderAuditQuiz() {
   const wizard = document.getElementById('quizWizard');
   if (!wizard) return;
 
   const isZh = currentLang === 'zh-TW';
   const questions = QUIZ_QUESTIONS[currentLang] || QUIZ_QUESTIONS['zh-TW'];
+  const totalQuestions = questions.length;
 
   let html = '';
 
@@ -1023,7 +1035,7 @@ function renderAuditQuiz() {
     html += `
       <div class="quiz-step ${qNum === 1 ? 'active' : ''}" data-step="${qNum}">
         <span style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.8rem;">
-          ${isZh ? `問題 ${qNum} / 5` : `QUESTION ${qNum} OF 5`}
+          ${isZh ? `問題 ${qNum} / ${totalQuestions}` : `QUESTION ${qNum} OF ${totalQuestions}`}
         </span>
         <h3 style="margin: 0.5rem 0 1rem;">${q.title}</h3>
         <div class="quiz-options">
@@ -1038,82 +1050,108 @@ function renderAuditQuiz() {
     `;
   });
 
-  // Final step template
+  // Final step. Score, tier and recommendation start empty: the previous
+  // hardcoded "TIER 4: ENTERPRISE SENTINEL" placeholder meant any failure in
+  // the scoring path would surface as a flattering top grade.
   html += `
     <div class="quiz-step" id="quizResultStep">
       <div style="text-align: center; padding: 1rem 0;">
         <span style="font-size: 3rem; display: block; margin-bottom: 0.5rem;">🏆</span>
         <h3 style="font-size: 1.75rem; margin-bottom: 0.5rem;">${isZh ? '資安防禦成熟度評估完成' : 'Audit Score Analysis Complete'}</h3>
-        <div style="font-size: 3.5rem; font-weight: 800; font-family: var(--font-mono); color: var(--accent-cyan);" id="quizFinalScore">0 / 100</div>
-        <p id="quizTierBadge" style="font-weight: 700; color: var(--accent-emerald); margin-bottom: 1rem; font-size: 1.2rem;">TIER 4: ENTERPRISE SENTINEL</p>
-        <p id="quizRecommendation" style="color: var(--text-secondary); max-width: 540px; margin: 0 auto 1.5rem;">Your security posture demonstrates robust defense-in-depth controls.</p>
-        <button class="btn btn-primary" onclick="window.print()">${isZh ? '列印 / 下載資安成熟度評估報告 📄' : 'Download / Print Security Assessment Report 📄'}</button>
+        <div style="font-size: 3.5rem; font-weight: 800; font-family: var(--font-mono); color: var(--accent-cyan);" id="quizFinalScore"></div>
+        <p id="quizTierBadge" style="font-weight: 700; margin-bottom: 1rem; font-size: 1.2rem;"></p>
+        <p id="quizRecommendation" style="color: var(--text-secondary); max-width: 540px; margin: 0 auto 1.5rem;"></p>
+        <div class="demo-note demo-note-inline" style="max-width: 560px; margin: 0 auto 1.5rem; text-align: left;">${escapeHtml(t('noteAudit'))}</div>
+        <button class="btn btn-primary" id="printReportBtn">${isZh ? '列印 / 下載資安成熟度評估報告 📄' : 'Download / Print Security Assessment Report 📄'}</button>
         <button class="btn btn-secondary" id="restartQuizBtn" style="margin-left: 0.5rem;">${isZh ? '重新評估' : 'Restart Audit'}</button>
       </div>
     </div>
   `;
 
   wizard.innerHTML = html;
-  initAuditQuiz();
+
+  // A render always returns the wizard to question 1, so the score resets too.
+  quizCurrentStep = 1;
+  quizTotalScore = 0;
+
+  bindAuditQuiz();
 }
 
-function initAuditQuiz() {
+/**
+ * Bind exactly one delegated click listener for the lifetime of #quizWizard.
+ * The marker lives on the element (not in a module flag) so that replacing the
+ * container would correctly yield a fresh binding.
+ */
+function bindAuditQuiz() {
+  const wizard = document.getElementById('quizWizard');
+  if (!wizard || wizard.dataset.quizBound === '1') return;
+
+  wizard.addEventListener('click', handleQuizClick);
+  wizard.dataset.quizBound = '1';
+}
+
+function handleQuizClick(e) {
   const wizard = document.getElementById('quizWizard');
   if (!wizard) return;
 
-  let currentStep = 1;
-  let totalScore = 0;
-
-  wizard.addEventListener('click', (e) => {
-    const btn = e.target.closest('.quiz-opt-btn');
-    if (!btn) return;
-
-    const score = parseInt(btn.getAttribute('data-score') || '0', 10);
-    totalScore += score;
-
-    const activeStepEl = wizard.querySelector(`.quiz-step[data-step="${currentStep}"]`);
-    if (activeStepEl) activeStepEl.classList.remove('active');
-
-    currentStep++;
-    const nextStepEl = wizard.querySelector(`.quiz-step[data-step="${currentStep}"]`);
-
-    if (nextStepEl) {
-      nextStepEl.classList.add('active');
-    } else {
-      const resultStep = document.getElementById('quizResultStep');
-      const scoreNum = document.getElementById('quizFinalScore');
-      const tierBadge = document.getElementById('quizTierBadge');
-      const rec = document.getElementById('quizRecommendation');
-
-      if (resultStep) resultStep.classList.add('active');
-      if (scoreNum) scoreNum.textContent = `${totalScore} / 100`;
-
-      const isZh = currentLang === 'zh-TW';
-
-      if (totalScore >= 85) {
-        tierBadge.textContent = isZh ? '層級 4：企業高階哨兵 (Enterprise Sentinel)' : 'TIER 4: ENTERPRISE SENTINEL';
-        tierBadge.style.color = 'var(--accent-emerald)';
-        rec.textContent = isZh ? '貴單位具備優異的深度防禦機制，且具備自動化 SOC 遙測與應變能力。' : 'Outstanding security controls with proactive defense-in-depth and automated SOC telemetry.';
-      } else if (totalScore >= 60) {
-        tierBadge.textContent = isZh ? '層級 3：進階防禦體系 (Advanced Posture)' : 'TIER 3: ADVANCED POSTURE';
-        tierBadge.style.color = 'var(--accent-cyan)';
-        rec.textContent = isZh ? '具備基礎資安防禦。建議補強不可變離線備份與強制部署 FIDO2 硬體 Key。' : 'Solid baseline controls. Recommend expanding immutable backups and mandatory FIDO2 hardware keys.';
-      } else {
-        tierBadge.textContent = isZh ? '層級 1-2：高風險警示 (Elevated Risk)' : 'TIER 1-2: ELEVATED RISK';
-        tierBadge.style.color = 'var(--accent-rose)';
-        rec.textContent = isZh ? '偵測到顯著資安防禦漏洞（如未強制 MFA 或缺乏備份隔離），建議立即著手改善。' : 'Critical security gaps detected in MFA and backup isolation. Immediate remediation required.';
-      }
-
-      showToast(isZh ? '資安成熟度計算完成！' : 'Audit calculation complete!', 'success');
-    }
-  });
-
-  const restartBtn = document.getElementById('restartQuizBtn');
-  if (restartBtn) {
-    restartBtn.addEventListener('click', () => {
-      renderAuditQuiz();
-    });
+  if (e.target.closest('#restartQuizBtn')) {
+    renderAuditQuiz();
+    return;
   }
+
+  // Replaces an inline onclick="window.print()" attribute, which would have
+  // required script-src 'unsafe-inline' in any future CSP.
+  if (e.target.closest('#printReportBtn')) {
+    window.print();
+    return;
+  }
+
+  const btn = e.target.closest('.quiz-opt-btn');
+  if (!btn) return;
+
+  quizTotalScore += parseInt(btn.getAttribute('data-score') || '0', 10);
+
+  const activeStepEl = wizard.querySelector(`.quiz-step[data-step="${quizCurrentStep}"]`);
+  if (activeStepEl) activeStepEl.classList.remove('active');
+
+  quizCurrentStep++;
+  const nextStepEl = wizard.querySelector(`.quiz-step[data-step="${quizCurrentStep}"]`);
+
+  if (nextStepEl) {
+    nextStepEl.classList.add('active');
+    return;
+  }
+
+  showQuizResult();
+}
+
+function showQuizResult() {
+  const isZh = currentLang === 'zh-TW';
+
+  const resultStep = document.getElementById('quizResultStep');
+  const scoreNum = document.getElementById('quizFinalScore');
+  const tierBadge = document.getElementById('quizTierBadge');
+  const rec = document.getElementById('quizRecommendation');
+
+  if (resultStep) resultStep.classList.add('active');
+  if (scoreNum) scoreNum.textContent = `${quizTotalScore} / 100`;
+  if (!tierBadge || !rec) return;
+
+  if (quizTotalScore >= 85) {
+    tierBadge.textContent = isZh ? '層級 4：企業高階哨兵 (Enterprise Sentinel)' : 'TIER 4: ENTERPRISE SENTINEL';
+    tierBadge.style.color = 'var(--accent-emerald)';
+    rec.textContent = isZh ? '貴單位具備優異的深度防禦機制，且具備自動化 SOC 遙測與應變能力。' : 'Outstanding security controls with proactive defense-in-depth and automated SOC telemetry.';
+  } else if (quizTotalScore >= 60) {
+    tierBadge.textContent = isZh ? '層級 3：進階防禦體系 (Advanced Posture)' : 'TIER 3: ADVANCED POSTURE';
+    tierBadge.style.color = 'var(--accent-cyan)';
+    rec.textContent = isZh ? '具備基礎資安防禦。建議補強不可變離線備份與強制部署 FIDO2 硬體 Key。' : 'Solid baseline controls. Recommend expanding immutable backups and mandatory FIDO2 hardware keys.';
+  } else {
+    tierBadge.textContent = isZh ? '層級 1-2：高風險警示 (Elevated Risk)' : 'TIER 1-2: ELEVATED RISK';
+    tierBadge.style.color = 'var(--accent-rose)';
+    rec.textContent = isZh ? '偵測到顯著資安防禦漏洞（如未強制 MFA 或缺乏備份隔離），建議立即著手改善。' : 'Critical security gaps detected in MFA and backup isolation. Immediate remediation required.';
+  }
+
+  showToast(isZh ? '資安成熟度計算完成！' : 'Audit calculation complete!', 'success');
 }
 
 /* Global Cyber Threat Map Canvas Animation */
