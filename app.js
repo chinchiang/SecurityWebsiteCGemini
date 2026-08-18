@@ -12,19 +12,19 @@ const TRANSLATIONS = {
     navCVE: 'CVE 情報 Intel',
     navPlaybooks: '應變劇本 Playbooks',
     navAudit: '成熟度評估 Audit',
-    sysStatus: 'DEFCON 4 • 系統正常運作',
+    sysStatus: 'DEMO MODE • 模擬介面',
     btnEmergency: '🚨 緊急通報 Emergency',
-    tickerLabel: '即時威脅快訊',
+    tickerLabel: '模擬威脅快訊',
     heroBadge: '⚡ 主動防禦協定已啟用 ACTIVE DEFENSE PROTOCOL',
     heroTitle: '新世代資安 <span>威脅情報與診斷指揮中心</span>',
-    heroSubtitle: '為資安團隊提供即時網域安全標頭診斷、密碼熵強度分析、CVE 漏洞情報追蹤與自動化事件應變劇本。',
+    heroSubtitle: '以前端模擬介面展示網域安全標頭、密碼熵值、CVE 情報與事件應變劇本；不提供即時監控或真實掃描。',
     heroBtnTools: '啟動診斷工具 Hub 🛠️',
     heroBtnMap: '探索全球威脅地圖 🌐',
-    statScanned: '已檢測網域',
-    statCVEs: '收錄 CVE 漏洞',
-    statUptime: '防禦運作率',
-    telemetryTitle: '即時遙測節點運作中',
-    telemetrySub: '網路延遲: 14ms • 封包丟失率: 0%',
+    statScanned: '模擬網域計數',
+    statCVEs: '範例 CVE 計數',
+    statUptime: '模擬運作率',
+    telemetryTitle: '模擬遙測介面',
+    telemetrySub: '範例延遲: 14ms • 範例封包丟失率: 0%',
     btnRefresh: '重新整理',
     mapTitle: '全球網路攻擊即時動態地圖',
     mapDesc: '模擬追蹤全球網路攻擊流量、惡意程式 C2 中繼站連線與 DDoS 洗流量中心動態。',
@@ -38,12 +38,12 @@ const TRANSLATIONS = {
     tabEntropy: '密碼熵值與雜湊計算',
     tabPhishing: '釣魚與偽造連結檢測',
     tabDarkweb: '暗網外洩紀錄模擬',
-    p1Title: 'HTTP 安全標頭與 SSL 體檢',
-    p1Desc: '評估 Web 應用程式對抗 Clickjacking、XSS、MIME 偽造與 SSL 降級攻擊的防禦能力。',
+    p1Title: 'HTTP 安全標頭與 SSL 評分示範',
+    p1Desc: '示範 Web 安全標頭評分介面；不會連線或檢測輸入的網站。',
     p1Label: '目標網域或 URL',
     p1Placeholder: '例如：secure-portal.company.com',
     p1Btn: '開始健檢 ⚡',
-    gaugeLbl: '整體安全評級',
+    gaugeLbl: '整體安全評級（示範值，非真實檢測）',
     p2Title: '密碼熵值強度與密碼學雜湊引擎',
     p2Desc: '測試憑證密碼對抗超級電腦與 GPU 叢集的破解時間，並即時計算 SHA-256 雜湊。',
     p2Label: '輸入測試密碼 / 密鑰字串',
@@ -55,17 +55,17 @@ const TRANSLATIONS = {
     p2ShaLabel: '前端純 Hash 計算 (SHA-256)',
     p2Copy: '複製 Hash',
     p3Title: '網絡釣魚與同形異義字 URL 檢查器',
-    p3Desc: '拆解可疑 URL 結構，自動比對假冒網域、多重連字號與可疑 IP 重定向。',
+    p3Desc: '以前端啟發式規則拆解 URL，僅檢查關鍵字、連字號與純 IP 格式。',
     p3Label: '要檢測的可疑 URL',
     p3Placeholder: '例如：http://login-paypalls-update.com/signin',
     p3Btn: '分析 URL 結構',
     p4Title: '暗網外洩紀錄模擬查詢',
-    p4Desc: '查詢企業 Email 或網域是否曾出現在公開洩漏資料庫或暗網竊密軟體 (Stealer Log) 檔案庫中。',
+    p4Desc: '以虛構結果示範企業 Email 或網域的外洩查詢介面；不會查詢任何真實資料庫。',
     p4Label: '企業 Email 或 網域名稱',
     p4Placeholder: 'employee@company.com',
     p4Btn: '查詢外洩紀錄',
     cveTitle: 'CVE 漏洞情報資料庫',
-    cveDesc: '整合 NVD 與 CISA KEV 目錄的最新高危險漏洞數據，支援即時搜尋與嚴重度篩選。',
+    cveDesc: '以虛構的範例漏洞條目，示範 CVE 情報的即時搜尋與嚴重度篩選介面。',
     cveSearchPh: '搜尋 CVE 編號、軟體名稱 (如 Linux, Apache, Chrome) 或關鍵字...',
     filterAll: '全部等級',
     filterCrit: '嚴重 Critical',
@@ -80,7 +80,7 @@ const TRANSLATIONS = {
     footerCol2: '國際權威機構',
     footerCol3: '緊急事件求助',
     modalTitle: '🚨 宣告重大資安事件 (Emergency)',
-    modalSub: '即時通報值班指揮官並啟動應變隔離程序。',
+    modalSub: '示範重大資安事件通報流程；不會聯絡值班指揮官或啟動任何應變程序。',
     modalTypeLabel: '事件類別 Category',
     optRansom: '受勒索軟體感染 / 檔案大規模加密',
     optCloud: '雲端或 Active Directory 未授權侵入',
@@ -89,7 +89,17 @@ const TRANSLATIONS = {
     modalContactLabel: '通報人電話 / Slack 帳號',
     modalContactPh: '@security-lead 或 +886 912-345-678',
     btnCancel: '取消',
-    btnSubmitEmergency: '發送緊急通報 🚨'
+    btnSubmitEmergency: '模擬送出（不會實際通報）🚨',
+    demoBanner: '⚠️ 示範網站聲明：本站為前端技術示範專案，不連線任何外部服務。威脅地圖、CVE 情報、統計數字與所有掃描結果皆為虛構的模擬資料，請勿作為實際安全決策的依據。',
+    noteHeaders: '⚠️ 模擬工具：受瀏覽器同源政策限制，前端 JavaScript 無法讀取其他網站的回應標頭。本工具未發出任何請求，分數與檢查結果純為示範，不代表目標網站的真實設定。實際檢測請使用 Mozilla HTTP Observatory 或 curl -I。',
+    notePassword: '🔒 安全提醒：請勿輸入您的真實密碼。所有運算（含 SHA-256）皆在您的瀏覽器本機完成，不會傳送至任何伺服器。但下方熵值模型假設密碼為均勻隨機字串，會明顯高估常見密碼（例如 Password123! 會被評為「高度安全」），僅供教學參考。',
+    notePhishing: 'ℹ️ 啟發式分析：本工具僅檢查關鍵字、連字號數量與純 IP 格式，尚未實作同形異義字 (IDN homograph) 與 punycode 偵測，也不檢查 path、query 與 userinfo。合法網域（如 accounts.google.com）可能被誤判，真實的釣魚網址也可能被漏判，結果僅供初步參考。',
+    noteDarkweb: '⚠️ 模擬工具：本工具未連線任何外洩資料庫，結果由輸入字串的長度決定，與真實外洩狀況完全無關。查詢真實外洩紀錄請使用 Have I Been Pwned (haveibeenpwned.com)。',
+    noteDarkwebInline: '⚠️ 以下為虛構的示範輸出，未查詢任何外洩資料庫，與此帳號的真實狀況無關。',
+    noteDarkwebAction: '請注意：以上為示範情境，並非針對此帳號的查詢結果。若需確認真實外洩狀況，請至 haveibeenpwned.com 查詢。',
+    noteCVE: 'ℹ️ 範例資料：以下 CVE 條目為教學用的虛構內容，並非來自 NVD 或 CISA KEV，其編號、影響版本與日期均不可信（版本號與揭露年份實際上互相矛盾）。真實漏洞資訊請查詢 nvd.nist.gov 或 CISA KEV 目錄。',
+    noteAudit: 'ℹ️ 關於此評分：本評估的配分與級距為本專案自訂，未對應 NIST CSF、CIS Controls 或 ISO 27001 等公認框架，且 5 道題目無法涵蓋完整的資安成熟度。結果僅供自我檢視與討論起點，不可作為稽核或合規證明。',
+    noteEmergency: '⚠️ 示範功能：本表單不會傳送資料、通知 SOC、聯絡任何人員或建立事件單。若發生真實事件，請使用貴組織正式核准的緊急通報管道。'
   },
   'en': {
     navThreatMap: 'Threat Map',
@@ -97,19 +107,19 @@ const TRANSLATIONS = {
     navCVE: 'CVE Intel',
     navPlaybooks: 'Playbooks',
     navAudit: 'Audit Score',
-    sysStatus: 'DEFCON 4 • OPERATIONAL',
+    sysStatus: 'DEMO MODE • SIMULATED UI',
     btnEmergency: '🚨 Emergency Incident',
-    tickerLabel: 'LIVE THREAT FEED',
+    tickerLabel: 'SIMULATED THREAT FEED',
     heroBadge: '⚡ ACTIVE DEFENSE PROTOCOL ACTIVE',
     heroTitle: 'Next-Gen Cyber <span>Intelligence & Diagnostics</span>',
-    heroSubtitle: 'Empowering security teams with real-time domain header diagnostics, cryptographic entropy analysis, live CVE vulnerability telemetry, and automated response playbooks.',
+    heroSubtitle: 'A front-end demonstration of security-header scoring, password entropy, CVE intelligence, and incident-response playbooks; it provides no live monitoring or real scanning.',
     heroBtnTools: 'Launch Diagnostic Tools 🛠️',
     heroBtnMap: 'Explore Threat Map 🌐',
-    statScanned: 'Scanned Domains',
-    statCVEs: 'Indexed CVEs',
-    statUptime: 'Defense Uptime',
-    telemetryTitle: 'Real-Time Telemetry Node',
-    telemetrySub: 'Latency: 14ms • Packet Loss: 0%',
+    statScanned: 'Simulated Domain Count',
+    statCVEs: 'Sample CVE Count',
+    statUptime: 'Simulated Uptime',
+    telemetryTitle: 'Simulated Telemetry UI',
+    telemetrySub: 'Sample latency: 14ms • Sample packet loss: 0%',
     btnRefresh: 'Refresh',
     mapTitle: 'Live Cyber Attack Vector Map',
     mapDesc: 'Simulated real-time tracking of global cyber attack traffic, malware command & control nodes, and scrubbing center telemetry.',
@@ -122,13 +132,13 @@ const TRANSLATIONS = {
     tabHeaders: 'Domain Security Headers',
     tabEntropy: 'Password & Hash Entropy',
     tabPhishing: 'Phishing Link Inspector',
-    tabDarkweb: 'Dark Web Exposure Check',
-    p1Title: 'HTTP Security Headers & SSL Scanner',
-    p1Desc: 'Evaluate your web application\'s defense posture against clickjacking, XSS, MIME sniffing, and SSL downgrade vectors.',
+    tabDarkweb: 'Dark Web Check (Simulated)',
+    p1Title: 'HTTP Security Headers & SSL Scoring Demo',
+    p1Desc: 'Demonstrates a web security-header scoring interface; it does not connect to or inspect the entered site.',
     p1Label: 'Target Domain or URL',
     p1Placeholder: 'e.g. secure-portal.company.com',
     p1Btn: 'Run Audit ⚡',
-    gaugeLbl: 'OVERALL SECURITY GRADE',
+    gaugeLbl: 'OVERALL GRADE (DEMO VALUE, NOT A REAL SCAN)',
     p2Title: 'Password Entropy & Crypto Hash Engine',
     p2Desc: 'Test credential entropy against quantum cracking hardware and generate client-side SHA-256 hashes.',
     p2Label: 'Enter Test Password / Secret Phrase',
@@ -140,17 +150,17 @@ const TRANSLATIONS = {
     p2ShaLabel: 'Client-Side SHA-256 Hash',
     p2Copy: 'Copy Hash',
     p3Title: 'Phishing & Typosquatting Link Inspector',
-    p3Desc: 'Deconstruct suspicious URLs, identify homograph attacks, lookalike domains, and suspicious IP redirects.',
+    p3Desc: 'Applies basic client-side heuristics limited to keywords, hyphen count, and raw-IP format.',
     p3Label: 'Suspicious URL to Inspect',
     p3Placeholder: 'e.g. http://login-paypalls-update.com/signin',
     p3Btn: 'Inspect URL',
     p4Title: 'Dark Web Exposure Search Simulator',
-    p4Desc: 'Check if enterprise email accounts or domains exist in public breach corpuses or dark web stealer log archives.',
+    p4Desc: 'Demonstrates an exposure-search interface with fictional results; no real breach database is queried.',
     p4Label: 'Email Address or Enterprise Domain',
     p4Placeholder: 'employee@company.com',
     p4Btn: 'Check Exposure',
     cveTitle: 'CVE Threat Intelligence Explorer',
-    cveDesc: 'Search and filter active Common Vulnerabilities and Exposures (CVEs) curated from NVD and CISA KEV catalogs.',
+    cveDesc: 'A CVE search and severity-filter interface, demonstrated with fictional sample vulnerability records.',
     cveSearchPh: 'Search by CVE ID, software (e.g. Linux, Apache, Chrome), or keyword...',
     filterAll: 'All Severities',
     filterCrit: 'Critical',
@@ -165,7 +175,7 @@ const TRANSLATIONS = {
     footerCol2: 'Advisories',
     footerCol3: 'Emergency Support',
     modalTitle: '🚨 Declare Emergency Incident',
-    modalSub: 'Notify on-call Incident Commander and isolate compromise scope immediately.',
+    modalSub: 'Demonstrates an emergency-reporting workflow; it does not contact an Incident Commander or start any response action.',
     modalTypeLabel: 'Incident Category',
     optRansom: 'Active Ransomware / File Encryption',
     optCloud: 'Unauthorized Cloud / Active Directory Breach',
@@ -174,7 +184,17 @@ const TRANSLATIONS = {
     modalContactLabel: 'On-Call Phone / Slack Handle',
     modalContactPh: '@security-lead or +1 555-0199',
     btnCancel: 'Cancel',
-    btnSubmitEmergency: 'Dispatch Emergency Alert 🚨'
+    btnSubmitEmergency: 'Simulate submission (not dispatched) 🚨',
+    demoBanner: '⚠️ Demo site notice: this is a front-end technical demo that connects to no external service. The threat map, CVE feed, statistics and all scan results are fictional simulated data. Do not rely on them for real security decisions.',
+    noteHeaders: '⚠️ Simulated tool: the same-origin policy prevents browser JavaScript from reading another site\'s response headers. This tool issues no request — the grade and checks are illustrative only and do not reflect the target site\'s real configuration. For a real assessment use Mozilla HTTP Observatory or curl -I.',
+    notePassword: '🔒 Safety note: do not enter a real password. All computation (including SHA-256) happens locally in your browser and is never transmitted. However, the entropy model below assumes a uniformly random string and so significantly overestimates common passwords (Password123! is rated "Strong"). Educational use only.',
+    notePhishing: 'ℹ️ Heuristic analysis: this tool only checks keywords, hyphen count and raw-IP format. It does not detect IDN homographs / punycode, and does not inspect the path, query string or userinfo. Legitimate domains (e.g. accounts.google.com) may be flagged and real phishing URLs may be missed. Treat results as indicative only.',
+    noteDarkweb: '⚠️ Simulated tool: no breach database is queried. The result is derived from the length of your input and bears no relation to any actual exposure. For real breach data use Have I Been Pwned (haveibeenpwned.com).',
+    noteDarkwebInline: '⚠️ The output below is fictional sample data. No breach database was queried and it says nothing about this account.',
+    noteDarkwebAction: 'Note: the above is an illustrative scenario, not a lookup result for this account. To check real exposure, visit haveibeenpwned.com.',
+    noteCVE: 'ℹ️ Sample data: the CVE entries below are fictional teaching examples. They are NOT sourced from NVD or CISA KEV, and their IDs, affected versions and dates are not trustworthy (the version numbers in fact contradict the stated disclosure years). For real advisories consult nvd.nist.gov or the CISA KEV catalog.',
+    noteAudit: 'ℹ️ About this score: the weightings and tiers are specific to this project and are not mapped to NIST CSF, CIS Controls, ISO 27001 or any recognised framework. Five questions cannot characterise security maturity. Use the result as a discussion starting point, not as audit or compliance evidence.',
+    noteEmergency: '⚠️ Demo only: this form does not transmit data, notify a SOC, contact anyone, or create an incident ticket. For a real incident, use your organization\'s formally approved emergency-reporting channel.'
   }
 };
 
@@ -205,15 +225,32 @@ document.addEventListener('DOMContentLoaded', () => {
   initPhishingInspector();
   initDarkWebChecker();
   initCVEExplorer();
-  initPlaybookAccordion();
-  initAuditQuiz();
   initThreatMapCanvas();
   initEmergencyModal();
   initCounters();
 
-  // Apply initial language
+  // Playbooks and the audit quiz are rendered (and bound) by setLanguage() ->
+  // renderPlaybooks() / renderAuditQuiz(). Calling their init functions here as
+  // well would bind a second set of listeners to the same containers.
   setLanguage(currentLang);
 });
+
+/* Translation Lookup Helper */
+function t(key) {
+  const dictionary = TRANSLATIONS[currentLang] || TRANSLATIONS['zh-TW'];
+  return dictionary[key] || '';
+}
+
+/**
+ * Escape a value before interpolating it into an HTML template string.
+ * Required for any user-controlled value: note that new URL() permits `"`
+ * and `=` inside hostname, so parsed URL parts are NOT safe by themselves.
+ */
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
 
 /* Toast Notification Utility */
 function showToast(message, type = 'info') {
@@ -224,7 +261,18 @@ function showToast(message, type = 'info') {
   toast.className = 'toast';
   
   const icon = type === 'success' ? '✅' : type === 'error' ? '🚨' : 'ℹ️';
-  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+
+  // Built via textContent, never innerHTML: toast messages embed raw user
+  // input (scanned domain, inspected URL, breach query) and would otherwise
+  // be a DOM XSS sink.
+  const iconEl = document.createElement('span');
+  iconEl.setAttribute('aria-hidden', 'true');
+  iconEl.textContent = icon;
+
+  const messageEl = document.createElement('span');
+  messageEl.textContent = message;
+
+  toast.append(iconEl, messageEl);
   
   container.appendChild(toast);
 
@@ -355,9 +403,15 @@ function initHeaderScanner() {
     const domain = input.value.trim().toLowerCase().replace(/^(https?:\/\/)/, '');
     if (!domain) return;
 
-    showToast(currentLang === 'zh-TW' ? `正在分析網域 ${domain}...` : `Scanning domain ${domain}...`, 'info');
+    showToast(currentLang === 'zh-TW' ? `正在產生 ${domain} 的示範評分...` : `Generating demo grade for ${domain}...`, 'info');
 
     setTimeout(() => {
+      // NOTE: no request is made. Same-origin policy prevents browser JS from
+      // reading cross-origin response headers, so this score is derived from
+      // substring matches on the domain name and is illustrative only.
+      // A real implementation needs a server-side proxy or the Mozilla HTTP
+      // Observatory API. Descriptions below therefore explain what each header
+      // DOES, and must never assert what the scanned site actually returned.
       let score = 88;
       if (domain.includes('bank') || domain.includes('gov') || domain.includes('secure')) score = 96;
       if (domain.includes('test') || domain.includes('demo')) score = 64;
@@ -368,32 +422,32 @@ function initHeaderScanner() {
         {
           name: 'Strict-Transport-Security (HSTS)',
           status: score >= 80 ? 'pass' : 'warn',
-          desc: isZh ? '強制執行 HTTPS 加密連線，防止 SSL 降級與中間人攻擊 (max-age=31536000; includeSubDomains)。' : 'Enforces HTTPS connections and prevents SSL stripping attacks (max-age=31536000; includeSubDomains).'
+          desc: isZh ? '作用：強制瀏覽器僅以 HTTPS 連線，防止 SSL 降級與中間人攻擊。建議值 max-age 至少一年並加上 includeSubDomains。' : 'Purpose: forces browsers to connect over HTTPS only, preventing SSL stripping and MITM attacks. Recommended max-age of at least one year plus includeSubDomains.'
         },
         {
           name: 'Content-Security-Policy (CSP)',
           status: score >= 90 ? 'pass' : score >= 70 ? 'warn' : 'fail',
-          desc: isZh ? '限制腳本執行來源，有效抵禦跨站腳本攻擊 (XSS) 與資料注入。' : 'Restricts script execution sources to prevent Cross-Site Scripting (XSS) and data injection.'
+          desc: isZh ? '作用：限制腳本可執行的來源，抵禦跨站腳本攻擊 (XSS) 與資料注入。建議避免 unsafe-inline。' : 'Purpose: restricts which sources may execute scripts, mitigating XSS and data injection. Avoid unsafe-inline where possible.'
         },
         {
           name: 'X-Frame-Options',
           status: 'pass',
-          desc: isZh ? '設定為 SAMEORIGIN。保護網站不被嵌入外頁發動 Clickjacking 點擊劫持。' : 'Set to SAMEORIGIN. Protects site against clickjacking attacks.'
+          desc: isZh ? '作用：控制網頁是否可被嵌入 iframe，用於防禦 Clickjacking 點擊劫持。現代作法建議改用 CSP frame-ancestors。' : 'Purpose: controls whether the page may be framed, defending against clickjacking. Modern equivalent is the CSP frame-ancestors directive.'
         },
         {
           name: 'X-Content-Type-Options',
           status: 'pass',
-          desc: isZh ? '設定為 nosniff。防止瀏覽器猜測與誤判 MIME 檔案類型。' : 'Set to nosniff. Prevents browser MIME-type sniffing.'
+          desc: isZh ? '作用：關閉瀏覽器的 MIME 類型猜測，避免上傳內容被誤判為可執行腳本。建議值 nosniff。' : 'Purpose: disables browser MIME-type sniffing so uploaded content is not reinterpreted as executable script. Recommended value nosniff.'
         },
         {
           name: 'Referrer-Policy',
           status: score >= 75 ? 'pass' : 'warn',
-          desc: isZh ? '設定為 strict-origin-when-cross-origin。避免外洩敏感 URL 參數數據。' : 'Set to strict-origin-when-cross-origin. Limits referrer data exposure.'
+          desc: isZh ? '作用：控制 Referer 標頭的傳送範圍，避免外洩敏感 URL 參數。建議值 strict-origin-when-cross-origin。' : 'Purpose: controls how much referrer information is sent, avoiding leakage of sensitive URL parameters. Recommended value strict-origin-when-cross-origin.'
         },
         {
           name: 'Permissions-Policy',
           status: score >= 85 ? 'pass' : 'fail',
-          desc: isZh ? '限制攝影機、麥克風、地理位置與支付 API 之未授權調用。' : 'Restricts camera, microphone, geolocation, and payment API access.'
+          desc: isZh ? '作用：限制攝影機、麥克風、地理位置與支付 API 的未授權調用。' : 'Purpose: restricts unauthorized use of camera, microphone, geolocation, and payment APIs.'
         }
       ];
 
@@ -409,10 +463,10 @@ function initHeaderScanner() {
 
       scoreNum.textContent = `${score} / 100`;
       scoreNum.style.color = score >= 90 ? 'var(--accent-emerald)' : score >= 70 ? 'var(--accent-amber)' : 'var(--accent-rose)';
-      scoreLbl.textContent = score >= 90 ? (isZh ? 'A+ 安全極佳' : 'A+ EXCELLENT') : score >= 70 ? (isZh ? 'B 尚可接受' : 'B ACCEPTABLE') : (isZh ? 'C 需立即改善' : 'C ACTION REQUIRED');
+      scoreLbl.textContent = score >= 90 ? (isZh ? 'A+（示範值）' : 'A+ (DEMO VALUE)') : score >= 70 ? (isZh ? 'B（示範值）' : 'B (DEMO VALUE)') : (isZh ? 'C（示範值）' : 'C (DEMO VALUE)');
 
       resultsContainer.style.display = 'block';
-      showToast(isZh ? `網域 ${domain} 健檢完成` : `Scan complete for ${domain}`, 'success');
+      showToast(isZh ? `${domain} 的示範評分已產生` : `Demo grade generated for ${domain}`, 'success');
     }, 600);
   });
 }
@@ -543,17 +597,20 @@ function initPhishingInspector() {
       riskColor = riskLevel.includes('HIGH') || riskLevel.includes('高') ? 'var(--accent-rose)' : 'var(--accent-amber)';
     }
 
+    const safeHost = escapeHtml(host);
+    const safeProtocol = escapeHtml(parsed.protocol);
+
     results.innerHTML = `
       <div style="background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-          <strong style="font-size: 1.1rem;">${isZh ? '網址拆解分析:' : 'URL Breakdown:'} ${host}</strong>
+          <strong style="font-size: 1.1rem;">${isZh ? '網址拆解分析:' : 'URL Breakdown:'} ${safeHost}</strong>
           <span style="background: ${riskColor}22; color: ${riskColor}; padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-weight: 700; font-family: var(--font-mono); font-size: 0.8rem;">
             ${isZh ? '風險等級:' : 'RISK LEVEL:'} ${riskLevel}
           </span>
         </div>
         <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
-          <li>🌐 <strong>${isZh ? '目標網域 Host:' : 'Host Domain:'}</strong> <span class="mono">${host}</span></li>
-          <li>🔒 <strong>${isZh ? '連線協定 Protocol:' : 'Protocol:'}</strong> <span class="mono">${parsed.protocol}</span></li>
+          <li>🌐 <strong>${isZh ? '目標網域 Host:' : 'Host Domain:'}</strong> <span class="mono">${safeHost}</span></li>
+          <li>🔒 <strong>${isZh ? '連線協定 Protocol:' : 'Protocol:'}</strong> <span class="mono">${safeProtocol}</span></li>
           <li>⚠️ <strong>${isZh ? 'IP 網址檢測:' : 'IP Host Detection:'}</strong> ${isIP ? (isZh ? '❌ 偵測到純 IP 位址 (高度可疑)' : '❌ Raw IP Address detected (Suspicious)') : (isZh ? '✅ 標準網域名稱' : '✅ Standard Domain Name')}</li>
           <li>🚩 <strong>${isZh ? '釣魚關鍵字匹配:' : 'Suspicious Keyword Matching:'}</strong> ${matchKeywords.length ? `⚠️ ${isZh ? '命中關鍵字:' : 'Found:'} ${matchKeywords.join(', ')}` : (isZh ? '✅ 未發現常見釣魚詞彙' : '✅ None detected')}</li>
           <li>🔗 <strong>${isZh ? '連字號密度分析:' : 'Hyphenation Density:'}</strong> ${hyphensCount > 2 ? `⚠️ ${isZh ? '密度過高' : 'High'} (${hyphensCount} ${isZh ? '個連字號' : 'hyphens'})` : (isZh ? '✅ 數量正常' : '✅ Normal')}</li>
@@ -581,42 +638,51 @@ function initDarkWebChecker() {
 
     const isZh = currentLang === 'zh-TW';
 
-    showToast(isZh ? `正在查詢外洩索引庫 ${query}...` : `Querying breach index for ${query}...`, 'info');
+    showToast(isZh ? `正在產生 ${query} 的模擬查詢結果...` : `Generating simulated result for ${query}...`, 'info');
 
     setTimeout(() => {
+      // NOTE: this is a deterministic stub, not a lookup. No breach database is
+      // queried (app.js makes zero network requests). Results are meaningless
+      // and must always be rendered alongside simNotice below.
       const isBreached = query.includes('test') || query.includes('admin') || query.length % 2 === 0;
+
+      const safeQuery = escapeHtml(query);
+      const simNotice = `<div class="demo-note demo-note-inline">${escapeHtml(t('noteDarkwebInline'))}</div>`;
 
       if (!isBreached) {
         results.innerHTML = `
+          ${simNotice}
           <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1.25rem; border-radius: var(--radius-md); text-align: center;">
             <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">🛡️</span>
-            <strong style="color: var(--accent-emerald); font-size: 1.1rem; display: block;">${isZh ? '未發現已知外洩紀錄' : 'NO KNOWN BREACH EXPOSURE FOUND'}</strong>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.35rem;">${isZh ? `公開竊密檔案與數據庫中未查獲 <strong>${query}</strong> 之憑證。` : `No record of <strong>${query}</strong> was detected in public stealer logs or credential leaks.`}</p>
+            <strong style="color: var(--accent-emerald); font-size: 1.1rem; display: block;">${isZh ? '示範結果：未發現外洩紀錄' : 'SAMPLE RESULT: NO EXPOSURE FOUND'}</strong>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.35rem;">${isZh ? `此為示範輸出，並未實際查詢 <strong>${safeQuery}</strong>。` : `This is sample output. No lookup was performed for <strong>${safeQuery}</strong>.`}</p>
           </div>
         `;
       } else {
         results.innerHTML = `
+          ${simNotice}
           <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1.25rem; border-radius: var(--radius-md);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <strong style="color: var(--accent-rose); font-size: 1.1rem;">⚠️ ${isZh ? '偵測到 2 筆數據庫外洩紀錄' : 'EXPOSURE DETECTED IN 2 DATASETS'}</strong>
-              <span class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${isZh ? '查詢目標:' : 'TARGET:'} ${query}</span>
+              <strong style="color: var(--accent-rose); font-size: 1.1rem;">⚠️ ${isZh ? '示範情境：虛構的 2 筆外洩紀錄' : 'SAMPLE SCENARIO: 2 FICTIONAL RECORDS'}</strong>
+              <span class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${isZh ? '查詢目標:' : 'TARGET:'} ${safeQuery}</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
               <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">1. RedLine Stealer 惡意軟體日誌庫 (2025)</strong>
-                <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '外洩欄位：明文密碼, 瀏覽器 Cookie, 登入 IP (185.220.x.x)' : 'Exposed: Plaintext Passwords, Browser Cookies, IP Log (185.220.x.x)'}</span>
+                <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">${isZh ? '1.〔範例〕Stealer 惡意軟體日誌庫' : '1. [EXAMPLE] Stealer Malware Log Corpus'}</strong>
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '此類外洩通常包含：明文密碼、瀏覽器 Cookie、登入來源 IP' : 'This breach class typically exposes: plaintext passwords, browser cookies, source IP'}</span>
               </div>
               <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">2. 電商平台 SQL 資料庫洩漏 (2024)</strong>
-                <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '外洩欄位：Email, Bcrypt 密碼雜湊, 帳單地址' : 'Exposed: Email, Bcrypt Password Hash, Billing Address'}</span>
+                <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">${isZh ? '2.〔範例〕電商平台資料庫洩漏' : '2. [EXAMPLE] E-commerce Database Leak'}</strong>
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '此類外洩通常包含：Email、密碼雜湊、帳單地址' : 'This breach class typically exposes: email, password hashes, billing address'}</span>
               </div>
             </div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.85rem;">${escapeHtml(t('noteDarkwebAction'))}</p>
           </div>
         `;
       }
 
       results.style.display = 'block';
-      showToast(isZh ? '暗網掃描模擬數據已更新' : 'Dark web scan results updated', 'success');
+      showToast(isZh ? '模擬的暗網查詢結果已更新' : 'Simulated dark web result updated', 'success');
     }, 500);
   });
 }
@@ -945,12 +1011,24 @@ const QUIZ_QUESTIONS = {
   ]
 };
 
+/**
+ * Audit quiz progress is held at module scope on purpose.
+ * renderAuditQuiz() replaces #quizWizard's innerHTML on every language switch
+ * and restart but leaves the container element itself in place. Keeping the
+ * step/score in a per-call closure meant old listeners survived with stale
+ * state, so after a restart the first click jumped straight to the result step
+ * with an accumulated score.
+ */
+let quizCurrentStep = 1;
+let quizTotalScore = 0;
+
 function renderAuditQuiz() {
   const wizard = document.getElementById('quizWizard');
   if (!wizard) return;
 
   const isZh = currentLang === 'zh-TW';
   const questions = QUIZ_QUESTIONS[currentLang] || QUIZ_QUESTIONS['zh-TW'];
+  const totalQuestions = questions.length;
 
   let html = '';
 
@@ -959,7 +1037,7 @@ function renderAuditQuiz() {
     html += `
       <div class="quiz-step ${qNum === 1 ? 'active' : ''}" data-step="${qNum}">
         <span style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.8rem;">
-          ${isZh ? `問題 ${qNum} / 5` : `QUESTION ${qNum} OF 5`}
+          ${isZh ? `問題 ${qNum} / ${totalQuestions}` : `QUESTION ${qNum} OF ${totalQuestions}`}
         </span>
         <h3 style="margin: 0.5rem 0 1rem;">${q.title}</h3>
         <div class="quiz-options">
@@ -974,82 +1052,108 @@ function renderAuditQuiz() {
     `;
   });
 
-  // Final step template
+  // Final step. Score, tier and recommendation start empty: the previous
+  // hardcoded "TIER 4: ENTERPRISE SENTINEL" placeholder meant any failure in
+  // the scoring path would surface as a flattering top grade.
   html += `
     <div class="quiz-step" id="quizResultStep">
       <div style="text-align: center; padding: 1rem 0;">
         <span style="font-size: 3rem; display: block; margin-bottom: 0.5rem;">🏆</span>
         <h3 style="font-size: 1.75rem; margin-bottom: 0.5rem;">${isZh ? '資安防禦成熟度評估完成' : 'Audit Score Analysis Complete'}</h3>
-        <div style="font-size: 3.5rem; font-weight: 800; font-family: var(--font-mono); color: var(--accent-cyan);" id="quizFinalScore">0 / 100</div>
-        <p id="quizTierBadge" style="font-weight: 700; color: var(--accent-emerald); margin-bottom: 1rem; font-size: 1.2rem;">TIER 4: ENTERPRISE SENTINEL</p>
-        <p id="quizRecommendation" style="color: var(--text-secondary); max-width: 540px; margin: 0 auto 1.5rem;">Your security posture demonstrates robust defense-in-depth controls.</p>
-        <button class="btn btn-primary" onclick="window.print()">${isZh ? '列印 / 下載資安成熟度評估報告 📄' : 'Download / Print Security Assessment Report 📄'}</button>
+        <div style="font-size: 3.5rem; font-weight: 800; font-family: var(--font-mono); color: var(--accent-cyan);" id="quizFinalScore"></div>
+        <p id="quizTierBadge" style="font-weight: 700; margin-bottom: 1rem; font-size: 1.2rem;"></p>
+        <p id="quizRecommendation" style="color: var(--text-secondary); max-width: 540px; margin: 0 auto 1.5rem;"></p>
+        <div class="demo-note demo-note-inline" style="max-width: 560px; margin: 0 auto 1.5rem; text-align: left;">${escapeHtml(t('noteAudit'))}</div>
+        <button class="btn btn-primary" id="printReportBtn">${isZh ? '列印 / 下載資安成熟度評估報告 📄' : 'Download / Print Security Assessment Report 📄'}</button>
         <button class="btn btn-secondary" id="restartQuizBtn" style="margin-left: 0.5rem;">${isZh ? '重新評估' : 'Restart Audit'}</button>
       </div>
     </div>
   `;
 
   wizard.innerHTML = html;
-  initAuditQuiz();
+
+  // A render always returns the wizard to question 1, so the score resets too.
+  quizCurrentStep = 1;
+  quizTotalScore = 0;
+
+  bindAuditQuiz();
 }
 
-function initAuditQuiz() {
+/**
+ * Bind exactly one delegated click listener for the lifetime of #quizWizard.
+ * The marker lives on the element (not in a module flag) so that replacing the
+ * container would correctly yield a fresh binding.
+ */
+function bindAuditQuiz() {
+  const wizard = document.getElementById('quizWizard');
+  if (!wizard || wizard.dataset.quizBound === '1') return;
+
+  wizard.addEventListener('click', handleQuizClick);
+  wizard.dataset.quizBound = '1';
+}
+
+function handleQuizClick(e) {
   const wizard = document.getElementById('quizWizard');
   if (!wizard) return;
 
-  let currentStep = 1;
-  let totalScore = 0;
-
-  wizard.addEventListener('click', (e) => {
-    const btn = e.target.closest('.quiz-opt-btn');
-    if (!btn) return;
-
-    const score = parseInt(btn.getAttribute('data-score') || '0', 10);
-    totalScore += score;
-
-    const activeStepEl = wizard.querySelector(`.quiz-step[data-step="${currentStep}"]`);
-    if (activeStepEl) activeStepEl.classList.remove('active');
-
-    currentStep++;
-    const nextStepEl = wizard.querySelector(`.quiz-step[data-step="${currentStep}"]`);
-
-    if (nextStepEl) {
-      nextStepEl.classList.add('active');
-    } else {
-      const resultStep = document.getElementById('quizResultStep');
-      const scoreNum = document.getElementById('quizFinalScore');
-      const tierBadge = document.getElementById('quizTierBadge');
-      const rec = document.getElementById('quizRecommendation');
-
-      if (resultStep) resultStep.classList.add('active');
-      if (scoreNum) scoreNum.textContent = `${totalScore} / 100`;
-
-      const isZh = currentLang === 'zh-TW';
-
-      if (totalScore >= 85) {
-        tierBadge.textContent = isZh ? '層級 4：企業高階哨兵 (Enterprise Sentinel)' : 'TIER 4: ENTERPRISE SENTINEL';
-        tierBadge.style.color = 'var(--accent-emerald)';
-        rec.textContent = isZh ? '貴單位具備優異的深度防禦機制，且具備自動化 SOC 遙測與應變能力。' : 'Outstanding security controls with proactive defense-in-depth and automated SOC telemetry.';
-      } else if (totalScore >= 60) {
-        tierBadge.textContent = isZh ? '層級 3：進階防禦體系 (Advanced Posture)' : 'TIER 3: ADVANCED POSTURE';
-        tierBadge.style.color = 'var(--accent-cyan)';
-        rec.textContent = isZh ? '具備基礎資安防禦。建議補強不可變離線備份與強制部署 FIDO2 硬體 Key。' : 'Solid baseline controls. Recommend expanding immutable backups and mandatory FIDO2 hardware keys.';
-      } else {
-        tierBadge.textContent = isZh ? '層級 1-2：高風險警示 (Elevated Risk)' : 'TIER 1-2: ELEVATED RISK';
-        tierBadge.style.color = 'var(--accent-rose)';
-        rec.textContent = isZh ? '偵測到顯著資安防禦漏洞（如未強制 MFA 或缺乏備份隔離），建議立即著手改善。' : 'Critical security gaps detected in MFA and backup isolation. Immediate remediation required.';
-      }
-
-      showToast(isZh ? '資安成熟度計算完成！' : 'Audit calculation complete!', 'success');
-    }
-  });
-
-  const restartBtn = document.getElementById('restartQuizBtn');
-  if (restartBtn) {
-    restartBtn.addEventListener('click', () => {
-      renderAuditQuiz();
-    });
+  if (e.target.closest('#restartQuizBtn')) {
+    renderAuditQuiz();
+    return;
   }
+
+  // Replaces an inline onclick="window.print()" attribute, which would have
+  // required script-src 'unsafe-inline' in any future CSP.
+  if (e.target.closest('#printReportBtn')) {
+    window.print();
+    return;
+  }
+
+  const btn = e.target.closest('.quiz-opt-btn');
+  if (!btn) return;
+
+  quizTotalScore += parseInt(btn.getAttribute('data-score') || '0', 10);
+
+  const activeStepEl = wizard.querySelector(`.quiz-step[data-step="${quizCurrentStep}"]`);
+  if (activeStepEl) activeStepEl.classList.remove('active');
+
+  quizCurrentStep++;
+  const nextStepEl = wizard.querySelector(`.quiz-step[data-step="${quizCurrentStep}"]`);
+
+  if (nextStepEl) {
+    nextStepEl.classList.add('active');
+    return;
+  }
+
+  showQuizResult();
+}
+
+function showQuizResult() {
+  const isZh = currentLang === 'zh-TW';
+
+  const resultStep = document.getElementById('quizResultStep');
+  const scoreNum = document.getElementById('quizFinalScore');
+  const tierBadge = document.getElementById('quizTierBadge');
+  const rec = document.getElementById('quizRecommendation');
+
+  if (resultStep) resultStep.classList.add('active');
+  if (scoreNum) scoreNum.textContent = `${quizTotalScore} / 100`;
+  if (!tierBadge || !rec) return;
+
+  if (quizTotalScore >= 85) {
+    tierBadge.textContent = isZh ? '層級 4：企業高階哨兵 (Enterprise Sentinel)' : 'TIER 4: ENTERPRISE SENTINEL';
+    tierBadge.style.color = 'var(--accent-emerald)';
+    rec.textContent = isZh ? '貴單位具備優異的深度防禦機制，且具備自動化 SOC 遙測與應變能力。' : 'Outstanding security controls with proactive defense-in-depth and automated SOC telemetry.';
+  } else if (quizTotalScore >= 60) {
+    tierBadge.textContent = isZh ? '層級 3：進階防禦體系 (Advanced Posture)' : 'TIER 3: ADVANCED POSTURE';
+    tierBadge.style.color = 'var(--accent-cyan)';
+    rec.textContent = isZh ? '具備基礎資安防禦。建議補強不可變離線備份與強制部署 FIDO2 硬體 Key。' : 'Solid baseline controls. Recommend expanding immutable backups and mandatory FIDO2 hardware keys.';
+  } else {
+    tierBadge.textContent = isZh ? '層級 1-2：高風險警示 (Elevated Risk)' : 'TIER 1-2: ELEVATED RISK';
+    tierBadge.style.color = 'var(--accent-rose)';
+    rec.textContent = isZh ? '偵測到顯著資安防禦漏洞（如未強制 MFA 或缺乏備份隔離），建議立即著手改善。' : 'Critical security gaps detected in MFA and backup isolation. Immediate remediation required.';
+  }
+
+  showToast(isZh ? '資安成熟度計算完成！' : 'Audit calculation complete!', 'success');
 }
 
 /* Global Cyber Threat Map Canvas Animation */
@@ -1209,7 +1313,7 @@ function initEmergencyModal() {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       closeModal();
-      showToast(currentLang === 'zh-TW' ? '🚨 緊急通報已發送至 SOC 值班指揮中心' : '🚨 EMERGENCY ALERT DISPATCHED TO SOC COMMAND TEAM', 'error');
+      showToast(currentLang === 'zh-TW' ? '示範完成：未傳送資料，也未發出任何緊急通報。' : 'Demo complete: no data was transmitted and no emergency alert was dispatched.', 'info');
     });
   }
 }
@@ -1231,7 +1335,7 @@ function initCounters() {
   const refreshBtn = document.getElementById('refreshTelemetryBtn');
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
-      showToast(currentLang === 'zh-TW' ? '正在刷新 SOC 遙測數據流...' : 'Refreshing SOC telemetry feeds...', 'info');
+      showToast(currentLang === 'zh-TW' ? '正在重新產生模擬遙測畫面...' : 'Regenerating the simulated telemetry display...', 'info');
     });
   }
 }
