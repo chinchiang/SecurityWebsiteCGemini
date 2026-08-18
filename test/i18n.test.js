@@ -58,7 +58,8 @@ test('the simulated-data disclosures exist in both languages', () => {
   const { app } = loadApp();
   const required = [
     'demoBanner', 'noteHeaders', 'notePassword', 'notePhishing',
-    'noteDarkweb', 'noteDarkwebInline', 'noteDarkwebAction', 'noteCVE', 'noteAudit'
+    'noteDarkweb', 'noteDarkwebInline', 'noteDarkwebAction', 'noteCVE', 'noteAudit',
+    'noteEmergency'
   ];
   for (const key of required) {
     for (const lang of ['zh-TW', 'en']) {

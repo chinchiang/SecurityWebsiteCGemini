@@ -40,7 +40,13 @@ test('third-party subresources are limited to a known allow-list', () => {
   // Every origin the browser is told to FETCH from. Footer hyperlinks are not
   // subresources and are excluded. Adding an origin here should be a conscious
   // supply-chain decision, which is the point of failing this test by default.
-  const ALLOWED = ['fonts.googleapis.com'];
+  //
+  // The list is EMPTY, and that is the whole point: dropping the Google Fonts
+  // @import left the page with no third-party subresource at all, so nothing
+  // outside this repository can change what a visitor executes. That is also
+  // the precondition for a Content-Security-Policy without a font/style
+  // exemption. Do not add an entry here to make a failure go away.
+  const ALLOWED = [];
 
   const origins = new Set();
   for (const [source, name] of [[CSS, 'styles.css'], [HTML, 'index.html']]) {
