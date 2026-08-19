@@ -69,6 +69,21 @@ function createElement(env, tagName) {
       return ev;
     },
 
+    /**
+     * Like dispatch, but awaits whatever the listeners return.
+     *
+     * A browser ignores the promise from an `async` handler, so dispatch()
+     * models it faithfully — but a test that then asserts on the result of an
+     * awaited crypto.subtle.digest() has to wait for it somehow. Polling the DOM
+     * for a fixed number of ticks is a flake; awaiting the handler's own promise
+     * is exact.
+     */
+    async dispatchAsync(type, event = {}) {
+      const ev = { type, target: el, preventDefault() {}, stopPropagation() {}, ...event };
+      await Promise.all(this.listeners.filter(l => l.type === type).map(l => l.fn(ev)));
+      return ev;
+    },
+
     setAttribute(name, value) {
       this.attributes[name] = String(value);
       if (name === 'id') this.id = String(value);
@@ -106,7 +121,17 @@ function createElement(env, tagName) {
   return el;
 }
 
-function createDom() {
+/**
+ * @param {object} [options]
+ * @param {'ok'|'throw'|'missing'} [options.storage] localStorage behaviour.
+ *   'throw' is Safari private browsing / "block all cookies" / a full quota:
+ *   the call raises instead of returning null. 'missing' is the rarer case of
+ *   no localStorage object at all, which makes the property access itself throw.
+ * @param {'ok'|'reject'|'missing'} [options.clipboard] navigator.clipboard
+ *   behaviour. 'reject' is a denied permission or an unfocused document;
+ *   'missing' is an insecure context, where the API is not exposed at all.
+ */
+function createDom(options = {}) {
   const byId = new Map();
   const byClass = new Map();     // class name -> elements registered by a test
   const i18nElements = [];
@@ -140,8 +165,14 @@ function createDom() {
     }
   };
 
+  // A real element rather than a stub literal, so data-theme round-trips through
+  // setAttribute/getAttribute the way initThemeToggle expects.
+  const documentElement = createElement(env, 'html');
+  documentElement.lang = '';
+  documentElement.style.setProperty = () => {};
+
   const document = {
-    documentElement: { lang: '', setAttribute() {}, style: { setProperty() {} }, classList: makeClassList() },
+    documentElement,
     body: null,
 
     getElementById(id) {
@@ -169,22 +200,45 @@ function createDom() {
     location: { href: 'https://example.test/', search: '' }
   };
 
-  const store = new Map();
-  const localStorage = {
-    getItem: k => (store.has(k) ? store.get(k) : null),
-    setItem: (k, v) => store.set(k, String(v)),
-    removeItem: k => store.delete(k),
-    clear: () => store.clear()
+  // Seeded before app.js is evaluated, so a test can exercise the "returning
+  // visitor" path: currentLang is read once, at the top of the file.
+  const store = new Map(Object.entries(options.stored || {}));
+  const storageMode = options.storage || 'ok';
+  const refuse = () => {
+    // Mirrors the real DOMException: a throw, not a null return.
+    const err = new Error('The operation is insecure.');
+    err.name = 'SecurityError';
+    throw err;
+  };
+  const localStorage = storageMode === 'missing' ? undefined : {
+    getItem: k => (storageMode === 'throw' ? refuse() : (store.has(k) ? store.get(k) : null)),
+    setItem: (k, v) => (storageMode === 'throw' ? refuse() : store.set(k, String(v))),
+    removeItem: k => (storageMode === 'throw' ? refuse() : store.delete(k)),
+    clear: () => (storageMode === 'throw' ? refuse() : store.clear())
   };
 
   const clipboardWrites = [];
-  const navigator = {
-    clipboard: { writeText: async text => { clipboardWrites.push(String(text)); } }
-  };
+  const clipboardMode = options.clipboard || 'ok';
+  const navigator = {};
+  if (clipboardMode !== 'missing') {
+    navigator.clipboard = {
+      writeText: async text => {
+        if (clipboardMode === 'reject') {
+          const err = new Error('Write permission denied.');
+          err.name = 'NotAllowedError';
+          throw err;
+        }
+        clipboardWrites.push(String(text));
+      }
+    };
+  }
 
   return {
     document, window, localStorage, navigator,
     clipboardWrites,
+    /** The values that actually reached storage, for asserting persistence. */
+    storedKeys: () => [...store.keys()],
+    stored: k => (store.has(k) ? store.get(k) : null),
     /** Register an element so document.querySelectorAll('.cls') can find it. */
     registerClass(name, el) {
       if (!byClass.has(name)) byClass.set(name, []);
