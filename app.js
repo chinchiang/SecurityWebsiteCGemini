@@ -106,6 +106,9 @@ const TRANSLATIONS = {
     p3Label: '要檢測的可疑 URL',
     p3Placeholder: '例如：http://login-paypalls-update.com/signin',
     p3Btn: '分析 URL 結構',
+    p3TierLow: '低風險 LOW',
+    p3TierSuspicious: '可疑網址 SUSPICIOUS',
+    p3TierHigh: '高風險極危險 HIGH DANGER',
     p4Title: '暗網外洩紀錄模擬查詢',
     p4Desc: '以虛構結果示範企業 Email 或網域的外洩查詢介面；不會查詢任何真實資料庫。',
     p4Label: '企業 Email 或 網域名稱',
@@ -219,6 +222,9 @@ const TRANSLATIONS = {
     p3Label: 'Suspicious URL to Inspect',
     p3Placeholder: 'e.g. http://login-paypalls-update.com/signin',
     p3Btn: 'Inspect URL',
+    p3TierLow: 'LOW',
+    p3TierSuspicious: 'SUSPICIOUS',
+    p3TierHigh: 'HIGH DANGER',
     p4Title: 'Dark Web Exposure Search Simulator',
     p4Desc: 'Demonstrates an exposure-search interface with fictional results; no real breach database is queried.',
     p4Label: 'Email Address or Enterprise Domain',
@@ -416,7 +422,14 @@ function setLanguage(lang) {
   renderPlaybooks();
   renderAuditQuiz();
   renderPasswordStrength();
+  renderHashOutput();
   renderCVEs();
+
+  // Each of these repaints a tool result the visitor has already produced. They
+  // are no-ops until the corresponding tool has been used once.
+  renderHeaderScan();
+  renderPhishingResult();
+  renderDarkwebResult();
 }
 
 /* Theme Toggle */
@@ -459,16 +472,109 @@ function initToolTabs() {
   });
 }
 
-/* Tool 1: HTTP Security Headers Scanner */
-function initHeaderScanner() {
-  const form = document.getElementById('headerScanForm');
-  const input = document.getElementById('domainInput');
+/* ------------------------------------------------------------------------- *
+ * Tool 1: HTTP Security Headers Scanner
+ *
+ * Split into state / render / bind so that setLanguage() can repaint the
+ * result. Everything below is built in JavaScript rather than sitting behind a
+ * data-i18n attribute, so while the render lived inside the submit listener a
+ * language switch left the entire panel — check names aside — in the previous
+ * language until the user pressed Scan again.
+ * ------------------------------------------------------------------------- */
+
+/** Domain of the most recent scan; '' means the panel has never been shown. */
+let headerScanDomain = '';
+
+/**
+ * Illustrative grade for a domain NAME.
+ *
+ * NOTE: no request is made. Same-origin policy prevents browser JS from reading
+ * cross-origin response headers, so this is a substring match on the domain and
+ * is illustrative only. A real implementation needs a server-side proxy or the
+ * Mozilla HTTP Observatory API.
+ *
+ * Kept as a pure function of the domain so the two languages cannot disagree
+ * about the number: re-rendering recomputes it rather than trusting stored text.
+ */
+function headerScanScore(domain) {
+  let score = 88;
+  if (domain.includes('bank') || domain.includes('gov') || domain.includes('secure')) score = 96;
+  if (domain.includes('test') || domain.includes('demo')) score = 64;
+  return score;
+}
+
+function renderHeaderScan() {
   const resultsContainer = document.getElementById('headerResultsContainer');
   const checksGrid = document.getElementById('headerChecksGrid');
   const scoreNum = document.getElementById('headerScoreNumber');
   const scoreLbl = document.getElementById('headerScoreLabel');
+  if (!resultsContainer || !checksGrid || !scoreNum || !scoreLbl) return;
 
-  if (!form) return;
+  if (!headerScanDomain) {
+    resultsContainer.style.display = 'none';
+    return;
+  }
+
+  const score = headerScanScore(headerScanDomain);
+  const isZh = currentLang === 'zh-TW';
+
+  // Descriptions explain what each header DOES. They must never assert what the
+  // scanned site actually returned, because nothing was fetched.
+  const checks = [
+    {
+      name: 'Strict-Transport-Security (HSTS)',
+      status: score >= 80 ? 'pass' : 'warn',
+      desc: isZh ? '作用：強制瀏覽器僅以 HTTPS 連線，防止 SSL 降級與中間人攻擊。建議值 max-age 至少一年並加上 includeSubDomains。' : 'Purpose: forces browsers to connect over HTTPS only, preventing SSL stripping and MITM attacks. Recommended max-age of at least one year plus includeSubDomains.'
+    },
+    {
+      name: 'Content-Security-Policy (CSP)',
+      status: score >= 90 ? 'pass' : score >= 70 ? 'warn' : 'fail',
+      desc: isZh ? '作用：限制腳本可執行的來源，抵禦跨站腳本攻擊 (XSS) 與資料注入。建議避免 unsafe-inline。' : 'Purpose: restricts which sources may execute scripts, mitigating XSS and data injection. Avoid unsafe-inline where possible.'
+    },
+    {
+      name: 'X-Frame-Options',
+      status: 'pass',
+      desc: isZh ? '作用：控制網頁是否可被嵌入 iframe，用於防禦 Clickjacking 點擊劫持。現代作法建議改用 CSP frame-ancestors。' : 'Purpose: controls whether the page may be framed, defending against clickjacking. Modern equivalent is the CSP frame-ancestors directive.'
+    },
+    {
+      name: 'X-Content-Type-Options',
+      status: 'pass',
+      desc: isZh ? '作用：關閉瀏覽器的 MIME 類型猜測，避免上傳內容被誤判為可執行腳本。建議值 nosniff。' : 'Purpose: disables browser MIME-type sniffing so uploaded content is not reinterpreted as executable script. Recommended value nosniff.'
+    },
+    {
+      name: 'Referrer-Policy',
+      status: score >= 75 ? 'pass' : 'warn',
+      desc: isZh ? '作用：控制 Referer 標頭的傳送範圍，避免外洩敏感 URL 參數。建議值 strict-origin-when-cross-origin。' : 'Purpose: controls how much referrer information is sent, avoiding leakage of sensitive URL parameters. Recommended value strict-origin-when-cross-origin.'
+    },
+    {
+      name: 'Permissions-Policy',
+      status: score >= 85 ? 'pass' : 'fail',
+      desc: isZh ? '作用：限制攝影機、麥克風、地理位置與支付 API 的未授權調用。' : 'Purpose: restricts unauthorized use of camera, microphone, geolocation, and payment APIs.'
+    }
+  ];
+
+  checksGrid.innerHTML = checks.map(c => `
+    <div class="check-card ${c.status}">
+      <div class="check-header">
+        <span class="check-name">${c.name}</span>
+        <span class="check-status-pill pill-${c.status}">${c.status.toUpperCase()}</span>
+      </div>
+      <p class="check-desc">${c.desc}</p>
+    </div>
+  `).join('');
+
+  scoreNum.textContent = `${score} / 100`;
+  scoreNum.style.color = score >= 90 ? 'var(--accent-emerald)' : score >= 70 ? 'var(--accent-amber)' : 'var(--accent-rose)';
+  scoreLbl.textContent = score >= 90 ? (isZh ? 'A+（示範值）' : 'A+ (DEMO VALUE)') : score >= 70 ? (isZh ? 'B（示範值）' : 'B (DEMO VALUE)') : (isZh ? 'C（示範值）' : 'C (DEMO VALUE)');
+
+  resultsContainer.style.display = 'block';
+}
+
+function initHeaderScanner() {
+  const form = document.getElementById('headerScanForm');
+  const input = document.getElementById('domainInput');
+
+  if (!form || !input) return;
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -478,67 +584,11 @@ function initHeaderScanner() {
     showToast(currentLang === 'zh-TW' ? `正在產生 ${domain} 的示範評分...` : `Generating demo grade for ${domain}...`, 'info');
 
     setTimeout(() => {
-      // NOTE: no request is made. Same-origin policy prevents browser JS from
-      // reading cross-origin response headers, so this score is derived from
-      // substring matches on the domain name and is illustrative only.
-      // A real implementation needs a server-side proxy or the Mozilla HTTP
-      // Observatory API. Descriptions below therefore explain what each header
-      // DOES, and must never assert what the scanned site actually returned.
-      let score = 88;
-      if (domain.includes('bank') || domain.includes('gov') || domain.includes('secure')) score = 96;
-      if (domain.includes('test') || domain.includes('demo')) score = 64;
-
-      const isZh = currentLang === 'zh-TW';
-
-      const checks = [
-        {
-          name: 'Strict-Transport-Security (HSTS)',
-          status: score >= 80 ? 'pass' : 'warn',
-          desc: isZh ? '作用：強制瀏覽器僅以 HTTPS 連線，防止 SSL 降級與中間人攻擊。建議值 max-age 至少一年並加上 includeSubDomains。' : 'Purpose: forces browsers to connect over HTTPS only, preventing SSL stripping and MITM attacks. Recommended max-age of at least one year plus includeSubDomains.'
-        },
-        {
-          name: 'Content-Security-Policy (CSP)',
-          status: score >= 90 ? 'pass' : score >= 70 ? 'warn' : 'fail',
-          desc: isZh ? '作用：限制腳本可執行的來源，抵禦跨站腳本攻擊 (XSS) 與資料注入。建議避免 unsafe-inline。' : 'Purpose: restricts which sources may execute scripts, mitigating XSS and data injection. Avoid unsafe-inline where possible.'
-        },
-        {
-          name: 'X-Frame-Options',
-          status: 'pass',
-          desc: isZh ? '作用：控制網頁是否可被嵌入 iframe，用於防禦 Clickjacking 點擊劫持。現代作法建議改用 CSP frame-ancestors。' : 'Purpose: controls whether the page may be framed, defending against clickjacking. Modern equivalent is the CSP frame-ancestors directive.'
-        },
-        {
-          name: 'X-Content-Type-Options',
-          status: 'pass',
-          desc: isZh ? '作用：關閉瀏覽器的 MIME 類型猜測，避免上傳內容被誤判為可執行腳本。建議值 nosniff。' : 'Purpose: disables browser MIME-type sniffing so uploaded content is not reinterpreted as executable script. Recommended value nosniff.'
-        },
-        {
-          name: 'Referrer-Policy',
-          status: score >= 75 ? 'pass' : 'warn',
-          desc: isZh ? '作用：控制 Referer 標頭的傳送範圍，避免外洩敏感 URL 參數。建議值 strict-origin-when-cross-origin。' : 'Purpose: controls how much referrer information is sent, avoiding leakage of sensitive URL parameters. Recommended value strict-origin-when-cross-origin.'
-        },
-        {
-          name: 'Permissions-Policy',
-          status: score >= 85 ? 'pass' : 'fail',
-          desc: isZh ? '作用：限制攝影機、麥克風、地理位置與支付 API 的未授權調用。' : 'Purpose: restricts unauthorized use of camera, microphone, geolocation, and payment APIs.'
-        }
-      ];
-
-      checksGrid.innerHTML = checks.map(c => `
-        <div class="check-card ${c.status}">
-          <div class="check-header">
-            <span class="check-name">${c.name}</span>
-            <span class="check-status-pill pill-${c.status}">${c.status.toUpperCase()}</span>
-          </div>
-          <p class="check-desc">${c.desc}</p>
-        </div>
-      `).join('');
-
-      scoreNum.textContent = `${score} / 100`;
-      scoreNum.style.color = score >= 90 ? 'var(--accent-emerald)' : score >= 70 ? 'var(--accent-amber)' : 'var(--accent-rose)';
-      scoreLbl.textContent = score >= 90 ? (isZh ? 'A+（示範值）' : 'A+ (DEMO VALUE)') : score >= 70 ? (isZh ? 'B（示範值）' : 'B (DEMO VALUE)') : (isZh ? 'C（示範值）' : 'C (DEMO VALUE)');
-
-      resultsContainer.style.display = 'block';
-      showToast(isZh ? `${domain} 的示範評分已產生` : `Demo grade generated for ${domain}`, 'success');
+      headerScanDomain = domain;
+      renderHeaderScan();
+      // Toasts are deliberately not re-rendered on a language switch: they are
+      // transient, and the language at the moment of the action is the right one.
+      showToast(currentLang === 'zh-TW' ? `${domain} 的示範評分已產生` : `Demo grade generated for ${domain}`, 'success');
     }, 600);
   });
 }
@@ -1026,13 +1076,98 @@ function initPasswordEntropyEngine() {
   }
 }
 
-/* Tool 3: Phishing Link Inspector */
+/* ------------------------------------------------------------------------- *
+ * Tool 3: Phishing Link Inspector
+ *
+ * Split into state / render / bind for the same reason as Tool 1: the whole
+ * result is built in JavaScript, so it has to be repainted on a language switch.
+ * ------------------------------------------------------------------------- */
+
+const PHISHING_SUSPICIOUS_TLDS = ['.top', '.xyz', '.biz', '.cc', '.work', '.click'];
+const PHISHING_KEYWORDS = ['login', 'paypal', 'apple', 'google', 'update', 'verify', 'account', 'bank', 'secure'];
+
+/**
+ * Display text and colour per risk tier, keyed by a language-independent tier
+ * name. The tier used to BE the translated string, and the colour was picked by
+ * substring-matching that string for 'HIGH' or '高' — so rewording either
+ * translation would silently have turned every high-risk verdict amber.
+ */
+const PHISHING_TIERS = {
+  low: { key: 'p3TierLow', colour: 'var(--accent-emerald)' },
+  suspicious: { key: 'p3TierSuspicious', colour: 'var(--accent-amber)' },
+  high: { key: 'p3TierHigh', colour: 'var(--accent-rose)' }
+};
+
+/** Findings from the last inspected URL, or null before the first one. */
+let phishingFindings = null;
+
+/**
+ * Reduce a parsed URL to the language-independent facts the panel displays.
+ *
+ * Known gaps, stated in notePhishing rather than hidden: no IDN homograph or
+ * punycode detection, and the path, query string and userinfo are not examined.
+ */
+function inspectUrl(parsed) {
+  const host = parsed.hostname;
+  const isIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(host);
+  const hasSuspiciousTLD = PHISHING_SUSPICIOUS_TLDS.some(tld => host.endsWith(tld));
+  const hyphens = (host.match(/-/g) || []).length;
+  const keywords = PHISHING_KEYWORDS.filter(k => host.includes(k));
+
+  let tier = 'low';
+  if (isIP || hasSuspiciousTLD || hyphens > 2 || keywords.length > 0) {
+    tier = (isIP || (keywords.length > 0 && hasSuspiciousTLD)) ? 'high' : 'suspicious';
+  }
+
+  return { host, protocol: parsed.protocol, isIP, hyphens, keywords, tier };
+}
+
+function renderPhishingResult() {
+  const results = document.getElementById('phishingResults');
+  if (!results) return;
+
+  if (!phishingFindings) {
+    results.style.display = 'none';
+    return;
+  }
+
+  const { host, protocol, isIP, hyphens, keywords, tier } = phishingFindings;
+  const isZh = currentLang === 'zh-TW';
+  const { key: tierKey, colour: riskColor } = PHISHING_TIERS[tier];
+  const riskLevel = escapeHtml(t(tierKey));
+
+  // The host and protocol come from user input. new URL() permits `"` and `=`
+  // inside a hostname, so parsed parts are not safe by themselves.
+  const safeHost = escapeHtml(host);
+  const safeProtocol = escapeHtml(protocol);
+  const safeKeywords = escapeHtml(keywords.join(', '));
+
+  results.innerHTML = `
+    <div style="background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <strong style="font-size: 1.1rem;">${isZh ? '網址拆解分析:' : 'URL Breakdown:'} ${safeHost}</strong>
+        <span style="background: ${riskColor}22; color: ${riskColor}; padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-weight: 700; font-family: var(--font-mono); font-size: 0.8rem;">
+          ${isZh ? '風險等級:' : 'RISK LEVEL:'} ${riskLevel}
+        </span>
+      </div>
+      <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
+        <li>🌐 <strong>${isZh ? '目標網域 Host:' : 'Host Domain:'}</strong> <span class="mono">${safeHost}</span></li>
+        <li>🔒 <strong>${isZh ? '連線協定 Protocol:' : 'Protocol:'}</strong> <span class="mono">${safeProtocol}</span></li>
+        <li>⚠️ <strong>${isZh ? 'IP 網址檢測:' : 'IP Host Detection:'}</strong> ${isIP ? (isZh ? '❌ 偵測到純 IP 位址 (高度可疑)' : '❌ Raw IP Address detected (Suspicious)') : (isZh ? '✅ 標準網域名稱' : '✅ Standard Domain Name')}</li>
+        <li>🚩 <strong>${isZh ? '釣魚關鍵字匹配:' : 'Suspicious Keyword Matching:'}</strong> ${keywords.length ? `⚠️ ${isZh ? '命中關鍵字:' : 'Found:'} ${safeKeywords}` : (isZh ? '✅ 未發現常見釣魚詞彙' : '✅ None detected')}</li>
+        <li>🔗 <strong>${isZh ? '連字號密度分析:' : 'Hyphenation Density:'}</strong> ${hyphens > 2 ? `⚠️ ${isZh ? '密度過高' : 'High'} (${hyphens} ${isZh ? '個連字號' : 'hyphens'})` : (isZh ? '✅ 數量正常' : '✅ Normal')}</li>
+      </ul>
+    </div>
+  `;
+
+  results.style.display = 'block';
+}
+
 function initPhishingInspector() {
   const form = document.getElementById('phishingForm');
   const input = document.getElementById('phishingUrlInput');
-  const results = document.getElementById('phishingResults');
 
-  if (!form) return;
+  if (!form || !input) return;
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -1047,109 +1182,110 @@ function initPhishingInspector() {
       return;
     }
 
-    const host = parsed.hostname;
-    const isIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(host);
-    const suspiciousTLDs = ['.top', '.xyz', '.biz', '.cc', '.work', '.click'];
-    const hasSuspiciousTLD = suspiciousTLDs.some(t => host.endsWith(t));
-    const hyphensCount = (host.match(/-/g) || []).length;
-    const targetKeywords = ['login', 'paypal', 'apple', 'google', 'update', 'verify', 'account', 'bank', 'secure'];
-    const matchKeywords = targetKeywords.filter(k => host.includes(k));
-
-    const isZh = currentLang === 'zh-TW';
-
-    let riskLevel = 'LOW';
-    let riskColor = 'var(--accent-emerald)';
-    if (isIP || hasSuspiciousTLD || hyphensCount > 2 || matchKeywords.length > 0) {
-      riskLevel = (isIP || (matchKeywords.length > 0 && hasSuspiciousTLD)) ? (isZh ? '高風險極危險' : 'HIGH DANGER') : (isZh ? '可疑網址' : 'SUSPICIOUS');
-      riskColor = riskLevel.includes('HIGH') || riskLevel.includes('高') ? 'var(--accent-rose)' : 'var(--accent-amber)';
-    }
-
-    const safeHost = escapeHtml(host);
-    const safeProtocol = escapeHtml(parsed.protocol);
-
-    results.innerHTML = `
-      <div style="background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-          <strong style="font-size: 1.1rem;">${isZh ? '網址拆解分析:' : 'URL Breakdown:'} ${safeHost}</strong>
-          <span style="background: ${riskColor}22; color: ${riskColor}; padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-weight: 700; font-family: var(--font-mono); font-size: 0.8rem;">
-            ${isZh ? '風險等級:' : 'RISK LEVEL:'} ${riskLevel}
-          </span>
-        </div>
-        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
-          <li>🌐 <strong>${isZh ? '目標網域 Host:' : 'Host Domain:'}</strong> <span class="mono">${safeHost}</span></li>
-          <li>🔒 <strong>${isZh ? '連線協定 Protocol:' : 'Protocol:'}</strong> <span class="mono">${safeProtocol}</span></li>
-          <li>⚠️ <strong>${isZh ? 'IP 網址檢測:' : 'IP Host Detection:'}</strong> ${isIP ? (isZh ? '❌ 偵測到純 IP 位址 (高度可疑)' : '❌ Raw IP Address detected (Suspicious)') : (isZh ? '✅ 標準網域名稱' : '✅ Standard Domain Name')}</li>
-          <li>🚩 <strong>${isZh ? '釣魚關鍵字匹配:' : 'Suspicious Keyword Matching:'}</strong> ${matchKeywords.length ? `⚠️ ${isZh ? '命中關鍵字:' : 'Found:'} ${matchKeywords.join(', ')}` : (isZh ? '✅ 未發現常見釣魚詞彙' : '✅ None detected')}</li>
-          <li>🔗 <strong>${isZh ? '連字號密度分析:' : 'Hyphenation Density:'}</strong> ${hyphensCount > 2 ? `⚠️ ${isZh ? '密度過高' : 'High'} (${hyphensCount} ${isZh ? '個連字號' : 'hyphens'})` : (isZh ? '✅ 數量正常' : '✅ Normal')}</li>
-        </ul>
-      </div>
-    `;
-
-    results.style.display = 'block';
-    showToast(isZh ? `已完成 ${host} 之釣魚特徵分析` : `URL analysis generated for ${host}`, 'info');
+    phishingFindings = inspectUrl(parsed);
+    renderPhishingResult();
+    showToast(
+      currentLang === 'zh-TW'
+        ? `已完成 ${phishingFindings.host} 之釣魚特徵分析`
+        : `URL analysis generated for ${phishingFindings.host}`,
+      'info'
+    );
   });
 }
 
-/* Tool 4: Dark Web Exposure Search Simulator */
+/* ------------------------------------------------------------------------- *
+ * Tool 4: Dark Web Exposure Search Simulator
+ *
+ * Split into state / render / bind for the same reason as Tools 1 and 3.
+ * ------------------------------------------------------------------------- */
+
+/** The last query string, or '' before the first search. */
+let darkwebQuery = '';
+
+/**
+ * NOTE: a deterministic stub, not a lookup. No breach database is queried
+ * (app.js makes zero network requests). The verdict is a pure function of the
+ * query so that both languages agree, and it is meaningless either way — which
+ * is why noteDarkwebInline is rendered above every result.
+ */
+function darkwebIsBreached(query) {
+  return query.includes('test') || query.includes('admin') || query.length % 2 === 0;
+}
+
+function renderDarkwebResult() {
+  const results = document.getElementById('darkwebResults');
+  if (!results) return;
+
+  if (!darkwebQuery) {
+    results.style.display = 'none';
+    return;
+  }
+
+  const isZh = currentLang === 'zh-TW';
+  const isBreached = darkwebIsBreached(darkwebQuery);
+  const safeQuery = escapeHtml(darkwebQuery);
+  const simNotice = `<div class="demo-note demo-note-inline">${escapeHtml(t('noteDarkwebInline'))}</div>`;
+
+  if (!isBreached) {
+    results.innerHTML = `
+      ${simNotice}
+      <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1.25rem; border-radius: var(--radius-md); text-align: center;">
+        <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">🛡️</span>
+        <strong style="color: var(--accent-emerald); font-size: 1.1rem; display: block;">${isZh ? '示範結果：未發現外洩紀錄' : 'SAMPLE RESULT: NO EXPOSURE FOUND'}</strong>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.35rem;">${isZh ? `此為示範輸出，並未實際查詢 <strong>${safeQuery}</strong>。` : `This is sample output. No lookup was performed for <strong>${safeQuery}</strong>.`}</p>
+      </div>
+    `;
+  } else {
+    results.innerHTML = `
+      ${simNotice}
+      <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1.25rem; border-radius: var(--radius-md);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <strong style="color: var(--accent-rose); font-size: 1.1rem;">⚠️ ${isZh ? '示範情境：虛構的 2 筆外洩紀錄' : 'SAMPLE SCENARIO: 2 FICTIONAL RECORDS'}</strong>
+          <span class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${isZh ? '查詢目標:' : 'TARGET:'} ${safeQuery}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">${isZh ? '1.〔範例〕Stealer 惡意軟體日誌庫' : '1. [EXAMPLE] Stealer Malware Log Corpus'}</strong>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '此類外洩通常包含：明文密碼、瀏覽器 Cookie、登入來源 IP' : 'This breach class typically exposes: plaintext passwords, browser cookies, source IP'}</span>
+          </div>
+          <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">${isZh ? '2.〔範例〕電商平台資料庫洩漏' : '2. [EXAMPLE] E-commerce Database Leak'}</strong>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '此類外洩通常包含：Email、密碼雜湊、帳單地址' : 'This breach class typically exposes: email, password hashes, billing address'}</span>
+          </div>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.85rem;">${escapeHtml(t('noteDarkwebAction'))}</p>
+      </div>
+    `;
+  }
+
+  results.style.display = 'block';
+}
+
 function initDarkWebChecker() {
   const form = document.getElementById('darkwebForm');
   const input = document.getElementById('darkwebEmailInput');
-  const results = document.getElementById('darkwebResults');
 
-  if (!form) return;
+  if (!form || !input) return;
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const query = input.value.trim();
     if (!query) return;
 
-    const isZh = currentLang === 'zh-TW';
-
-    showToast(isZh ? `正在產生 ${query} 的模擬查詢結果...` : `Generating simulated result for ${query}...`, 'info');
+    showToast(
+      currentLang === 'zh-TW'
+        ? `正在產生 ${query} 的模擬查詢結果...`
+        : `Generating simulated result for ${query}...`,
+      'info'
+    );
 
     setTimeout(() => {
-      // NOTE: this is a deterministic stub, not a lookup. No breach database is
-      // queried (app.js makes zero network requests). Results are meaningless
-      // and must always be rendered alongside simNotice below.
-      const isBreached = query.includes('test') || query.includes('admin') || query.length % 2 === 0;
-
-      const safeQuery = escapeHtml(query);
-      const simNotice = `<div class="demo-note demo-note-inline">${escapeHtml(t('noteDarkwebInline'))}</div>`;
-
-      if (!isBreached) {
-        results.innerHTML = `
-          ${simNotice}
-          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1.25rem; border-radius: var(--radius-md); text-align: center;">
-            <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">🛡️</span>
-            <strong style="color: var(--accent-emerald); font-size: 1.1rem; display: block;">${isZh ? '示範結果：未發現外洩紀錄' : 'SAMPLE RESULT: NO EXPOSURE FOUND'}</strong>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.35rem;">${isZh ? `此為示範輸出，並未實際查詢 <strong>${safeQuery}</strong>。` : `This is sample output. No lookup was performed for <strong>${safeQuery}</strong>.`}</p>
-          </div>
-        `;
-      } else {
-        results.innerHTML = `
-          ${simNotice}
-          <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1.25rem; border-radius: var(--radius-md);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <strong style="color: var(--accent-rose); font-size: 1.1rem;">⚠️ ${isZh ? '示範情境：虛構的 2 筆外洩紀錄' : 'SAMPLE SCENARIO: 2 FICTIONAL RECORDS'}</strong>
-              <span class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${isZh ? '查詢目標:' : 'TARGET:'} ${safeQuery}</span>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-              <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">${isZh ? '1.〔範例〕Stealer 惡意軟體日誌庫' : '1. [EXAMPLE] Stealer Malware Log Corpus'}</strong>
-                <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '此類外洩通常包含：明文密碼、瀏覽器 Cookie、登入來源 IP' : 'This breach class typically exposes: plaintext passwords, browser cookies, source IP'}</span>
-              </div>
-              <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                <strong style="font-size: 0.9rem; display: block; color: var(--accent-amber);">${isZh ? '2.〔範例〕電商平台資料庫洩漏' : '2. [EXAMPLE] E-commerce Database Leak'}</strong>
-                <span style="font-size: 0.8rem; color: var(--text-secondary);">${isZh ? '此類外洩通常包含：Email、密碼雜湊、帳單地址' : 'This breach class typically exposes: email, password hashes, billing address'}</span>
-              </div>
-            </div>
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.85rem;">${escapeHtml(t('noteDarkwebAction'))}</p>
-          </div>
-        `;
-      }
-
-      results.style.display = 'block';
-      showToast(isZh ? '模擬的暗網查詢結果已更新' : 'Simulated dark web result updated', 'success');
+      darkwebQuery = query;
+      renderDarkwebResult();
+      showToast(
+        currentLang === 'zh-TW' ? '模擬的暗網查詢結果已更新' : 'Simulated dark web result updated',
+        'success'
+      );
     }, 500);
   });
 }
