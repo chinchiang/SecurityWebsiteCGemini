@@ -3,7 +3,36 @@
  * Supports Dynamic English / Traditional Chinese Bilingual Switching
  */
 
-let currentLang = localStorage.getItem('aegis-lang') || 'zh-TW';
+/**
+ * localStorage access can THROW rather than return null: Safari private
+ * browsing, "block all cookies", a page opened from file:// in some browsers,
+ * and a full storage quota all raise instead of degrading. The old code read it
+ * as the very first statement of this file, so any of those threw before a
+ * single listener was bound and left the whole page inert with no visible cause.
+ *
+ * Persistence is a nicety here — the language and theme both have defaults — so
+ * every failure is swallowed and the caller continues without it.
+ */
+const storage = {
+  get(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (err) {
+      return null;
+    }
+  },
+  /** @returns {boolean} whether the value was actually persisted. */
+  set(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+};
+
+let currentLang = storage.get('aegis-lang') || 'zh-TW';
 
 const TRANSLATIONS = {
   'zh-TW': {
@@ -321,7 +350,8 @@ function initLanguageToggle() {
 
   btn.addEventListener('click', () => {
     currentLang = currentLang === 'zh-TW' ? 'en' : 'zh-TW';
-    localStorage.setItem('aegis-lang', currentLang);
+    // The switch takes effect for this page view even if it cannot be remembered.
+    storage.set('aegis-lang', currentLang);
     setLanguage(currentLang);
     showToast(currentLang === 'zh-TW' ? '已切換至 繁體中文' : 'Switched to English', 'success');
   });
@@ -386,7 +416,7 @@ function initThemeToggle() {
   const btn = document.getElementById('themeToggleBtn');
   if (!btn) return;
 
-  const currentTheme = localStorage.getItem('aegis-theme') || 'dark';
+  const currentTheme = storage.get('aegis-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', currentTheme);
   btn.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
 
@@ -394,7 +424,7 @@ function initThemeToggle() {
     const activeTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('aegis-theme', newTheme);
+    storage.set('aegis-theme', newTheme);
     btn.textContent = newTheme === 'dark' ? '🌙' : '☀️';
     showToast(`Switched to ${newTheme} mode`);
   });
