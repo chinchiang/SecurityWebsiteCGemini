@@ -343,6 +343,23 @@ h1, h2, h3, h4, h5, h6 {
   color: #fff;
 }
 
+/*
+  The Copy Hash button is disabled whenever the panel is showing a notice rather
+  than a digest. Without this it would look and hover exactly like an enabled
+  button while doing nothing, so the disabled state has to be visible.
+*/
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover,
+.btn[disabled]:hover {
+  background: transparent;
+  border-color: var(--border-color);
+}
+
 .icon-btn {
   padding: 0.55rem;
   border-radius: var(--radius-sm);

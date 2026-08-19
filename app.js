@@ -97,6 +97,10 @@ const TRANSLATIONS = {
     p2CharLength: '字元總長度',
     p2ShaLabel: '前端純 Hash 計算 (SHA-256)',
     p2Copy: '複製 Hash',
+    p2HashInsecureContext: '此頁面非安全環境 (secure context)，瀏覽器停用了 SubtleCrypto，無法計算 SHA-256。請改以 https:// 或 localhost 開啟。',
+    p2HashError: '雜湊計算失敗，請重新輸入。',
+    toastThemeDark: '已切換至深色模式',
+    toastThemeLight: '已切換至淺色模式',
     p3Title: '網絡釣魚與同形異義字 URL 檢查器',
     p3Desc: '以前端啟發式規則拆解 URL，僅檢查關鍵字、連字號與純 IP 格式。',
     p3Label: '要檢測的可疑 URL',
@@ -206,6 +210,10 @@ const TRANSLATIONS = {
     p2CharLength: 'Character Length',
     p2ShaLabel: 'Client-Side SHA-256 Hash',
     p2Copy: 'Copy Hash',
+    p2HashInsecureContext: 'This page is not a secure context, so the browser withholds SubtleCrypto and SHA-256 cannot be computed. Open it over https:// or from localhost.',
+    p2HashError: 'Hash computation failed. Try entering the value again.',
+    toastThemeDark: 'Switched to dark mode',
+    toastThemeLight: 'Switched to light mode',
     p3Title: 'Phishing & Typosquatting Link Inspector',
     p3Desc: 'Applies basic client-side heuristics limited to keywords, hyphen count, and raw-IP format.',
     p3Label: 'Suspicious URL to Inspect',
@@ -426,7 +434,7 @@ function initThemeToggle() {
     document.documentElement.setAttribute('data-theme', newTheme);
     storage.set('aegis-theme', newTheme);
     btn.textContent = newTheme === 'dark' ? '🌙' : '☀️';
-    showToast(`Switched to ${newTheme} mode`);
+    showToast(t(newTheme === 'dark' ? 'toastThemeDark' : 'toastThemeLight'));
   });
 }
 
@@ -922,9 +930,49 @@ function renderPasswordStrength() {
 }
 
 /* Tool 2: Password Entropy & Crypto Hash Engine */
+
+/**
+ * The hash currently on display, or '' when the panel is showing a notice
+ * instead. Only a non-empty value is offered to the clipboard, so the copy
+ * button can never quietly hand the user an error message.
+ */
+let sha256Current = EMPTY_SHA256;
+
+/** i18n key of the notice replacing the hash, or '' when a hash is shown. */
+let sha256Notice = '';
+
+/**
+ * SubtleCrypto is only exposed in a secure context. Served over plain http://
+ * from anything other than localhost — or opened as a file:// URL in some
+ * browsers — `crypto.subtle` is undefined, so the digest call threw a
+ * TypeError. That was caught, but the panel then showed a hardcoded English
+ * "Error computing hash" with no hint that the cause was the page's origin
+ * rather than the input.
+ */
+function subtleCryptoAvailable() {
+  return Boolean(
+    typeof crypto !== 'undefined' && crypto && crypto.subtle &&
+    typeof crypto.subtle.digest === 'function'
+  );
+}
+
+function renderHashOutput() {
+  const output = document.getElementById('sha256HashOutput');
+  const copyBtn = document.getElementById('copyHashBtn');
+
+  if (output) output.textContent = sha256Notice ? t(sha256Notice) : sha256Current;
+  if (copyBtn) copyBtn.disabled = !sha256Current;
+}
+
+/** @param {string} notice i18n key, or '' to display `hash` instead. */
+function setHashOutput(hash, notice) {
+  sha256Current = hash;
+  sha256Notice = notice;
+  renderHashOutput();
+}
+
 function initPasswordEntropyEngine() {
   const passInput = document.getElementById('passInput');
-  const sha256Output = document.getElementById('sha256HashOutput');
   const copyBtn = document.getElementById('copyHashBtn');
 
   if (!passInput) return;
@@ -933,10 +981,14 @@ function initPasswordEntropyEngine() {
     renderPasswordStrength();
 
     const val = passInput.value;
-    if (!sha256Output) return;
 
     if (!val) {
-      sha256Output.textContent = EMPTY_SHA256;
+      setHashOutput(EMPTY_SHA256, '');
+      return;
+    }
+
+    if (!subtleCryptoAvailable()) {
+      setHashOutput('', 'p2HashInsecureContext');
       return;
     }
 
@@ -945,16 +997,31 @@ function initPasswordEntropyEngine() {
       const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      sha256Output.textContent = hashHex;
+      setHashOutput(hashHex, '');
     } catch (err) {
-      sha256Output.textContent = 'Error computing hash';
+      setHashOutput('', 'p2HashError');
     }
   });
 
   if (copyBtn) {
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(sha256Output.textContent);
-      showToast(currentLang === 'zh-TW' ? 'SHA-256 雜湊已複製至剪貼簿！' : 'SHA-256 hash copied to clipboard!', 'success');
+    copyBtn.addEventListener('click', async () => {
+      // The panel is showing a notice, not a hash. The button is disabled in
+      // that state, but a click can still arrive from assistive tooling.
+      if (!sha256Current) return;
+
+      const isZh = currentLang === 'zh-TW';
+      try {
+        // navigator.clipboard is itself undefined outside a secure context, and
+        // writeText() rejects when the permission is denied or the document is
+        // not focused, so both the property access and the await belong in here.
+        await navigator.clipboard.writeText(sha256Current);
+        showToast(isZh ? 'SHA-256 雜湊已複製至剪貼簿！' : 'SHA-256 hash copied to clipboard!', 'success');
+      } catch (err) {
+        showToast(
+          isZh ? '無法存取剪貼簿，請手動選取後複製。' : 'Clipboard access failed — select the hash and copy it manually.',
+          'error'
+        );
+      }
     });
   }
 }
