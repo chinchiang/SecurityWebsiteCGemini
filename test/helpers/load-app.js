@@ -20,14 +20,21 @@ const APP_PATH = process.env.AEGIS_APP_PATH
  * app.js's variable, not a copy taken at load time.
  */
 const EXPOSED = [
-  'escapeHtml', 't', 'setLanguage', 'currentLang', 'showToast',
+  'escapeHtml', 't', 'setLanguage', 'currentLang', 'showToast', 'storage',
   'TRANSLATIONS', 'TICKER_ITEMS', 'CVE_DATABASE', 'QUIZ_QUESTIONS', 'PLAYBOOK_DATA',
   'renderAuditQuiz', 'renderPlaybooks', 'renderCVEs', 'showQuizResult',
   'quizCurrentStep', 'quizTotalScore',
   'cveActiveSeverity', 'cveSearchQuery',
   'initCVEExplorer', 'initPasswordEntropyEngine', 'initAuditQuiz',
+  'initHeaderScanner', 'initPhishingInspector', 'initDarkWebChecker',
+  'initLanguageToggle', 'initThemeToggle',
   'estimatePasswordStrength', 'formatCrackTime', 'crackTimeSeconds',
-  'strengthTier', 'renderPasswordStrength', 'ATTACK_RATES', 'COMMON_PASSWORDS'
+  'strengthTier', 'renderPasswordStrength', 'ATTACK_RATES', 'COMMON_PASSWORDS',
+  'headerScanDomain', 'headerScanScore', 'renderHeaderScan',
+  'phishingFindings', 'inspectUrl', 'renderPhishingResult', 'PHISHING_TIERS',
+  'darkwebQuery', 'darkwebIsBreached', 'renderDarkwebResult',
+  'sha256Current', 'sha256Notice', 'subtleCryptoAvailable', 'renderHashOutput',
+  'EMPTY_SHA256'
 ];
 
 function readSource() {
@@ -36,10 +43,15 @@ function readSource() {
 
 /**
  * Load app.js against a fresh DOM stub.
+ *
+ * @param {object} [options] passed to createDom (see its jsdoc), plus:
+ *   `crypto: 'missing'` for an insecure context, where the browser exposes
+ *   `crypto` but withholds `crypto.subtle`; `crypto: 'absent'` for no crypto
+ *   global at all.
  * @returns {{app: object, dom: object, source: string}}
  */
-function loadApp() {
-  const dom = createDom();
+function loadApp(options = {}) {
+  const dom = createDom(options);
   const source = readSource();
 
   // `typeof` on an undeclared identifier is safe, so a name that does not exist
@@ -48,9 +60,13 @@ function loadApp() {
     EXPOSED.map(n => `get ${n}(){ return typeof ${n} === 'undefined' ? undefined : ${n}; }`).join(',') +
     '};\n';
 
+  // Every browser global app.js touches is a parameter, so a test can withhold
+  // one. Anything left off this list resolves to Node's real global instead,
+  // which is how `crypto` used to be reachable here by accident.
   const factory = new Function(
     'document', 'window', 'localStorage', 'navigator',
     'requestAnimationFrame', 'cancelAnimationFrame', 'setInterval', 'setTimeout',
+    'crypto', 'TextEncoder',
     source + epilogue
   );
 
@@ -69,6 +85,11 @@ function loadApp() {
     return queue.length; // still-pending count
   };
 
+  const cryptoStub =
+    options.crypto === 'absent' ? undefined :
+    options.crypto === 'missing' ? { getRandomValues: globalThis.crypto.getRandomValues } :
+    globalThis.crypto;
+
   const app = factory(
     dom.document,
     dom.window,
@@ -77,7 +98,9 @@ function loadApp() {
     () => 0,          // requestAnimationFrame: never paint
     () => {},         // cancelAnimationFrame
     () => 0,          // setInterval: never tick
-    setTimeoutStub
+    setTimeoutStub,
+    cryptoStub,
+    globalThis.TextEncoder
   );
 
   return { app, dom, source, flushTimers, pendingTimers: () => queue.length };
