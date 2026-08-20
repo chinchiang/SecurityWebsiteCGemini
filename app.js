@@ -102,13 +102,40 @@ const TRANSLATIONS = {
     toastThemeDark: '已切換至深色模式',
     toastThemeLight: '已切換至淺色模式',
     p3Title: '網絡釣魚與同形異義字 URL 檢查器',
-    p3Desc: '以前端啟發式規則拆解 URL，僅檢查關鍵字、連字號與純 IP 格式。',
+    p3Desc: '在瀏覽器端拆解 URL：punycode 解碼、混用文字系統與 ASCII 相似字、userinfo 誘餌、註冊網域、誘餌字詞與 path／query。',
     p3Label: '要檢測的可疑 URL',
     p3Placeholder: '例如：http://login-paypalls-update.com/signin',
     p3Btn: '分析 URL 結構',
     p3TierLow: '低風險 LOW',
     p3TierSuspicious: '可疑網址 SUSPICIOUS',
     p3TierHigh: '高風險極危險 HIGH DANGER',
+    p3RowBreakdown: '網址拆解分析:',
+    p3RowRisk: '風險等級:',
+    p3RowHost: '目標主機 Host:',
+    p3RowRegistrable: '註冊網域 (eTLD+1):',
+    p3RowProtocol: '連線協定 Protocol:',
+    p3RowRenders: '解碼後實際顯示為:',
+    p3RowSignals: '命中的風險特徵:',
+    p3RowClean: '✅ 未命中任何風險特徵 —— 這只代表本工具的規則沒有觸發，不代表網址安全。',
+    p3ScoreLabel: '加權分數:',
+    p3SigRawIp: '❌ 主機是純 IP 位址（{host}）。正常服務極少要求使用者直接連線 IP，十進位或十六進位的變形寫法也會被瀏覽器還原成這個位址。',
+    p3SigUserinfo: '❌ 網址含有 userinfo「{user}@」。瀏覽器實際連線的是 {host}，@ 前面那段只是給人看的誘餌，這是最常被用來假造網域的手法。',
+    p3SigScheme: '❌ 協定不是 http/https，而是 {scheme}。這類 URL 可能直接執行程式碼或下載檔案，而非開啟網頁。',
+    p3SigPunycode: 'ℹ️ 主機使用 IDN punycode 編碼（{ascii}），解碼後為「{decoded}」。編碼本身合法，但也是同形異義字攻擊的前置條件。',
+    p3SigPunycodeBad: '⚠️ punycode 標籤「{label}」無法解碼，可能是刻意構造的畸形網域。',
+    p3SigMixedScript: '❌ 標籤「{label}」在同一段中混用了 {scripts}。依 Unicode UTS #39 的判定，這種組合幾乎只出現在同形異義字攻擊。',
+    p3SigAsciiLookalike: '❌ 標籤「{label}」使用了 ASCII 相似字（{samples}），在畫面上會被讀成「{skeleton}」。',
+    p3SigConfusableBrand: '❌ 解碼後的外觀等同於知名網域 {brand}，但實際連線的網域並不是它。',
+    p3SigInvisible: '❌ 主機含有不可見或雙向控制字元（{chars}），可用來在畫面上重排或隱藏網域文字。',
+    p3SigBrand: '⚠️ 主機出現品牌名稱「{brand}」，但註冊網域是 {registrable}，並非該品牌的網域。',
+    p3SigLures: '⚠️ 主機含有 {count} 個常見誘餌字詞：{words}。',
+    p3SigSuspiciousTld: '⚠️ 頂級網域 {tld} 註冊門檻低，在濫用統計中占比偏高。',
+    p3SigHyphens: '⚠️ 主機有 {count} 個連字號，常見於模仿正牌網域的拼法。',
+    p3SigEmbeddedUrl: '⚠️ path 或 query 中夾帶了另一個網址（{url}），常見於開放轉址與視覺誘餌。',
+    p3SigDangerousFile: '❌ path 指向可執行檔或壓縮容器（{ext}）。',
+    p3SigPort: 'ℹ️ 指定了非標準連接埠 {port}。',
+    p3Toast: '已完成 {host} 之釣魚特徵分析',
+    p3ToastInvalid: '網址格式無效',
     p4Title: '暗網外洩紀錄模擬查詢',
     p4Desc: '以虛構結果示範企業 Email 或網域的外洩查詢介面；不會查詢任何真實資料庫。',
     p4Label: '企業 Email 或 網域名稱',
@@ -143,7 +170,7 @@ const TRANSLATIONS = {
     demoBanner: '⚠️ 示範網站聲明：本站為前端技術示範專案，不連線任何外部服務。威脅地圖、CVE 情報、統計數字與所有掃描結果皆為虛構的模擬資料，請勿作為實際安全決策的依據。',
     noteHeaders: '⚠️ 模擬工具：受瀏覽器同源政策限制，前端 JavaScript 無法讀取其他網站的回應標頭。本工具未發出任何請求，分數與檢查結果純為示範，不代表目標網站的真實設定。實際檢測請使用 Mozilla HTTP Observatory 或 curl -I。',
     notePassword: '🔒 安全提醒：請勿輸入您的真實密碼。所有運算（含 SHA-256）皆在您的瀏覽器本機完成，不會傳送至任何伺服器。破解時間假設攻擊者已取得密碼雜湊並於離線環境暴力破解，且雜湊為快速演算法（如本頁計算的 SHA-256）；若改用 bcrypt 或 Argon2id，實際時間會長上好幾個數量級。本頁字典僅為常見密碼的取樣，真實破解工具的字典有數百萬筆，因此在此得到高分仍不代表安全。',
-    notePhishing: 'ℹ️ 啟發式分析：本工具僅檢查關鍵字、連字號數量與純 IP 格式，尚未實作同形異義字 (IDN homograph) 與 punycode 偵測，也不檢查 path、query 與 userinfo。合法網域（如 accounts.google.com）可能被誤判，真實的釣魚網址也可能被漏判，結果僅供初步參考。',
+    notePhishing: 'ℹ️ 啟發式分析：本工具會在瀏覽器端解碼 punycode，檢查混用文字系統、ASCII 相似字、不可見字元、userinfo 誘餌、註冊網域、誘餌字詞、可疑 TLD 與 path／query，但它終究只是一組加權規則，不查詢任何信譽或黑名單資料庫。內建的公用後綴清單與品牌／可信網域清單都是精簡樣本，因此註冊網域可能算錯，冷門的合法網域（尤其是使用非拉丁文字的網域）可能被誤判，而剛註冊、沒有任何特徵的釣魚網址則可能完全零命中。結果僅供初步參考，不可作為唯一判斷依據。',
     noteDarkweb: '⚠️ 模擬工具：本工具未連線任何外洩資料庫，結果由輸入字串的長度決定，與真實外洩狀況完全無關。查詢真實外洩紀錄請使用 Have I Been Pwned (haveibeenpwned.com)。',
     noteDarkwebInline: '⚠️ 以下為虛構的示範輸出，未查詢任何外洩資料庫，與此帳號的真實狀況無關。',
     noteDarkwebAction: '請注意：以上為示範情境，並非針對此帳號的查詢結果。若需確認真實外洩狀況，請至 haveibeenpwned.com 查詢。',
@@ -218,13 +245,40 @@ const TRANSLATIONS = {
     toastThemeDark: 'Switched to dark mode',
     toastThemeLight: 'Switched to light mode',
     p3Title: 'Phishing & Typosquatting Link Inspector',
-    p3Desc: 'Applies basic client-side heuristics limited to keywords, hyphen count, and raw-IP format.',
+    p3Desc: 'Breaks a URL down client-side: punycode decoding, mixed scripts and ASCII lookalikes, userinfo bait, the registrable domain, lure keywords and the path/query.',
     p3Label: 'Suspicious URL to Inspect',
     p3Placeholder: 'e.g. http://login-paypalls-update.com/signin',
     p3Btn: 'Inspect URL',
     p3TierLow: 'LOW',
     p3TierSuspicious: 'SUSPICIOUS',
     p3TierHigh: 'HIGH DANGER',
+    p3RowBreakdown: 'URL Breakdown:',
+    p3RowRisk: 'RISK LEVEL:',
+    p3RowHost: 'Host:',
+    p3RowRegistrable: 'Registrable domain (eTLD+1):',
+    p3RowProtocol: 'Protocol:',
+    p3RowRenders: 'Decoded, this renders as:',
+    p3RowSignals: 'Signals matched:',
+    p3RowClean: '✅ No signal matched — which only means none of this tool\'s rules fired, not that the URL is safe.',
+    p3ScoreLabel: 'Weighted score:',
+    p3SigRawIp: '❌ The host is a raw IP address ({host}). Legitimate services rarely ask you to connect to one directly, and decimal or hexadecimal variants are normalised back to this address by the browser.',
+    p3SigUserinfo: '❌ The URL carries userinfo, "{user}@". The browser connects to {host}; everything before the @ is bait for the reader, and this is the most common way a domain is faked.',
+    p3SigScheme: '❌ The scheme is {scheme} rather than http/https. A URL like this can execute code or fetch a file instead of opening a page.',
+    p3SigPunycode: 'ℹ️ The host is IDN punycode ({ascii}), which decodes to "{decoded}". The encoding is legitimate in itself, but it is also the precondition for a homograph attack.',
+    p3SigPunycodeBad: '⚠️ The punycode label "{label}" does not decode — a sign of a deliberately malformed host.',
+    p3SigMixedScript: '❌ The label "{label}" mixes {scripts} within one label. Under Unicode UTS #39 that combination occurs almost exclusively in homograph attacks.',
+    p3SigAsciiLookalike: '❌ The label "{label}" uses ASCII lookalike characters ({samples}), so on screen it reads as "{skeleton}".',
+    p3SigConfusableBrand: '❌ Decoded, this is visually identical to the well-known domain {brand} — but it is not that domain.',
+    p3SigInvisible: '❌ The host contains invisible or bidirectional control characters ({chars}), which can reorder or hide parts of the displayed domain.',
+    p3SigBrand: '⚠️ The brand name "{brand}" appears in the host, but the registrable domain is {registrable}, which does not belong to that brand.',
+    p3SigLures: '⚠️ The host contains {count} common lure words: {words}.',
+    p3SigSuspiciousTld: '⚠️ The TLD {tld} is cheap to register and over-represented in abuse data.',
+    p3SigHyphens: '⚠️ The host has {count} hyphens, a common shape for spellings that imitate a real domain.',
+    p3SigEmbeddedUrl: '⚠️ Another URL is embedded in the path or query ({url}) — typical of open redirects and visual bait.',
+    p3SigDangerousFile: '❌ The path points at an executable or an archive container ({ext}).',
+    p3SigPort: 'ℹ️ A non-standard port is specified: {port}.',
+    p3Toast: 'URL analysis generated for {host}',
+    p3ToastInvalid: 'Invalid URL format',
     p4Title: 'Dark Web Exposure Search Simulator',
     p4Desc: 'Demonstrates an exposure-search interface with fictional results; no real breach database is queried.',
     p4Label: 'Email Address or Enterprise Domain',
@@ -259,7 +313,7 @@ const TRANSLATIONS = {
     demoBanner: '⚠️ Demo site notice: this is a front-end technical demo that connects to no external service. The threat map, CVE feed, statistics and all scan results are fictional simulated data. Do not rely on them for real security decisions.',
     noteHeaders: '⚠️ Simulated tool: the same-origin policy prevents browser JavaScript from reading another site\'s response headers. This tool issues no request — the grade and checks are illustrative only and do not reflect the target site\'s real configuration. For a real assessment use Mozilla HTTP Observatory or curl -I.',
     notePassword: '🔒 Safety note: do not enter a real password. All computation (including SHA-256) happens locally in your browser and is never transmitted. Crack times assume an attacker already holds the hash and is guessing offline against a fast algorithm — the same SHA-256 this page computes; bcrypt or Argon2id would take orders of magnitude longer. The wordlist here is only a sample of common passwords, while real cracking tools carry millions of entries, so a good score here is still not proof of safety.',
-    notePhishing: 'ℹ️ Heuristic analysis: this tool only checks keywords, hyphen count and raw-IP format. It does not detect IDN homographs / punycode, and does not inspect the path, query string or userinfo. Legitimate domains (e.g. accounts.google.com) may be flagged and real phishing URLs may be missed. Treat results as indicative only.',
+    notePhishing: 'ℹ️ Heuristic analysis: this tool decodes punycode in the browser and checks for mixed scripts, ASCII lookalikes, invisible characters, userinfo bait, the registrable domain, lure keywords, suspicious TLDs and the path/query — but it is still only a set of weighted rules, and it queries no reputation or blocklist service. The bundled public-suffix, brand and trusted-domain lists are small samples, so the registrable domain can be computed wrongly, an obscure legitimate domain (especially one written in a non-Latin script) can be flagged, and a freshly registered phishing URL with no distinguishing features can match nothing at all. Treat results as indicative only.',
     noteDarkweb: '⚠️ Simulated tool: no breach database is queried. The result is derived from the length of your input and bears no relation to any actual exposure. For real breach data use Have I Been Pwned (haveibeenpwned.com).',
     noteDarkwebInline: '⚠️ The output below is fictional sample data. No breach database was queried and it says nothing about this account.',
     noteDarkwebAction: 'Note: the above is an illustrative scenario, not a lookup result for this account. To check real exposure, visit haveibeenpwned.com.',
@@ -1081,10 +1135,443 @@ function initPasswordEntropyEngine() {
  *
  * Split into state / render / bind for the same reason as Tool 1: the whole
  * result is built in JavaScript, so it has to be repainted on a language switch.
+ *
+ * The heuristics used to be three: a raw-IP host, a hyphen count, and a
+ * substring search for nine keywords across the whole host. That last one is
+ * why accounts.google.com read as suspicious — 'google' and 'account' both hit,
+ * with nothing to say the host was google's own. It also missed every attack
+ * that does not spell its lure in ASCII: a Cyrillic homograph, an @-userinfo
+ * bait, a brand pushed into a subdomain of an unrelated domain.
+ *
+ * What is here now: punycode is decoded, the decoded labels are checked for
+ * mixed scripts and ASCII lookalikes, the registrable domain is derived so a
+ * brand name can be judged against who actually owns the domain, and the
+ * userinfo, port, path and query are inspected too. Each check contributes a
+ * weighted signal rather than flipping the verdict on its own.
  * ------------------------------------------------------------------------- */
 
-const PHISHING_SUSPICIOUS_TLDS = ['.top', '.xyz', '.biz', '.cc', '.work', '.click'];
-const PHISHING_KEYWORDS = ['login', 'paypal', 'apple', 'google', 'update', 'verify', 'account', 'bank', 'secure'];
+const PHISHING_SUSPICIOUS_TLDS = ['.top', '.xyz', '.biz', '.cc', '.work', '.click', '.zip', '.mov', '.tk', '.gq'];
+
+/**
+ * Brands worth impersonating. Matched against the host only — a brand name in
+ * the path is not the same claim, because the host is what the browser honours.
+ */
+const PHISHING_BRANDS = [
+  'paypal', 'apple', 'icloud', 'google', 'microsoft', 'office365', 'outlook',
+  'amazon', 'facebook', 'instagram', 'whatsapp', 'netflix', 'linkedin',
+  'dhl', 'fedex', 'chase', 'hsbc', 'binance', 'coinbase', 'metamask', 'steam'
+];
+
+/**
+ * Generic urgency words. Deliberately weighted low: secure-login.acme.com is a
+ * perfectly ordinary corporate host, so these only matter in combination.
+ */
+const PHISHING_LURES = [
+  'login', 'signin', 'verify', 'verification', 'confirm', 'update', 'account',
+  'secure', 'security', 'password', 'billing', 'invoice', 'payment', 'support',
+  'alert', 'suspended', 'unlock', 'recover', 'wallet'
+];
+
+/**
+ * The registrable domains the brands above actually use. If a host's own
+ * eTLD+1 is on this list, a brand name inside it belongs to the brand rather
+ * than to an impersonator — which is the whole fix for accounts.google.com.
+ *
+ * A sample, not an authority. notePhishing says so, because the failure mode is
+ * a legitimate brand domain that is missing here and therefore reads as an
+ * impersonation of itself.
+ */
+const PHISHING_TRUSTED_DOMAINS = [
+  'google.com', 'gmail.com', 'youtube.com', 'paypal.com', 'apple.com',
+  'icloud.com', 'microsoft.com', 'live.com', 'outlook.com', 'office.com',
+  'amazon.com', 'facebook.com', 'instagram.com', 'whatsapp.com', 'netflix.com',
+  'linkedin.com', 'github.com', 'x.com', 'twitter.com', 'dhl.com', 'fedex.com',
+  'chase.com', 'hsbc.com', 'binance.com', 'coinbase.com', 'metamask.io',
+  'steampowered.com'
+];
+
+/**
+ * Multi-label public suffixes, so the eTLD+1 of pay.example.co.uk comes out as
+ * example.co.uk and not co.uk. The real Public Suffix List is around 15 000
+ * entries and 200 KB, which is not something to inline into a demo page; this is
+ * its common tail, and the disclosure note states the approximation.
+ */
+const PHISHING_PUBLIC_SUFFIXES = [
+  'co.uk', 'org.uk', 'gov.uk', 'ac.uk', 'me.uk', 'net.uk', 'sch.uk',
+  'com.tw', 'org.tw', 'net.tw', 'gov.tw', 'edu.tw', 'idv.tw',
+  'com.cn', 'net.cn', 'org.cn', 'gov.cn', 'edu.cn',
+  'com.hk', 'org.hk', 'net.hk', 'edu.hk',
+  'co.jp', 'or.jp', 'ne.jp', 'ac.jp', 'go.jp',
+  'com.au', 'net.au', 'org.au', 'edu.au', 'gov.au',
+  'com.sg', 'com.my', 'co.th', 'co.id', 'com.ph', 'com.vn',
+  'com.br', 'com.mx', 'com.ar', 'co.in', 'net.in', 'org.in',
+  'co.kr', 'or.kr', 'co.nz', 'co.za', 'com.tr', 'com.ua'
+];
+
+/** Path endings that mean "this link is a download, not a page". */
+const PHISHING_DANGEROUS_EXTENSIONS = [
+  '.exe', '.scr', '.msi', '.bat', '.cmd', '.hta', '.jse', '.vbs', '.wsf',
+  '.ps1', '.jar', '.apk', '.dmg', '.iso', '.img', '.lnk',
+  '.zip', '.rar', '.7z', '.gz'
+];
+
+/**
+ * Every signal the inspector can raise, with the weight it contributes and the
+ * translation key for its message. One table so the scoring model is readable in
+ * one place, and so a test can assert that each signal has a message in both
+ * languages — the tier bug taught this codebase not to leave display strings
+ * scattered across the logic that produces them.
+ */
+const PHISHING_SIGNALS = {
+  rawIp: { weight: 3, key: 'p3SigRawIp' },
+  userinfo: { weight: 3, key: 'p3SigUserinfo' },
+  scheme: { weight: 3, key: 'p3SigScheme' },
+  punycode: { weight: 1, key: 'p3SigPunycode' },
+  punycodeBad: { weight: 2, key: 'p3SigPunycodeBad' },
+  mixedScript: { weight: 4, key: 'p3SigMixedScript' },
+  asciiLookalike: { weight: 3, key: 'p3SigAsciiLookalike' },
+  confusableBrand: { weight: 4, key: 'p3SigConfusableBrand' },
+  invisible: { weight: 4, key: 'p3SigInvisible' },
+  brandMismatch: { weight: 3, key: 'p3SigBrand' },
+  lures: { weight: 1, key: 'p3SigLures' },
+  suspiciousTld: { weight: 2, key: 'p3SigSuspiciousTld' },
+  hyphens: { weight: 1, key: 'p3SigHyphens' },
+  embeddedUrl: { weight: 2, key: 'p3SigEmbeddedUrl' },
+  dangerousFile: { weight: 3, key: 'p3SigDangerousFile' },
+  port: { weight: 1, key: 'p3SigPort' }
+};
+
+/** Weighted score at which each tier starts. Checked from the top down. */
+const PHISHING_TIER_FLOORS = [
+  { tier: 'high', min: 3 },
+  { tier: 'suspicious', min: 1 },
+  { tier: 'low', min: 0 }
+];
+
+/* ----------------------------- punycode (RFC 3492) ------------------------ *
+ * new URL() hands back the ASCII form of an internationalised host — the
+ * Cyrillic аpple.com arrives as xn--pple-43d.com — so the attack is invisible
+ * until the label is decoded. Node exposes a punycode module and browsers do
+ * not, and this page ships no dependencies, so the decoder is here. Decode
+ * only: nothing in this tool needs to produce punycode.
+ * ------------------------------------------------------------------------- */
+
+const PUNYCODE = { base: 36, tmin: 1, tmax: 26, skew: 38, damp: 700, initialBias: 72, initialN: 128 };
+
+function punycodeAdapt(delta, numPoints, firstTime) {
+  let d = firstTime ? Math.floor(delta / PUNYCODE.damp) : Math.floor(delta / 2);
+  d += Math.floor(d / numPoints);
+  let k = 0;
+  while (d > ((PUNYCODE.base - PUNYCODE.tmin) * PUNYCODE.tmax) / 2) {
+    d = Math.floor(d / (PUNYCODE.base - PUNYCODE.tmin));
+    k += PUNYCODE.base;
+  }
+  return k + Math.floor(((PUNYCODE.base - PUNYCODE.tmin + 1) * d) / (d + PUNYCODE.skew));
+}
+
+/** Digit value of a base-36 character, or -1 if it is not one. */
+function punycodeDigit(char) {
+  const code = char.charCodeAt(0);
+  if (code >= 0x30 && code <= 0x39) return code - 0x30 + 26;  // 0-9 -> 26..35
+  if (code >= 0x61 && code <= 0x7A) return code - 0x61;       // a-z -> 0..25
+  if (code >= 0x41 && code <= 0x5A) return code - 0x41;       // A-Z, case-folded
+  return -1;
+}
+
+/**
+ * Decode one `xn--` label back to Unicode.
+ *
+ * @param {string} label a full label including the `xn--` prefix
+ * @returns {string|null} the decoded label, or null if it is malformed —
+ *   returned rather than thrown, because a malformed label is itself a finding.
+ */
+function punycodeDecodeLabel(label) {
+  const encoded = label.slice(4);
+  if (!encoded) return null;
+
+  const output = [];
+  const delimiter = encoded.lastIndexOf('-');
+  let index = 0;
+
+  // Anything before the last hyphen is literal ASCII, copied across as-is.
+  if (delimiter >= 0) {
+    for (const char of encoded.slice(0, delimiter)) {
+      if (char.charCodeAt(0) >= 0x80) return null;
+      output.push(char.codePointAt(0));
+    }
+    index = delimiter + 1;
+  }
+
+  let n = PUNYCODE.initialN;
+  let bias = PUNYCODE.initialBias;
+  let i = 0;
+
+  while (index < encoded.length) {
+    const oldi = i;
+    let w = 1;
+
+    for (let k = PUNYCODE.base; ; k += PUNYCODE.base) {
+      if (index >= encoded.length) return null;         // truncated delta
+      const digit = punycodeDigit(encoded[index++]);
+      if (digit < 0) return null;
+      i += digit * w;
+      if (!Number.isSafeInteger(i)) return null;
+      const t = k <= bias ? PUNYCODE.tmin
+        : (k >= bias + PUNYCODE.tmax ? PUNYCODE.tmax : k - bias);
+      if (digit < t) break;
+      w *= PUNYCODE.base - t;
+      if (!Number.isSafeInteger(w)) return null;
+    }
+
+    const out = output.length + 1;
+    bias = punycodeAdapt(i - oldi, out, oldi === 0);
+    n += Math.floor(i / out);
+    if (n > 0x10FFFF) return null;
+    i = i % out;
+    output.splice(i, 0, n);
+    i++;
+  }
+
+  try {
+    return String.fromCodePoint(...output);
+  } catch (err) {
+    return null;   // a code point String.fromCodePoint refuses
+  }
+}
+
+/**
+ * Decode every punycode label in a host.
+ *
+ * @returns {{decoded: string, hadPunycode: boolean, undecodable: string[]}}
+ *   `decoded` is display-only: it can contain any Unicode the attacker chose.
+ */
+function decodePunycodeHost(host) {
+  const undecodable = [];
+  let hadPunycode = false;
+
+  const decoded = host.split('.').map(label => {
+    if (!/^xn--/i.test(label)) return label;
+    hadPunycode = true;
+    const plain = punycodeDecodeLabel(label.toLowerCase());
+    if (plain === null) {
+      undecodable.push(label);
+      return label;
+    }
+    return plain;
+  }).join('.');
+
+  return { decoded, hadPunycode, undecodable };
+}
+
+/* --------------------------- scripts and confusables ---------------------- */
+
+/**
+ * Coarse script ranges — enough to tell "this label mixes Latin with Cyrillic"
+ * from "this label is Japanese", which is the distinction the check needs.
+ */
+const SCRIPT_RANGES = [
+  { name: 'Latin', re: /[A-Za-zÀ-ɏḀ-ỿ]/ },
+  { name: 'Cyrillic', re: /[Ѐ-ԯⷠ-ⷿꙀ-ꚟ]/ },
+  { name: 'Greek', re: /[Ͱ-Ͽἀ-῿]/ },
+  { name: 'Armenian', re: /[԰-֏]/ },
+  { name: 'Hebrew', re: /[֐-׿]/ },
+  { name: 'Arabic', re: /[؀-ۿݐ-ݿ]/ },
+  { name: 'Devanagari', re: /[ऀ-ॿ]/ },
+  { name: 'Thai', re: /[฀-๿]/ },
+  { name: 'Cherokee', re: /[Ꭰ-᏿ꭰ-ꮿ]/ },
+  { name: 'Han', re: /[㐀-䶿一-鿿豈-﫿]/ },
+  { name: 'Hiragana', re: /[぀-ゟ]/ },
+  { name: 'Katakana', re: /[゠-ヿㇰ-ㇿ]/ },
+  { name: 'Hangul', re: /[ᄀ-ᇿ㄰-㆏가-힯]/ }
+];
+
+/** Script sets that legitimately share one label: Japanese, and Korean. */
+const SCRIPT_SETS_OK = [
+  ['Han', 'Hiragana', 'Katakana'],
+  ['Han', 'Hangul']
+];
+
+/** Scripts whose ASCII lookalikes make any mixture with Latin suspect. */
+const SCRIPT_CONFUSABLE_WITH_LATIN = ['Cyrillic', 'Greek', 'Armenian', 'Cherokee'];
+
+/**
+ * Non-ASCII characters that render close enough to an ASCII character to be
+ * read as it, split by where they come from.
+ *
+ * `crossScript` is the attack material: a Cyrillic а inside an otherwise Latin
+ * word has no innocent explanation. `latin` is not — ł, ó and ż are how Polish
+ * is spelled, so a domain using them is flagged as an IDN (informational) but
+ * not as a homograph. Both maps feed the "renders as" skeleton; only
+ * `crossScript` raises the asciiLookalike signal.
+ *
+ * A curated subset of the Unicode confusables data, which is thousands of rows.
+ */
+const CONFUSABLE_CROSS_SCRIPT = {
+  'а': 'a', 'в': 'b', 'г': 'r', 'е': 'e', 'ѕ': 's', 'з': '3', 'и': 'u', 'й': 'u',
+  'к': 'k', 'м': 'm', 'н': 'h', 'о': 'o', 'р': 'p', 'с': 'c', 'т': 't', 'у': 'y',
+  'х': 'x', 'ц': 'u', 'ч': 'y', 'ъ': 'b', 'ь': 'b', 'ё': 'e', 'є': 'e', 'і': 'i',
+  'ї': 'i', 'ј': 'j', 'ѐ': 'e', 'ѡ': 'w', 'ѵ': 'v', 'ԁ': 'd', 'ԛ': 'q', 'ԝ': 'w',
+  'һ': 'h', 'ӏ': 'l', 'ө': 'o', 'ѳ': 'o',
+  'α': 'a', 'β': 'b', 'γ': 'y', 'ε': 'e', 'η': 'n', 'ι': 'i', 'κ': 'k', 'μ': 'u',
+  'ν': 'v', 'ο': 'o', 'ρ': 'p', 'σ': 'o', 'τ': 't', 'υ': 'u', 'χ': 'x', 'ω': 'w',
+  'ϲ': 'c', 'ϳ': 'j', 'ϑ': 'o',
+  'օ': 'o', 'ց': 'g', 'ի': 'h', 'ո': 'n', 'ս': 'u', 'ր': 'r', 'ք': 'p',
+  'Ꭺ': 'a', 'Ꭼ': 'e', 'Ꮐ': 'g', 'Ꮋ': 'h', 'Ꭻ': 'j', 'Ꮶ': 'k', 'Ꮮ': 'l', 'Ꮇ': 'm',
+  'ａ': 'a', 'ｂ': 'b', 'ｃ': 'c', 'ｄ': 'd', 'ｅ': 'e', 'ｇ': 'g', 'ｉ': 'i',
+  'ｌ': 'l', 'ｍ': 'm', 'ｎ': 'n', 'ｏ': 'o', 'ｐ': 'p', 'ｒ': 'r', 'ｓ': 's',
+  'ｔ': 't', 'ｕ': 'u', 'ｙ': 'y', '０': '0', '１': '1', '－': '-', '．': '.'
+};
+
+const CONFUSABLE_LATIN = {
+  'á': 'a', 'à': 'a', 'â': 'a', 'ä': 'a', 'ã': 'a', 'å': 'a', 'ą': 'a', 'ạ': 'a',
+  'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e', 'ę': 'e', 'ẹ': 'e', 'ė': 'e',
+  'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i', 'ı': 'i', 'ị': 'i', 'ɩ': 'i',
+  'ó': 'o', 'ò': 'o', 'ô': 'o', 'ö': 'o', 'õ': 'o', 'ø': 'o', 'ọ': 'o',
+  'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u', 'ụ': 'u', 'ů': 'u',
+  'ç': 'c', 'ć': 'c', 'č': 'c', 'ñ': 'n', 'ń': 'n', 'ň': 'n',
+  'ś': 's', 'š': 's', 'ş': 's', 'ź': 'z', 'ż': 'z', 'ž': 'z',
+  'ł': 'l', 'ĺ': 'l', 'ľ': 'l', 'ⅼ': 'l', 'ǀ': 'l',
+  'ý': 'y', 'ÿ': 'y', 'ğ': 'g', 'ɡ': 'g', 'ř': 'r', 'ť': 't', 'ď': 'd', 'ǝ': 'e'
+};
+
+/**
+ * Characters that occupy no width or reorder what follows them. An RLO in a
+ * host can make evil.top/moc.lapyap read as paypal.com on screen, and it would
+ * reorder this page's own text too if it were rendered raw — which is why the
+ * display path replaces them with their code points rather than printing them.
+ */
+const INVISIBLE_CHAR_RE = /[­͏؜ᅟᅠ឴឵᠋-᠎​-‏‪-‮⁠-⁤⁦-⁩ㅤ﻿ﾠ]/;
+
+/** The scripts present in a string, ignoring digits, hyphens and separators. */
+function scriptsIn(text) {
+  return SCRIPT_RANGES.filter(script => script.re.test(text)).map(script => script.name);
+}
+
+/**
+ * Whether a label's script mixture is one that occurs in real domains.
+ *
+ * This is Unicode UTS #39's Moderately Restrictive level, narrowed to what this
+ * tool can justify: any Latin/Cyrillic, Latin/Greek, Latin/Armenian or
+ * Latin/Cherokee mixture is suspect, as is any pair of non-Latin scripts that
+ * is not the Japanese or Korean set.
+ */
+function isMixedScriptLabel(scripts) {
+  if (scripts.length < 2) return false;
+
+  const hasLatin = scripts.includes('Latin');
+  const others = scripts.filter(name => name !== 'Latin');
+
+  if (hasLatin && others.some(name => SCRIPT_CONFUSABLE_WITH_LATIN.includes(name))) return true;
+  if (others.length < 2) return false;
+
+  return !SCRIPT_SETS_OK.some(set => others.every(name => set.includes(name)));
+}
+
+/**
+ * Reduce a host to what a reader sees it as, by mapping every confusable
+ * character to its ASCII lookalike.
+ *
+ * @returns {{skeleton: string, crossScript: string[]}} the ASCII reading, and
+ *   the cross-script characters that made it differ.
+ */
+function confusableSkeleton(text) {
+  const crossScript = [];
+  let skeleton = '';
+
+  for (const char of text) {
+    if (Object.prototype.hasOwnProperty.call(CONFUSABLE_CROSS_SCRIPT, char)) {
+      crossScript.push(char);
+      skeleton += CONFUSABLE_CROSS_SCRIPT[char];
+    } else if (Object.prototype.hasOwnProperty.call(CONFUSABLE_LATIN, char)) {
+      skeleton += CONFUSABLE_LATIN[char];
+    } else {
+      skeleton += char;
+    }
+  }
+
+  return { skeleton, crossScript };
+}
+
+/**
+ * Make a decoded host safe to *display*. escapeHtml handles the markup; this
+ * handles the characters that are dangerous even as text, by printing an
+ * invisible or bidirectional character as its code point instead.
+ */
+function visualiseHost(text) {
+  let out = '';
+  for (const char of text) {
+    out += INVISIBLE_CHAR_RE.test(char)
+      ? `<U+${char.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}>`
+      : char;
+  }
+  return out;
+}
+
+/* ------------------------------- host analysis ---------------------------- */
+
+/**
+ * Best-effort eTLD+1.
+ *
+ * Correct resolution needs the Public Suffix List; this covers the common
+ * multi-label suffixes and otherwise takes the last two labels, so
+ * example.co.uk is right but a suffix missing from the sample list yields one
+ * label too few. Stated in notePhishing rather than presented as authoritative.
+ */
+function registrableDomain(host) {
+  // An IP literal has no registrable domain; taking its last two labels would
+  // report the eTLD+1 of 1.2.3.4 as "3.4".
+  if (isIpHost(host)) return host;
+
+  const labels = host.split('.').filter(Boolean);
+  if (labels.length <= 2) return labels.join('.');
+
+  const lastTwo = labels.slice(-2).join('.').toLowerCase();
+  return PHISHING_PUBLIC_SUFFIXES.includes(lastTwo)
+    ? labels.slice(-3).join('.')
+    : labels.slice(-2).join('.');
+}
+
+/**
+ * Split a host into the words a reader would see in it.
+ *
+ * Everything that is not a Latin letter separates, so dots, hyphens,
+ * underscores and digits all break a token: paypal2024.top yields
+ * ['paypal', 'top']. Run on a skeleton, so the tokens are the ASCII reading.
+ */
+function tokenise(text) {
+  return text.toLowerCase().split(/[^a-z]+/).filter(Boolean);
+}
+
+/** Whether a host is an IP literal rather than a name. */
+function isIpHost(host) {
+  if (/^\[[0-9a-f:.]+\]$/i.test(host)) return true;          // IPv6, bracketed
+  return /^(\d{1,3}\.){3}\d{1,3}$/.test(host);               // IPv4, as normalised
+}
+
+/** decodeURIComponent that returns the input instead of throwing on bad input. */
+function decodeUriSafe(text) {
+  try {
+    return decodeURIComponent(text);
+  } catch (err) {
+    return text;
+  }
+}
+
+/**
+ * Whether the input already names a scheme, so `http://` should not be prepended.
+ *
+ * The old test was `rawUrl.startsWith('http')`, which is wrong twice: a bare
+ * host beginning with those four letters — httpbin.org, httpd.apache.org — was
+ * handed to new URL() with no scheme at all and rejected as invalid, and
+ * `javascript:alert(1)` was silently turned into a host named `javascript`.
+ * Requiring `//` keeps `localhost:8080` reading as a host and a port, while the
+ * short list covers the schemes that carry a payload instead of an authority —
+ * the ones worth flagging rather than mangling.
+ */
+function hasExplicitScheme(input) {
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(input)
+    || /^(javascript|data|file|mailto|tel|blob|vbscript):/i.test(input);
+}
 
 /**
  * Display text and colour per risk tier, keyed by a language-independent tier
@@ -1101,25 +1588,199 @@ const PHISHING_TIERS = {
 /** Findings from the last inspected URL, or null before the first one. */
 let phishingFindings = null;
 
+/** The weight a raised signal contributes, honouring a per-instance override. */
+function phishingSignalWeight(signal) {
+  const defined = PHISHING_SIGNALS[signal.id];
+  if (!defined) return 0;
+  return typeof signal.weight === 'number' ? signal.weight : defined.weight;
+}
+
 /**
  * Reduce a parsed URL to the language-independent facts the panel displays.
  *
- * Known gaps, stated in notePhishing rather than hidden: no IDN homograph or
- * punycode detection, and the path, query string and userinfo are not examined.
+ * Everything returned is either a number, a language-independent key, or raw
+ * user input — never display text. The tier bug was caused by a verdict that
+ * WAS its own translation, and the same rule applies to every signal here: the
+ * message lives in TRANSLATIONS, keyed off `id`, and the values that go into it
+ * travel in `data` to be escaped at render time.
+ *
+ * Remaining gaps, stated in notePhishing rather than hidden: the public-suffix
+ * and brand lists are samples, so an eTLD+1 can be off by a label and a
+ * legitimate brand domain missing from the trusted list reads as impersonating
+ * itself; and no reputation or blocklist service is consulted, because the page
+ * makes no network requests at all.
  */
 function inspectUrl(parsed) {
   const host = parsed.hostname;
-  const isIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(host);
-  const hasSuspiciousTLD = PHISHING_SUSPICIOUS_TLDS.some(tld => host.endsWith(tld));
-  const hyphens = (host.match(/-/g) || []).length;
-  const keywords = PHISHING_KEYWORDS.filter(k => host.includes(k));
+  const signals = [];
 
-  let tier = 'low';
-  if (isIP || hasSuspiciousTLD || hyphens > 2 || keywords.length > 0) {
-    tier = (isIP || (keywords.length > 0 && hasSuspiciousTLD)) ? 'high' : 'suspicious';
+  const { decoded, hadPunycode, undecodable } = decodePunycodeHost(host);
+  const displayHost = visualiseHost(decoded);
+  const { skeleton, crossScript } = confusableSkeleton(decoded);
+  const registrable = registrableDomain(host);
+  const skeletonRegistrable = registrableDomain(skeleton);
+  const isIP = isIpHost(host);
+  // Counted on the decoded host, not the ASCII one: punycode spells itself with
+  // hyphens (xn--pple-43d.com has three), so counting the encoded form reported
+  // a hyphen density the attacker never chose.
+  const hyphens = (decoded.match(/-/g) || []).length;
+
+  /* --- the scheme, the userinfo and the port: everything but the name --- */
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    signals.push({ id: 'scheme', data: { scheme: parsed.protocol } });
   }
 
-  return { host, protocol: parsed.protocol, isIP, hyphens, keywords, tier };
+  // http://accounts.google.com@evil.top/ connects to evil.top. The browser is
+  // not confused; the reader is, which is the entire point of the technique.
+  if (parsed.username || parsed.password) {
+    signals.push({ id: 'userinfo', data: { user: parsed.username || '', host: host } });
+  }
+
+  if (parsed.port) {
+    signals.push({ id: 'port', data: { port: parsed.port } });
+  }
+
+  /* --- the host --- */
+
+  if (isIP) {
+    signals.push({ id: 'rawIp', data: { host: host } });
+  } else if (host) {
+    if (hadPunycode) {
+      signals.push({ id: 'punycode', data: { ascii: host, decoded: displayHost } });
+    }
+    for (const label of undecodable) {
+      signals.push({ id: 'punycodeBad', data: { label: label } });
+    }
+
+    if (INVISIBLE_CHAR_RE.test(decoded)) {
+      const found = [...decoded]
+        .filter(char => INVISIBLE_CHAR_RE.test(char))
+        .map(char => `U+${char.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}`);
+      signals.push({ id: 'invisible', data: { chars: [...new Set(found)].join(', ') } });
+    }
+
+    for (const label of decoded.split('.')) {
+      const scripts = scriptsIn(label);
+      if (isMixedScriptLabel(scripts)) {
+        signals.push({ id: 'mixedScript', data: { label: visualiseHost(label), scripts: scripts.join(' + ') } });
+      }
+    }
+
+    if (crossScript.length > 0 && skeleton !== decoded) {
+      signals.push({
+        id: 'asciiLookalike',
+        data: {
+          label: displayHost,
+          samples: [...new Set(crossScript)].join(' '),
+          skeleton: skeleton
+        }
+      });
+
+      // The strongest form: what it renders as is a domain someone trusts.
+      if (PHISHING_TRUSTED_DOMAINS.includes(skeletonRegistrable.toLowerCase())) {
+        signals.push({ id: 'confusableBrand', data: { brand: skeletonRegistrable } });
+      }
+    }
+
+    // Both word checks run over the SKELETON, so a Cyrillic pаypal is judged as
+    // the paypal a reader sees, and over TOKENS rather than substrings: matching
+    // 'microsoft' anywhere in the host flagged login.microsoftonline.com, which
+    // is Microsoft's own. The cost of tokenising is a miss on a concatenation
+    // like mypaypal.com, which notePhishing covers along with the rest.
+    const skeletonDomain = registrableDomain(skeleton);
+    const hostTokens = tokenise(skeleton);
+    const domainTokens = tokenise(skeletonDomain);
+    // The whole leading label, not its first token: tokenising splits the digits
+    // off paypal2024, which would have read as paypal's own domain.
+    const leadingLabel = skeletonDomain.toLowerCase().split('.')[0];
+    const trusted = PHISHING_TRUSTED_DOMAINS.includes(registrable.toLowerCase());
+
+    if (!trusted) {
+      // Brands are checked across the whole host: paypal.com.evil.top puts the
+      // brand in a subdomain, and that is a claim about identity wherever it
+      // sits. It is not an impersonation when the registrable domain leads with
+      // the brand itself, which is what makes amazon.co.jp and every other
+      // country variant come out clean without listing them all.
+      const brand = PHISHING_BRANDS.find(name => hostTokens.includes(name));
+      if (brand && leadingLabel !== brand) {
+        signals.push({ id: 'brandMismatch', data: { brand: brand, registrable: registrable } });
+      }
+
+      // Lures are checked on the registrable domain only. login.example.com and
+      // secure.bank.example.com are ordinary subdomains; secure-login-verify.top
+      // is a domain someone chose to name that way.
+      const lures = PHISHING_LURES.filter(word => domainTokens.includes(word));
+      if (lures.length > 0) {
+        // Two or more is a shape rather than a coincidence, so it counts double.
+        signals.push({
+          id: 'lures',
+          weight: lures.length > 1 ? 2 : 1,
+          data: { count: lures.length, words: lures.join(', ') }
+        });
+      }
+    }
+
+    const tld = PHISHING_SUSPICIOUS_TLDS.find(suffix => host.toLowerCase().endsWith(suffix));
+    if (tld) {
+      signals.push({ id: 'suspiciousTld', data: { tld: tld } });
+    }
+
+    if (hyphens > 2) {
+      signals.push({ id: 'hyphens', data: { count: hyphens } });
+    }
+  }
+
+  /* --- the path and the query --- */
+
+  const tail = decodeUriSafe(parsed.pathname + parsed.search);
+  const embedded = /https?:\/\/([^\s/?#&"']+)/i.exec(tail);
+  if (embedded) {
+    signals.push({ id: 'embeddedUrl', data: { url: embedded[0] } });
+  }
+
+  const path = parsed.pathname.toLowerCase();
+  const extension = PHISHING_DANGEROUS_EXTENSIONS.find(ext => path.endsWith(ext));
+  if (extension) {
+    signals.push({ id: 'dangerousFile', data: { ext: extension } });
+  }
+
+  const score = signals.reduce((total, signal) => total + phishingSignalWeight(signal), 0);
+  const tier = PHISHING_TIER_FLOORS.find(floor => score >= floor.min).tier;
+
+  return {
+    host,
+    displayHost,
+    registrable,
+    protocol: parsed.protocol,
+    hadPunycode,
+    isIP,
+    hyphens,
+    signals,
+    score,
+    tier
+  };
+}
+
+/**
+ * Fill a signal's translated message with its values.
+ *
+ * The template is ours and holds no markup; every value is user input, so each
+ * is escaped as it is substituted. Deliberately not named render* — the guard in
+ * static-source.test.js requires every top-level render function to be reachable
+ * from setLanguage(), and this one is a helper of one that already is.
+ *
+ * @returns {string} HTML-safe text
+ */
+function phishingSignalText(signal) {
+  const defined = PHISHING_SIGNALS[signal.id];
+  if (!defined) return '';
+
+  const values = signal.data || {};
+  return Object.keys(values).reduce(
+    (text, name) => text.split(`{${name}}`).join(escapeHtml(String(values[name]))),
+    escapeHtml(t(defined.key))
+  );
 }
 
 function renderPhishingResult() {
@@ -1131,32 +1792,56 @@ function renderPhishingResult() {
     return;
   }
 
-  const { host, protocol, isIP, hyphens, keywords, tier } = phishingFindings;
-  const isZh = currentLang === 'zh-TW';
+  const { host, displayHost, registrable, protocol, hadPunycode, signals, score, tier } = phishingFindings;
   const { key: tierKey, colour: riskColor } = PHISHING_TIERS[tier];
   const riskLevel = escapeHtml(t(tierKey));
 
-  // The host and protocol come from user input. new URL() permits `"` and `=`
-  // inside a hostname, so parsed parts are not safe by themselves.
+  // Everything below came out of the address bar. new URL() permits `"` and `=`
+  // inside a hostname, so parsed parts are not safe by themselves, and the
+  // decoded host is arbitrary Unicode by definition.
   const safeHost = escapeHtml(host);
   const safeProtocol = escapeHtml(protocol);
-  const safeKeywords = escapeHtml(keywords.join(', '));
+  const safeRegistrable = escapeHtml(registrable);
+  const safeDisplayHost = escapeHtml(displayHost);
+
+  const rows = [
+    `<li>🌐 <strong>${escapeHtml(t('p3RowHost'))}</strong> <span class="mono">${safeHost}</span></li>`,
+    `<li>🔒 <strong>${escapeHtml(t('p3RowProtocol'))}</strong> <span class="mono">${safeProtocol}</span></li>`
+  ];
+
+  if (registrable && registrable !== host) {
+    rows.push(`<li>🏷️ <strong>${escapeHtml(t('p3RowRegistrable'))}</strong> <span class="mono">${safeRegistrable}</span></li>`);
+  }
+  // Only worth a row when the two forms differ — otherwise it repeats the host.
+  // Not keyed on hadPunycode alone: an invisible character needs the row too, so
+  // that what the host really contains is visible somewhere on the panel.
+  if (hadPunycode || displayHost !== host) {
+    rows.push(`<li>👁️ <strong>${escapeHtml(t('p3RowRenders'))}</strong> <span class="mono">${safeDisplayHost}</span></li>`);
+  }
+
+  const signalItems = signals.length
+    ? signals.map(signal =>
+      `<li style="padding-left: 0.25rem;">${phishingSignalText(signal)}</li>`).join('')
+    : `<li>${escapeHtml(t('p3RowClean'))}</li>`;
 
   results.innerHTML = `
     <div style="background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1rem;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-        <strong style="font-size: 1.1rem;">${isZh ? '網址拆解分析:' : 'URL Breakdown:'} ${safeHost}</strong>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; gap: 0.75rem; flex-wrap: wrap;">
+        <strong style="font-size: 1.1rem;">${escapeHtml(t('p3RowBreakdown'))} ${safeHost}</strong>
         <span style="background: ${riskColor}22; color: ${riskColor}; padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-weight: 700; font-family: var(--font-mono); font-size: 0.8rem;">
-          ${isZh ? '風險等級:' : 'RISK LEVEL:'} ${riskLevel}
+          ${escapeHtml(t('p3RowRisk'))} ${riskLevel}
         </span>
       </div>
       <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
-        <li>🌐 <strong>${isZh ? '目標網域 Host:' : 'Host Domain:'}</strong> <span class="mono">${safeHost}</span></li>
-        <li>🔒 <strong>${isZh ? '連線協定 Protocol:' : 'Protocol:'}</strong> <span class="mono">${safeProtocol}</span></li>
-        <li>⚠️ <strong>${isZh ? 'IP 網址檢測:' : 'IP Host Detection:'}</strong> ${isIP ? (isZh ? '❌ 偵測到純 IP 位址 (高度可疑)' : '❌ Raw IP Address detected (Suspicious)') : (isZh ? '✅ 標準網域名稱' : '✅ Standard Domain Name')}</li>
-        <li>🚩 <strong>${isZh ? '釣魚關鍵字匹配:' : 'Suspicious Keyword Matching:'}</strong> ${keywords.length ? `⚠️ ${isZh ? '命中關鍵字:' : 'Found:'} ${safeKeywords}` : (isZh ? '✅ 未發現常見釣魚詞彙' : '✅ None detected')}</li>
-        <li>🔗 <strong>${isZh ? '連字號密度分析:' : 'Hyphenation Density:'}</strong> ${hyphens > 2 ? `⚠️ ${isZh ? '密度過高' : 'High'} (${hyphens} ${isZh ? '個連字號' : 'hyphens'})` : (isZh ? '✅ 數量正常' : '✅ Normal')}</li>
+        ${rows.join('')}
+        <li>📊 <strong>${escapeHtml(t('p3ScoreLabel'))}</strong> <span class="mono">${score}</span></li>
       </ul>
+      <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+        <strong style="font-size: 0.9rem;">${escapeHtml(t('p3RowSignals'))}</strong>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem; margin-top: 0.5rem;">
+          ${signalItems}
+        </ul>
+      </div>
     </div>
   `;
 
@@ -1176,20 +1861,15 @@ function initPhishingInspector() {
 
     let parsed;
     try {
-      parsed = new URL(rawUrl.startsWith('http') ? rawUrl : `http://${rawUrl}`);
+      parsed = new URL(hasExplicitScheme(rawUrl) ? rawUrl : `http://${rawUrl}`);
     } catch (err) {
-      showToast(currentLang === 'zh-TW' ? '網址格式無效' : 'Invalid URL format', 'error');
+      showToast(t('p3ToastInvalid'), 'error');
       return;
     }
 
     phishingFindings = inspectUrl(parsed);
     renderPhishingResult();
-    showToast(
-      currentLang === 'zh-TW'
-        ? `已完成 ${phishingFindings.host} 之釣魚特徵分析`
-        : `URL analysis generated for ${phishingFindings.host}`,
-      'info'
-    );
+    showToast(t('p3Toast').replace('{host}', phishingFindings.host), 'info');
   });
 }
 
