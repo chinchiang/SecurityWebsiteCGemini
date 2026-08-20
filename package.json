@@ -4,7 +4,7 @@
   "private": true,
   "description": "Static bilingual cybersecurity demo portal. Plain HTML/CSS/JS with no build step and no runtime dependencies; this manifest exists only to expose the test runner.",
   "scripts": {
-    "test": "node --check app.js && node --test test/audit-quiz.test.js test/cve.test.js test/hash.test.js test/i18n.test.js test/password.test.js test/static-source.test.js test/storage.test.js test/tool-language.test.js test/workflows.test.js test/xss.test.js",
+    "test": "node --check app.js && node --test test/audit-quiz.test.js test/cve.test.js test/hash.test.js test/i18n.test.js test/password.test.js test/phishing.test.js test/static-source.test.js test/storage.test.js test/tool-language.test.js test/workflows.test.js test/xss.test.js",
     "check": "node --check app.js"
   },
   "engines": {

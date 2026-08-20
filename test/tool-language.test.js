@@ -156,9 +156,15 @@ test('inspectUrl grades the documented heuristics', () => {
   assert.equal(tierOf('https://example.com/'), 'low');
   assert.equal(tierOf('http://1.2.3.4/'), 'high', 'a raw IP host');
   assert.equal(tierOf('http://login-paypal.xyz/'), 'high', 'a keyword plus a suspicious TLD');
-  assert.equal(tierOf('https://accounts.google.com/'), 'suspicious',
-    'a known false positive, disclosed in notePhishing rather than hidden');
   assert.equal(tierOf('https://a-b-c-d.example.net/'), 'suspicious', 'hyphen density alone');
+
+  // This used to be pinned as 'suspicious' and labelled a known false positive:
+  // the keyword search ran over the whole host, so 'google' and 'account' both
+  // matched with nothing to say the host was google's own. Deriving the eTLD+1
+  // and checking it against the trusted list is what fixed it, and the whole
+  // phishing.test.js file exists to keep that fix from regressing.
+  assert.equal(tierOf('https://accounts.google.com/'), 'low',
+    'a brand keyword on the brand\'s own registrable domain is not a signal');
 });
 
 test('every phishing tier has a translation and a distinct colour', () => {

@@ -32,6 +32,11 @@ const EXPOSED = [
   'strengthTier', 'renderPasswordStrength', 'ATTACK_RATES', 'COMMON_PASSWORDS',
   'headerScanDomain', 'headerScanScore', 'renderHeaderScan',
   'phishingFindings', 'inspectUrl', 'renderPhishingResult', 'PHISHING_TIERS',
+  'PHISHING_SIGNALS', 'PHISHING_BRANDS', 'PHISHING_LURES', 'PHISHING_TIER_FLOORS',
+  'PHISHING_TRUSTED_DOMAINS', 'PHISHING_SUSPICIOUS_TLDS',
+  'punycodeDecodeLabel', 'decodePunycodeHost', 'confusableSkeleton', 'visualiseHost',
+  'scriptsIn', 'isMixedScriptLabel', 'registrableDomain', 'isIpHost',
+  'hasExplicitScheme', 'phishingSignalText', 'phishingSignalWeight',
   'darkwebQuery', 'darkwebIsBreached', 'renderDarkwebResult',
   'sha256Current', 'sha256Notice', 'subtleCryptoAvailable', 'renderHashOutput',
   'EMPTY_SHA256'

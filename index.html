@@ -247,9 +247,9 @@
             <!-- Panel 3: Phishing Link Inspector -->
             <div class="tool-panel card" id="panel-phishing" role="tabpanel">
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p3Title">網絡釣魚與同形異義字 URL 檢查器</h3>
-              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p3Desc">以前端啟發式規則拆解 URL，僅檢查關鍵字、連字號與純 IP 格式。</p>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p3Desc">在瀏覽器端拆解 URL：punycode 解碼、混用文字系統與 ASCII 相似字、userinfo 誘餌、註冊網域、誘餌字詞與 path／query。</p>
 
-              <div class="demo-note" data-i18n="notePhishing">ℹ️ 啟發式分析：本工具僅檢查關鍵字、連字號數量與純 IP 格式，尚未實作同形異義字 (IDN homograph) 與 punycode 偵測，也不檢查 path、query 與 userinfo。合法網域（如 accounts.google.com）可能被誤判，真實的釣魚網址也可能被漏判，結果僅供初步參考。</div>
+              <div class="demo-note" data-i18n="notePhishing">ℹ️ 啟發式分析：本工具會在瀏覽器端解碼 punycode，檢查混用文字系統、ASCII 相似字、不可見字元、userinfo 誘餌、註冊網域、誘餌字詞、可疑 TLD 與 path／query，但它終究只是一組加權規則，不查詢任何信譽或黑名單資料庫。內建的公用後綴清單與品牌／可信網域清單都是精簡樣本，因此註冊網域可能算錯，冷門的合法網域（尤其是使用非拉丁文字的網域）可能被誤判，而剛註冊、沒有任何特徵的釣魚網址則可能完全零命中。結果僅供初步參考，不可作為唯一判斷依據。</div>
 
               <form id="phishingForm">
                 <div class="form-group">
