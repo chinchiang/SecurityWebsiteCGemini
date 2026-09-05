@@ -427,29 +427,43 @@ test('a hostile value inside a signal message is escaped', () => {
 test('an invisible character in a host is flagged and never rendered raw', () => {
   const { app } = loadApp();
 
-  // Both the raw form (http://<RLO>evil.example.com/) and its punycode
-  // equivalent (xn--evil-yd7a) are rejected by new URL() before they reach the
-  // inspector: ICU applies UTS #46, which disallows these code points in a host.
-  // So this signal is defence in depth against a more permissive parser — and
-  // inspectUrl is duck-typed on a parsed URL, which is how it gets exercised.
-  assert.throws(() => new URL('http://‮evil.example.com/'), { name: 'TypeError' });
-  assert.throws(() => new URL('http://xn--evil-yd7a.example.com/'), { name: 'TypeError' });
+  // What this repository ships is the inspector, and it is duck-typed on a
+  // parsed URL. Whether a runtime's parser hands the host over first is not
+  // ours to assert: Node 22 rejects both the raw form (http://<RLO>evil…) and
+  // its punycode equivalent (xn--evil-yd7a) under UTS #46, and Node 24 accepts
+  // the punycode one. This test used to require the rejection, which pinned
+  // the stricter parser, tested nothing in app.js, and turned a runner upgrade
+  // into a red suite. A more permissive parser is the case the signal exists
+  // for, so assert what happens when the host does reach the inspector.
+  for (const hostname of ['evil‮.example.com', 'xn--evil-yd7a.example.com']) {
+    const findings = app.inspectUrl({
+      hostname,
+      protocol: 'http:',
+      username: '', password: '', port: '', pathname: '/', search: ''
+    });
 
-  const findings = app.inspectUrl({
-    hostname: 'evil‮.example.com',
+    const invisible = findings.signals.find(signal => signal.id === 'invisible');
+    assert.ok(invisible, `the override must be reported for ${hostname}`);
+    assert.equal(invisible.data.chars, 'U+202E');
+
+    // The display path is the part that matters even when the signal is not
+    // reachable: an RLO rendered raw reorders this page's own text, not just
+    // the host, so it is replaced with its code point before it can reach
+    // innerHTML.
+    assert.equal(findings.displayHost, 'evil<U+202E>.example.com');
+    assert.doesNotMatch(app.phishingSignalText(invisible), /‮/);
+  }
+
+  // On a parser that accepts it, the encoded form arrives as an ordinary ASCII
+  // host; being recognised as punycode is the only thing that makes the RLO
+  // inside it visible at all.
+  const encoded = app.inspectUrl({
+    hostname: 'xn--evil-yd7a.example.com',
     protocol: 'http:',
     username: '', password: '', port: '', pathname: '/', search: ''
   });
-
-  const invisible = findings.signals.find(signal => signal.id === 'invisible');
-  assert.ok(invisible, 'the override must be reported');
-  assert.equal(invisible.data.chars, 'U+202E');
-
-  // The display path is the part that matters even when the signal is not
-  // reachable: an RLO rendered raw reorders this page's own text, not just the
-  // host, so it is replaced with its code point before it can reach innerHTML.
-  assert.equal(findings.displayHost, 'evil<U+202E>.example.com');
-  assert.doesNotMatch(app.phishingSignalText(invisible), /‮/);
+  assert.ok(encoded.signals.some(signal => signal.id === 'punycode'),
+    'an encoded host must be decoded before it is judged');
 });
 
 test('the whole panel repaints on a language switch, signals included', () => {
