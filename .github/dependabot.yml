@@ -14,6 +14,16 @@ updates:
       prefix: 'chore(actions)'
     labels:
       - dependencies
+    groups:
+      # init and analyze are two paths into one action, and CodeQL refuses to
+      # run when they are on different releases: analyze aborts with "Loaded a
+      # configuration file for version X, but running version Y". Split across
+      # separate pull requests, each one holds half the upgrade and can never
+      # go green on its own — which is how #8 and #9 both failed. Grouping
+      # keeps every codeql-action path in a single pull request.
+      codeql-action:
+        patterns:
+          - 'github/codeql-action*'
 
   # No npm ecosystem entry: package.json declares no dependencies and exists
   # only to expose the test runner. Add one here if that ever changes.
