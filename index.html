@@ -40,15 +40,15 @@
           <span class="pulse-dot"></span>
           <span id="sysStatusText" data-i18n="sysStatus">DEMO MODE • 模擬介面</span>
         </div>
-        <button class="btn btn-outline" id="langToggleBtn" style="padding: 0.35rem 0.75rem; font-family: var(--font-mono); font-size: 0.8rem;" aria-label="Toggle Language">🌐 EN / 繁中</button>
-        <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme" aria-label="Toggle Theme">🌙</button>
-        <button class="btn btn-primary" id="openEmergencyModalBtn" data-i18n="btnEmergency">🚨 緊急通報 Emergency</button>
+        <button class="btn btn-outline" id="langToggleBtn" style="padding: 0.35rem 0.75rem; font-family: var(--font-mono); font-size: 0.8rem;" aria-label="Toggle Language" type="button">🌐 EN / 繁中</button>
+        <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme" aria-label="Toggle Theme" type="button">🌙</button>
+        <button class="btn btn-primary" id="openEmergencyModalBtn" data-i18n="btnEmergency" type="button">🚨 緊急通報 Emergency</button>
       </div>
     </div>
   </header>
 
   <!-- Live Threat Feed Ticker -->
-  <div class="ticker-bar" aria-label="Live Threat Stream">
+  <div class="ticker-bar" role="region" aria-label="Live Threat Stream">
     <div class="ticker-label" data-i18n="tickerLabel">模擬威脅快訊</div>
     <div class="ticker-content" id="threatTickerContent">
       <!-- Dynamically rendered via app.js -->
@@ -102,7 +102,7 @@
                 <span style="font-size: 0.75rem; color: var(--text-secondary);" data-i18n="telemetrySub">範例延遲: 14ms • 範例封包丟失率: 0%</span>
               </div>
             </div>
-            <button class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" id="refreshTelemetryBtn" data-i18n="btnRefresh">重新整理</button>
+            <button class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" id="refreshTelemetryBtn" data-i18n="btnRefresh" type="button">重新整理</button>
           </div>
         </div>
       </div>
@@ -142,22 +142,22 @@
           <!-- Sidebar Navigation -->
           <ul class="tool-nav-list" role="tablist">
             <li>
-              <button class="tool-nav-btn active" data-target="panel-headers" role="tab" id="tab-headers">
+              <button class="tool-nav-btn active" data-target="panel-headers" role="tab" id="tab-headers" type="button">
                 <span>🌐</span> <span data-i18n="tabHeaders">網域 HTTP 安全標頭</span>
               </button>
             </li>
             <li>
-              <button class="tool-nav-btn" data-target="panel-entropy" role="tab" id="tab-entropy">
+              <button class="tool-nav-btn" data-target="panel-entropy" role="tab" id="tab-entropy" type="button">
                 <span>🔑</span> <span data-i18n="tabEntropy">密碼熵值與雜湊計算</span>
               </button>
             </li>
             <li>
-              <button class="tool-nav-btn" data-target="panel-phishing" role="tab" id="tab-phishing">
+              <button class="tool-nav-btn" data-target="panel-phishing" role="tab" id="tab-phishing" type="button">
                 <span>🔍</span> <span data-i18n="tabPhishing">釣魚與偽造連結檢測</span>
               </button>
             </li>
             <li>
-              <button class="tool-nav-btn" data-target="panel-darkweb" role="tab" id="tab-darkweb">
+              <button class="tool-nav-btn" data-target="panel-darkweb" role="tab" id="tab-darkweb" type="button">
                 <span>🕵️</span> <span data-i18n="tabDarkweb">暗網外洩紀錄模擬</span>
               </button>
             </li>
@@ -239,7 +239,7 @@
                 <label class="form-label" data-i18n="p2ShaLabel">前端純 Hash 計算 (SHA-256)</label>
                 <div class="hash-output-box">
                   <span id="sha256HashOutput">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
-                  <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" id="copyHashBtn" data-i18n="p2Copy">複製 Hash</button>
+                  <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" id="copyHashBtn" data-i18n="p2Copy" type="button">複製 Hash</button>
                 </div>
               </div>
             </div>
@@ -309,10 +309,10 @@
             <input type="text" id="cveSearchInput" class="form-input" placeholder="搜尋 CVE 編號、軟體名稱 (如 Linux, Apache, Chrome) 或關鍵字...">
           </div>
           <ul class="filter-pills">
-            <li><button class="filter-btn active" data-severity="ALL" data-i18n="filterAll">全部等級</button></li>
-            <li><button class="filter-btn" data-severity="CRITICAL" data-i18n="filterCrit">嚴重 Critical</button></li>
-            <li><button class="filter-btn" data-severity="HIGH" data-i18n="filterHigh">高危 High</button></li>
-            <li><button class="filter-btn" data-severity="MEDIUM" data-i18n="filterMed">中度 Medium</button></li>
+            <li><button class="filter-btn active" data-severity="ALL" data-i18n="filterAll" type="button">全部等級</button></li>
+            <li><button class="filter-btn" data-severity="CRITICAL" data-i18n="filterCrit" type="button">嚴重 Critical</button></li>
+            <li><button class="filter-btn" data-severity="HIGH" data-i18n="filterHigh" type="button">高危 High</button></li>
+            <li><button class="filter-btn" data-severity="MEDIUM" data-i18n="filterMed" type="button">中度 Medium</button></li>
           </ul>
         </div>
 
@@ -406,7 +406,7 @@
   <!-- Emergency Incident Modal -->
   <div class="modal-overlay" id="emergencyModal">
     <div class="modal-card">
-      <button class="modal-close" id="closeEmergencyModalBtn">&times;</button>
+      <button class="modal-close" id="closeEmergencyModalBtn" type="button">&times;</button>
       <h3 style="color: var(--accent-rose); font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="modalTitle">🚨 宣告重大資安事件 (Emergency)</h3>
       <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="modalSub">示範重大資安事件通報流程；不會聯絡值班指揮官或啟動任何應變程序。</p>
 
