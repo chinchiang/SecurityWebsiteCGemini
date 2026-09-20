@@ -150,6 +150,10 @@ const TRANSLATIONS = {
     filterMed: '中度 Medium',
     playbookTitle: '資安事件應變標準作業劇本 (SOP)',
     playbookDesc: '提供 SOC 監控人員與事件應變小組 (IRT) 在面對資安事件時的標準處置步驟。',
+    // No longer says 「點擊」: the row is a <button>, so Enter and Space work too.
+    // Marked aria-hidden in the template, because aria-expanded already tells a
+    // screen reader the state and repeating it in the name adds nothing.
+    playbookToggle: '展開／收合 ▾',
     auditTitle: '企業資安防禦成熟度評估',
     auditDesc: '回答 5 個關鍵策略問題，快速衡量貴單位的資安成熟度指數與改善建議。',
     footerBrand: '企業級網路安全情報遙測、漏洞診斷與資安事件處置平台。',
@@ -158,6 +162,8 @@ const TRANSLATIONS = {
     footerCol3: '緊急事件求助',
     modalTitle: '🚨 宣告重大資安事件 (Emergency)',
     modalSub: '示範重大資安事件通報流程；不會聯絡值班指揮官或啟動任何應變程序。',
+    // The button's only visible content is a × glyph. Read as an aria-label.
+    modalClose: '關閉對話框',
     modalTypeLabel: '事件類別 Category',
     optRansom: '受勒索軟體感染 / 檔案大規模加密',
     optCloud: '雲端或 Active Directory 未授權侵入',
@@ -293,6 +299,7 @@ const TRANSLATIONS = {
     filterMed: 'Medium',
     playbookTitle: 'Incident Response Playbooks',
     playbookDesc: 'Interactive SOP workflows for SOC analysts during live cyber security incidents.',
+    playbookToggle: 'Expand / collapse ▾',
     auditTitle: 'Security Posture Maturity Calculator',
     auditDesc: 'Answer 5 quick strategic questions to benchmark your organization\'s cybersecurity defense score.',
     footerBrand: 'Enterprise Cyber Threat Telemetry, Vulnerability Diagnostics, and Incident Containment Platform.',
@@ -301,6 +308,7 @@ const TRANSLATIONS = {
     footerCol3: 'Emergency Support',
     modalTitle: '🚨 Declare Emergency Incident',
     modalSub: 'Demonstrates an emergency-reporting workflow; it does not contact an Incident Commander or start any response action.',
+    modalClose: 'Close dialog',
     modalTypeLabel: 'Incident Category',
     optRansom: 'Active Ransomware / File Encryption',
     optCloud: 'Unauthorized Cloud / Active Directory Breach',
@@ -436,6 +444,16 @@ function setLanguage(lang) {
     const key = el.getAttribute('data-i18n');
     if (dictionary[key]) {
       el.innerHTML = dictionary[key];
+    }
+  });
+
+  // An accessible name carried in an attribute has to be translated too, and
+  // there is no text node to swap. Declaring it in the markup rather than
+  // wiring another id here means the next one cannot be forgotten.
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (dictionary[key]) {
+      el.setAttribute('aria-label', dictionary[key]);
     }
   });
 
@@ -2167,19 +2185,34 @@ function renderPlaybooks() {
 
   const data = PLAYBOOK_DATA[currentLang] || PLAYBOOK_DATA['zh-TW'];
 
-  container.innerHTML = data.map((pb, index) => `
-    <div class="playbook-item ${index === 0 ? 'open' : ''}">
-      <div class="playbook-header">
-        <div class="playbook-title-group">
-          <div class="playbook-icon">${pb.icon}</div>
-          <div>
-            <strong style="font-size: 1.1rem; display: block;">${pb.title}</strong>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">${pb.code}</span>
-          </div>
-        </div>
-        <span class="mono" style="color: var(--accent-cyan);">${currentLang === 'zh-TW' ? '點擊展開/收合 ▾' : 'Click to toggle ▾'}</span>
-      </div>
-      <div class="playbook-content">
+  // The header is a <button> inside a heading, not a <div> with a click
+  // listener. As a div it was unreachable by Tab and ignored Enter and Space, so
+  // a keyboard or screen-reader user could not open a single playbook — the
+  // content was there and simply could not be got at. A native button also
+  // means no keydown handler: it synthesises click from both keys itself.
+  //
+  // A button may only contain phrasing content, so the inner divs are spans;
+  // .playbook-title-text restores the block layout the markup relied on.
+  container.innerHTML = data.map((pb, index) => {
+    const open = index === 0;
+    const headerId = `playbook-header-${index}`;
+    const panelId = `playbook-panel-${index}`;
+
+    return `
+    <div class="playbook-item${open ? ' open' : ''}">
+      <h3 class="playbook-heading">
+        <button class="playbook-header" type="button" id="${headerId}" aria-expanded="${open}" aria-controls="${panelId}">
+          <span class="playbook-title-group">
+            <span class="playbook-icon" aria-hidden="true">${pb.icon}</span>
+            <span class="playbook-title-text">
+              <strong style="font-size: 1.1rem; display: block;">${pb.title}</strong>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">${pb.code}</span>
+            </span>
+          </span>
+          <span class="mono" style="color: var(--accent-cyan);" aria-hidden="true">${t('playbookToggle')}</span>
+        </button>
+      </h3>
+      <div class="playbook-content" id="${panelId}" role="region" aria-labelledby="${headerId}">
         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">${pb.desc}</p>
         <div class="checklist">
           ${pb.steps.map(s => `
@@ -2194,7 +2227,8 @@ function renderPlaybooks() {
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   initPlaybookAccordion();
 }
@@ -2202,16 +2236,25 @@ function renderPlaybooks() {
 function initPlaybookAccordion() {
   const items = document.querySelectorAll('.playbook-item');
 
+  /** Keeps aria-expanded in step with the class the CSS actually reads. */
+  function setOpen(item, open) {
+    item.classList.toggle('open', open);
+    const header = item.querySelector('.playbook-header');
+    if (header) header.setAttribute('aria-expanded', String(open));
+  }
+
   items.forEach(item => {
     const header = item.querySelector('.playbook-header');
     if (!header) return;
 
     header.addEventListener('click', () => {
-      const isOpen = item.classList.contains('open');
-      items.forEach(i => i.classList.remove('open'));
-      if (!isOpen) {
-        item.classList.add('open');
-      }
+      const wasOpen = item.classList.contains('open');
+
+      // At most one panel open, which is what the CSS assumes. Closing the rest
+      // has to clear their aria-expanded too, or a screen reader is told three
+      // panels are expanded while two are display:none.
+      items.forEach(other => setOpen(other, false));
+      if (!wasOpen) setOpen(item, true);
     });
   });
 }
@@ -2583,26 +2626,99 @@ function initThreatMapCanvas() {
 }
 
 /* Emergency Modal Logic */
+
+// Everything Tab can land on. tabindex="-1" elements (the dialog card) and
+// disabled controls are filtered out in JavaScript rather than with :not(),
+// which keeps every part of the list to a form that is trivially correct.
+const FOCUSABLE_SELECTOR = 'button, input, select, textarea, a[href], [tabindex]';
+
+/** Tab stops inside `root`, in document order — the order a trap has to wrap. */
+function focusableWithin(root) {
+  return [...root.querySelectorAll(FOCUSABLE_SELECTOR)]
+    .filter(el => !el.disabled && el.getAttribute('tabindex') !== '-1');
+}
+
 function initEmergencyModal() {
   const modal = document.getElementById('emergencyModal');
+  if (!modal) return;
+
   const openBtn = document.getElementById('openEmergencyModalBtn');
   const closeBtn = document.getElementById('closeEmergencyModalBtn');
   const cancelBtn = document.getElementById('cancelEmergencyBtn');
   const form = document.getElementById('emergencyForm');
+  const card = modal.querySelector('.modal-card');
 
-  if (!modal) return;
+  // What had focus before the dialog opened, so it can be handed back. Dropping
+  // focus on close sends it to the top of the document, and a keyboard user has
+  // to tab all the way back down to find where they were.
+  let opener = null;
+
+  const isOpen = () => modal.classList.contains('active');
 
   function openModal() {
+    opener = document.activeElement;
     modal.classList.add('active');
+    document.body.classList.add('modal-open');
+
+    // The card, not the first field: it is what carries role="dialog" and the
+    // aria-labelledby/describedby pair, so focusing it is what makes a screen
+    // reader announce the title and the demo disclosure before the form.
+    if (card) card.focus();
   }
 
   function closeModal() {
+    if (!isOpen()) return;
+
     modal.classList.remove('active');
+    document.body.classList.remove('modal-open');
+
+    if (opener && typeof opener.focus === 'function') opener.focus();
+    opener = null;
   }
 
   if (openBtn) openBtn.addEventListener('click', openModal);
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
   if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  // On the overlay, and only when the overlay is itself the target: a click that
+  // starts inside the card bubbles up here too, and dismissing the dialog
+  // because someone clicked a label would be worse than not closing at all.
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Bound to the document rather than the modal so Escape works even if focus
+  // has ended up outside — which is the state this handler also has to repair.
+  document.addEventListener('keydown', (e) => {
+    if (!isOpen()) return;
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeModal();
+      return;
+    }
+
+    if (e.key !== 'Tab') return;
+
+    // aria-modal is a promise to assistive technology; it does nothing to the
+    // browser's own tab order. Everything behind the overlay is still tabbable,
+    // so the wrap has to be done here or Tab walks straight out of the dialog.
+    const stops = focusableWithin(modal);
+    if (stops.length === 0) return;
+
+    const first = stops[0];
+    const last = stops[stops.length - 1];
+    const here = document.activeElement;
+    const outside = !stops.includes(here);
+
+    if (e.shiftKey && (here === first || outside)) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (here === last || outside)) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
 
   if (form) {
     form.addEventListener('submit', (e) => {

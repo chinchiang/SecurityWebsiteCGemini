@@ -21,7 +21,8 @@ npm test       # node --check app.js + node --test test/*.test.js
 npm run check  # 只做語法檢查
 ```
 
-測試涵蓋釣魚網址解析、XSS 轉義、i18n、儲存、CSP 與 GitHub Actions workflow 的安全規則（SHA 釘選、最小權限、逾時）。
+測試涵蓋釣魚網址解析、XSS 轉義、i18n、儲存、CSP、鍵盤可及性（劇本手風琴與緊急事件對話框的焦點管理），
+以及 GitHub Actions workflow 的安全規則（SHA 釘選、最小權限、逾時）。
 
 `npm test` 的指令逐一列出測試檔，而非使用 glob；`test/static-source.test.js` 有一條守門測試確保這份清單不會漏掉新增的檔案。
 
@@ -43,6 +44,19 @@ npm run check  # 只做語法檢查
 
 `frame-ancestors` 在 `<meta>` 政策中無效，因此刻意未列入。若要防禦 clickjacking，
 需由伺服器送出真正的 `Content-Security-Policy` 或 `X-Frame-Options` 回應標頭。
+
+## 無障礙注意事項
+
+互動元件一律使用原生可聚焦元素：劇本手風琴的標題列是 `<h3>` 內的 `<button>`（而非掛 click
+的 `<div>`），因此 Tab、Enter、Space 與標題導覽皆可用，展開狀態由 `aria-expanded` 對外表達。
+
+緊急事件對話框以 `visibility: hidden` 隱藏，而不只是 `opacity: 0`——後者會讓關閉中的對話框
+仍留在 Tab 順序裡。`visibility` 是 discrete 屬性，過場寫成 `visibility 0s linear 0.3s`
+（`.active` 時延遲歸零），淡出才不會被切掉、開啟時又能立刻聚焦；細節見 `styles.css` 註解。
+對話框開啟時會記住觸發元素、把焦點移入卡片、支援 Esc 與點擊遮罩關閉、在兩端截斷 Tab，
+並鎖住背景捲動；關閉時把焦點交還原觸發元素。
+
+以上行為由 `test/playbooks.test.js` 與 `test/emergency-modal.test.js` 守護。
 
 ## 授權
 
