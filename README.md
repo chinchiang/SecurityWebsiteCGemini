@@ -32,3 +32,7 @@ npm test      # node --check app.js + node --test test/*.test.js
 
 所有使用者輸入在寫入 DOM 前皆經 `escapeHtml()` 轉義；`test/xss.test.js` 守護此行為。
 釣魚範例中的網址（例如 `http://login-paypalls-update.com/…`）僅為示範字串，不會被請求。
+
+## 授權
+
+MIT，詳見 [LICENSE](LICENSE)。
