@@ -46,7 +46,12 @@
   <!-- Sticky Top Navigation -->
   <header class="navbar">
     <div class="container nav-container">
-      <a href="#" class="logo-group" id="nav-logo">
+      <!-- href="#hero" rather than href="#": a bare fragment scrolls to the top,
+           but it announces no destination, appends a stray "#" to the address
+           bar, and adds a history entry for a link that named nowhere. The
+           wordmark now goes to the same place the nav links go — a section. The
+           id it used to carry was referenced from nowhere in app.js. -->
+      <a href="#hero" class="logo-group">
         <div class="logo-icon">🛡️</div>
         <div class="logo-text">Aegis<span>Guard</span></div>
       </a>
@@ -166,24 +171,31 @@
 
         <div class="tools-grid">
           <!-- Sidebar Navigation -->
-          <ul class="tool-nav-list" role="tablist">
+          <!-- role="tab" was already here, but none of what makes it mean
+               anything: no aria-selected (so a screen reader announced four tabs
+               and never said which one was showing), no aria-controls, and four
+               separate tab stops instead of the one a tablist is meant to be.
+               aria-controls replaces the data-target this used to carry: the
+               panel id was written twice per tab, which is one place too many.
+               tabindex here is the initial roving state; app.js moves it. -->
+          <ul class="tool-nav-list" role="tablist" aria-orientation="vertical" aria-label="資安檢測工具" data-i18n-aria-label="tabListLabel">
             <li>
-              <button class="tool-nav-btn active" data-target="panel-headers" role="tab" id="tab-headers" type="button">
+              <button class="tool-nav-btn active" role="tab" id="tab-headers" type="button" aria-controls="panel-headers" aria-selected="true" tabindex="0">
                 <span>🌐</span> <span data-i18n="tabHeaders">網域 HTTP 安全標頭</span>
               </button>
             </li>
             <li>
-              <button class="tool-nav-btn" data-target="panel-entropy" role="tab" id="tab-entropy" type="button">
+              <button class="tool-nav-btn" role="tab" id="tab-entropy" type="button" aria-controls="panel-entropy" aria-selected="false" tabindex="-1">
                 <span>🔑</span> <span data-i18n="tabEntropy">密碼熵值與雜湊計算</span>
               </button>
             </li>
             <li>
-              <button class="tool-nav-btn" data-target="panel-phishing" role="tab" id="tab-phishing" type="button">
+              <button class="tool-nav-btn" role="tab" id="tab-phishing" type="button" aria-controls="panel-phishing" aria-selected="false" tabindex="-1">
                 <span>🔍</span> <span data-i18n="tabPhishing">釣魚與偽造連結檢測</span>
               </button>
             </li>
             <li>
-              <button class="tool-nav-btn" data-target="panel-darkweb" role="tab" id="tab-darkweb" type="button">
+              <button class="tool-nav-btn" role="tab" id="tab-darkweb" type="button" aria-controls="panel-darkweb" aria-selected="false" tabindex="-1">
                 <span>🕵️</span> <span data-i18n="tabDarkweb">暗網外洩紀錄模擬</span>
               </button>
             </li>
@@ -193,7 +205,13 @@
           <div class="tool-content-area">
             
             <!-- Panel 1: Security Headers Scanner -->
-            <div class="tool-panel active card" id="panel-headers" role="tabpanel">
+            <!-- aria-labelledby points back at the tab, which is what names the
+                 panel; without it the panel is an unnamed region. No `hidden`
+                 attribute and no tabindex: `.tool-panel { display: none }`
+                 already keeps the inactive panels out of both the tab order and
+                 the accessibility tree, and every panel starts with a form
+                 control, so there is nothing that needs a container tab stop. -->
+            <div class="tool-panel active card" id="panel-headers" role="tabpanel" aria-labelledby="tab-headers">
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p1Title">HTTP 安全標頭與 SSL 評分示範</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p1Desc">示範 Web 安全標頭評分介面；不會連線或檢測輸入的網站。</p>
 
@@ -226,7 +244,7 @@
             </div>
 
             <!-- Panel 2: Password Entropy Engine & Hash Generator -->
-            <div class="tool-panel card" id="panel-entropy" role="tabpanel">
+            <div class="tool-panel card" id="panel-entropy" role="tabpanel" aria-labelledby="tab-entropy">
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p2Title">密碼強度與密碼學雜湊引擎</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p2Desc">估算密碼在離線暴力破解下可撐多久，並在瀏覽器本機計算 SHA-256 雜湊。</p>
 
@@ -271,7 +289,7 @@
             </div>
 
             <!-- Panel 3: Phishing Link Inspector -->
-            <div class="tool-panel card" id="panel-phishing" role="tabpanel">
+            <div class="tool-panel card" id="panel-phishing" role="tabpanel" aria-labelledby="tab-phishing">
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p3Title">網絡釣魚與同形異義字 URL 檢查器</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p3Desc">在瀏覽器端拆解 URL：punycode 解碼、混用文字系統與 ASCII 相似字、userinfo 誘餌、註冊網域、誘餌字詞與 path／query。</p>
 
@@ -293,7 +311,7 @@
             </div>
 
             <!-- Panel 4: Dark Web Exposure Check Simulator -->
-            <div class="tool-panel card" id="panel-darkweb" role="tabpanel">
+            <div class="tool-panel card" id="panel-darkweb" role="tabpanel" aria-labelledby="tab-darkweb">
               <h3 style="margin-bottom: 0.5rem; font-size: 1.35rem;" data-i18n="p4Title">暗網外洩紀錄模擬查詢</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="p4Desc">以虛構結果示範企業 Email 或網域的外洩查詢介面；不會查詢任何真實資料庫。</p>
 

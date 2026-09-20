@@ -63,6 +63,7 @@ const TRANSLATIONS = {
     legProtected: '受保護節點',
     toolkitTitle: '資安檢測工具箱 Hub',
     toolkitDesc: '提供 DevSecOps、SOC 分析師與系統管理員使用的高效前端純檢測工具。',
+    tabListLabel: '資安檢測工具',
     tabHeaders: '網域 HTTP 安全標頭',
     tabEntropy: '密碼熵值與雜湊計算',
     tabPhishing: '釣魚與偽造連結檢測',
@@ -224,6 +225,7 @@ const TRANSLATIONS = {
     legProtected: 'Protected Node',
     toolkitTitle: 'Cyber Security Toolkit Hub',
     toolkitDesc: 'Instant client-side security auditing tools designed for DevOps, SOC analysts, and system administrators.',
+    tabListLabel: 'Security tools',
     tabHeaders: 'Domain Security Headers',
     tabEntropy: 'Password & Hash Entropy',
     tabPhishing: 'Phishing Link Inspector',
@@ -544,22 +546,73 @@ function initThemeToggle() {
 }
 
 /* Tool Tab Switcher */
+
+/**
+ * The four tool panels, wired up as the tablist their markup already claimed.
+ *
+ * index.html carried role="tablist" and role="tab" from the start and none of
+ * what gives those roles meaning: nothing announced which tab was selected,
+ * nothing tied a tab to the panel it opens, and all four tabs were separate tab
+ * stops, so reaching the panel behind the last one took four presses of Tab. The
+ * roving tabindex below is the part that makes Tab behave the way the role
+ * implies — one stop for the whole list, arrows to move within it.
+ */
 function initToolTabs() {
-  const tabBtns = document.querySelectorAll('.tool-nav-btn');
-  const panels = document.querySelectorAll('.tool-panel');
+  const tabBtns = [...document.querySelectorAll('.tool-nav-btn')];
+  const panels = [...document.querySelectorAll('.tool-panel')];
+  if (!tabBtns.length) return;
 
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const targetId = btn.getAttribute('data-target');
+  /**
+   * Show `btn`'s panel and make `btn` the list's only tab stop.
+   *
+   * @param {boolean} moveFocus true when an arrow key moved the selection, so
+   *   focus has to follow it; false for a click, which already moved focus.
+   */
+  function select(btn, moveFocus) {
+    tabBtns.forEach(b => {
+      const on = b === btn;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.setAttribute('tabindex', on ? '0' : '-1');
+    });
 
-      tabBtns.forEach(b => b.classList.remove('active'));
-      panels.forEach(p => p.classList.remove('active'));
+    panels.forEach(p => p.classList.remove('active'));
+    // aria-controls is now the only place the panel id is written — it replaced a
+    // data-target holding the same string, so the attribute assistive technology
+    // follows and the panel that actually opens can no longer disagree.
+    const targetPanel = document.getElementById(btn.getAttribute('aria-controls'));
+    if (targetPanel) {
+      targetPanel.classList.add('active');
+    }
 
-      btn.classList.add('active');
-      const targetPanel = document.getElementById(targetId);
-      if (targetPanel) {
-        targetPanel.classList.add('active');
-      }
+    if (moveFocus) btn.focus();
+  }
+
+  tabBtns.forEach((btn, index) => {
+    btn.addEventListener('click', () => select(btn, false));
+
+    btn.addEventListener('keydown', e => {
+      const last = tabBtns.length - 1;
+      let next;
+
+      // The list is a column at every breakpoint, which is what its
+      // aria-orientation advertises, so Up/Down is the documented axis.
+      // Left/Right is accepted as well: a key that does nothing gives a keyboard
+      // user no way to tell "wrong key" from "this list is not really a tablist".
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = index === last ? 0 : index + 1;
+      else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next = index === 0 ? last : index - 1;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = last;
+      else return;
+
+      // Otherwise ArrowDown scrolls the page out from under the list and Home
+      // jumps to the top of the document, taking the focused tab off-screen.
+      e.preventDefault();
+
+      // Selection follows focus, which is the right choice here because every
+      // panel is already in the document: showing one costs a class change, so
+      // arrowing through the list is one keystroke per tab instead of two.
+      select(tabBtns[next], true);
     });
   });
 }
@@ -2400,7 +2453,7 @@ function renderAuditQuiz() {
         <h3 style="margin: 0.5rem 0 1rem;">${q.title}</h3>
         <div class="quiz-options">
           ${q.opts.map(o => `
-            <button class="quiz-opt-btn" data-score="${o.score}">
+            <button class="quiz-opt-btn" type="button" data-score="${o.score}">
               <span>${o.text}</span>
               <span class="mono">+${o.score} pts</span>
             </button>
@@ -2422,8 +2475,8 @@ function renderAuditQuiz() {
         <p id="quizTierBadge" style="font-weight: 700; margin-bottom: 1rem; font-size: 1.2rem;"></p>
         <p id="quizRecommendation" style="color: var(--text-secondary); max-width: 540px; margin: 0 auto 1.5rem;"></p>
         <div class="demo-note demo-note-inline" style="max-width: 560px; margin: 0 auto 1.5rem; text-align: left;">${escapeHtml(t('noteAudit'))}</div>
-        <button class="btn btn-primary" id="printReportBtn">${isZh ? '列印 / 下載資安成熟度評估報告 📄' : 'Download / Print Security Assessment Report 📄'}</button>
-        <button class="btn btn-secondary" id="restartQuizBtn" style="margin-left: 0.5rem;">${isZh ? '重新評估' : 'Restart Audit'}</button>
+        <button class="btn btn-primary" type="button" id="printReportBtn">${isZh ? '列印 / 下載資安成熟度評估報告 📄' : 'Download / Print Security Assessment Report 📄'}</button>
+        <button class="btn btn-secondary" type="button" id="restartQuizBtn" style="margin-left: 0.5rem;">${isZh ? '重新評估' : 'Restart Audit'}</button>
       </div>
     </div>
   `;
