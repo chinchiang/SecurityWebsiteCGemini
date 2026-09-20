@@ -28,7 +28,7 @@ const EXPOSED = [
   'initCVEExplorer', 'initPasswordEntropyEngine', 'initAuditQuiz', 'initPlaybookAccordion',
   'initHeaderScanner', 'initPhishingInspector', 'initDarkWebChecker',
   'initLanguageToggle', 'initThemeToggle', 'initEmergencyModal', 'initThreatMapCanvas',
-  'initToolTabs',
+  'initToolTabs', 'initCounters',
   'focusableWithin', 'FOCUSABLE_SELECTOR',
   'estimatePasswordStrength', 'formatCrackTime', 'crackTimeSeconds',
   'strengthTier', 'renderPasswordStrength', 'ATTACK_RATES', 'COMMON_PASSWORDS',

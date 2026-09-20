@@ -112,8 +112,13 @@
               <div class="stat-value" id="statScannedDomains">24,819</div>
               <div class="stat-label" data-i18n="statScanned">模擬網域計數</div>
             </div>
+            <!-- The static value is the one app.js writes here on load, so a
+                 visitor whose JavaScript never runs is told the same number.
+                 It was 8,410, next to an explorer holding five entries; the
+                 label already said "sample", and now the count agrees with it.
+                 cve.test.js keeps this in step with CVE_DATABASE.length. -->
             <div class="stat-item">
-              <div class="stat-value" id="statMonitoredCVEs">8,410</div>
+              <div class="stat-value" id="statMonitoredCVEs">5</div>
               <div class="stat-label" data-i18n="statCVEs">範例 CVE 計數</div>
             </div>
             <div class="stat-item">
