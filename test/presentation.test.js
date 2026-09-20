@@ -200,15 +200,33 @@ test('no breakpoint hides the navigation outright', () => {
     'hiding the nav removes the only route to these sections; let it wrap instead');
 });
 
-test('every navigation link points at a section that exists', () => {
+test('every in-page link points at a section that exists', () => {
+  // Page-wide rather than scoped to <nav>, because the same defect kept turning
+  // up outside it: two footer links (fixed in b10ef97) and the header wordmark.
+  const ids = new Set([...HTML.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]));
+  const targets = [...HTML.matchAll(/href="#([^"]+)"/g)].map(m => m[1]);
+
+  // A floor, not a count: the nav's five, the hero's two and the footer's four.
+  // Without it an extraction that stops matching reads as a page of valid links.
+  assert.ok(targets.length >= 11, `only ${targets.length} in-page links were examined`);
+  assert.deepEqual([...new Set(targets.filter(t => !ids.has(t)))], [],
+    'a link to a fragment that is in no id on the page');
+
+  // And the nav in particular still carries a route to every section, which is
+  // the reason the 640px breakpoint was rewritten rather than left hiding it.
   const nav = /<nav>([\s\S]*?)<\/nav>/.exec(HTML);
   assert.ok(nav, '<nav> exists');
+  assert.ok([...nav[1].matchAll(/href="#/g)].length >= 5, 'the five section links');
+});
 
-  const targets = [...nav[1].matchAll(/href="#([^"]+)"/g)].map(m => m[1]);
-  assert.ok(targets.length >= 5, `expected the five section links, found ${targets.length}`);
-
-  const ids = new Set([...HTML.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]));
-  assert.deepEqual(targets.filter(t => !ids.has(t)), [], 'nav links to no such section');
+test('no link on the page names nowhere', () => {
+  // `href="#"` is the shape a control takes when it was drawn before it had
+  // anywhere to go: it scrolls to the top, says nothing about where that is,
+  // leaves a stray "#" in the address bar and adds a history entry for it. The
+  // footer had two of them around a fake hotline; the header wordmark had the
+  // last one, and now points at #hero the way the nav links point at sections.
+  const bare = [...HTML.matchAll(/<a\b[^>]*href="#"[^>]*>/g)].map(m => m[0]);
+  assert.deepEqual(bare, [], 'give the link a destination, or do not make it a link');
 });
 
 /* ---- the footer ---- */

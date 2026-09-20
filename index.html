@@ -46,7 +46,12 @@
   <!-- Sticky Top Navigation -->
   <header class="navbar">
     <div class="container nav-container">
-      <a href="#" class="logo-group" id="nav-logo">
+      <!-- href="#hero" rather than href="#": a bare fragment scrolls to the top,
+           but it announces no destination, appends a stray "#" to the address
+           bar, and adds a history entry for a link that named nowhere. The
+           wordmark now goes to the same place the nav links go — a section. The
+           id it used to carry was referenced from nowhere in app.js. -->
+      <a href="#hero" class="logo-group">
         <div class="logo-icon">🛡️</div>
         <div class="logo-text">Aegis<span>Guard</span></div>
       </a>
