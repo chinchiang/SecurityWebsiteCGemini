@@ -25,7 +25,7 @@ const EXPOSED = [
   'renderAuditQuiz', 'renderPlaybooks', 'renderCVEs', 'showQuizResult',
   'quizCurrentStep', 'quizTotalScore',
   'cveActiveSeverity', 'cveSearchQuery',
-  'initCVEExplorer', 'initPasswordEntropyEngine', 'initAuditQuiz',
+  'initCVEExplorer', 'initPasswordEntropyEngine', 'initAuditQuiz', 'initPlaybookAccordion',
   'initHeaderScanner', 'initPhishingInspector', 'initDarkWebChecker',
   'initLanguageToggle', 'initThemeToggle',
   'estimatePasswordStrength', 'formatCrackTime', 'crackTimeSeconds',

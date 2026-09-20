@@ -14,6 +14,21 @@
  *    about rendered markup assert on the innerHTML string instead.
  */
 
+/**
+ * Walks parentNode so a scoped querySelector really is scoped.
+ *
+ * Without this, `item.querySelector('.playbook-header')` returned the first
+ * header registered anywhere, so every accordion item appeared to share one
+ * header and a test could not tell "opened the item I clicked" from "opened the
+ * first item". Elements become descendants through append/appendChild.
+ */
+function isDescendantOf(node, ancestor) {
+  for (let parent = node && node.parentNode; parent; parent = parent.parentNode) {
+    if (parent === ancestor) return true;
+  }
+  return false;
+}
+
 function makeClassList() {
   const set = new Set();
   return {
@@ -159,7 +174,10 @@ function createDom(options = {}) {
       if (sel === '[data-i18n]') return [...i18nElements];
 
       const cls = /^\.([A-Za-z][\w-]*)$/.exec(sel);
-      if (cls) return [...(byClass.get(cls[1]) || [])];
+      if (cls) {
+        const all = [...(byClass.get(cls[1]) || [])];
+        return scope ? all.filter(el => isDescendantOf(el, scope)) : all;
+      }
 
       throw new Error(`dom-stub: unsupported selector ${JSON.stringify(sel)} — teach the stub instead of loosening it`);
     }

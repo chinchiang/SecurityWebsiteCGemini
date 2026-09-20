@@ -150,6 +150,10 @@ const TRANSLATIONS = {
     filterMed: '中度 Medium',
     playbookTitle: '資安事件應變標準作業劇本 (SOP)',
     playbookDesc: '提供 SOC 監控人員與事件應變小組 (IRT) 在面對資安事件時的標準處置步驟。',
+    // No longer says 「點擊」: the row is a <button>, so Enter and Space work too.
+    // Marked aria-hidden in the template, because aria-expanded already tells a
+    // screen reader the state and repeating it in the name adds nothing.
+    playbookToggle: '展開／收合 ▾',
     auditTitle: '企業資安防禦成熟度評估',
     auditDesc: '回答 5 個關鍵策略問題，快速衡量貴單位的資安成熟度指數與改善建議。',
     footerBrand: '企業級網路安全情報遙測、漏洞診斷與資安事件處置平台。',
@@ -293,6 +297,7 @@ const TRANSLATIONS = {
     filterMed: 'Medium',
     playbookTitle: 'Incident Response Playbooks',
     playbookDesc: 'Interactive SOP workflows for SOC analysts during live cyber security incidents.',
+    playbookToggle: 'Expand / collapse ▾',
     auditTitle: 'Security Posture Maturity Calculator',
     auditDesc: 'Answer 5 quick strategic questions to benchmark your organization\'s cybersecurity defense score.',
     footerBrand: 'Enterprise Cyber Threat Telemetry, Vulnerability Diagnostics, and Incident Containment Platform.',
@@ -2167,19 +2172,34 @@ function renderPlaybooks() {
 
   const data = PLAYBOOK_DATA[currentLang] || PLAYBOOK_DATA['zh-TW'];
 
-  container.innerHTML = data.map((pb, index) => `
-    <div class="playbook-item ${index === 0 ? 'open' : ''}">
-      <div class="playbook-header">
-        <div class="playbook-title-group">
-          <div class="playbook-icon">${pb.icon}</div>
-          <div>
-            <strong style="font-size: 1.1rem; display: block;">${pb.title}</strong>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">${pb.code}</span>
-          </div>
-        </div>
-        <span class="mono" style="color: var(--accent-cyan);">${currentLang === 'zh-TW' ? '點擊展開/收合 ▾' : 'Click to toggle ▾'}</span>
-      </div>
-      <div class="playbook-content">
+  // The header is a <button> inside a heading, not a <div> with a click
+  // listener. As a div it was unreachable by Tab and ignored Enter and Space, so
+  // a keyboard or screen-reader user could not open a single playbook — the
+  // content was there and simply could not be got at. A native button also
+  // means no keydown handler: it synthesises click from both keys itself.
+  //
+  // A button may only contain phrasing content, so the inner divs are spans;
+  // .playbook-title-text restores the block layout the markup relied on.
+  container.innerHTML = data.map((pb, index) => {
+    const open = index === 0;
+    const headerId = `playbook-header-${index}`;
+    const panelId = `playbook-panel-${index}`;
+
+    return `
+    <div class="playbook-item${open ? ' open' : ''}">
+      <h3 class="playbook-heading">
+        <button class="playbook-header" type="button" id="${headerId}" aria-expanded="${open}" aria-controls="${panelId}">
+          <span class="playbook-title-group">
+            <span class="playbook-icon" aria-hidden="true">${pb.icon}</span>
+            <span class="playbook-title-text">
+              <strong style="font-size: 1.1rem; display: block;">${pb.title}</strong>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">${pb.code}</span>
+            </span>
+          </span>
+          <span class="mono" style="color: var(--accent-cyan);" aria-hidden="true">${t('playbookToggle')}</span>
+        </button>
+      </h3>
+      <div class="playbook-content" id="${panelId}" role="region" aria-labelledby="${headerId}">
         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">${pb.desc}</p>
         <div class="checklist">
           ${pb.steps.map(s => `
@@ -2194,7 +2214,8 @@ function renderPlaybooks() {
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   initPlaybookAccordion();
 }
@@ -2202,16 +2223,25 @@ function renderPlaybooks() {
 function initPlaybookAccordion() {
   const items = document.querySelectorAll('.playbook-item');
 
+  /** Keeps aria-expanded in step with the class the CSS actually reads. */
+  function setOpen(item, open) {
+    item.classList.toggle('open', open);
+    const header = item.querySelector('.playbook-header');
+    if (header) header.setAttribute('aria-expanded', String(open));
+  }
+
   items.forEach(item => {
     const header = item.querySelector('.playbook-header');
     if (!header) return;
 
     header.addEventListener('click', () => {
-      const isOpen = item.classList.contains('open');
-      items.forEach(i => i.classList.remove('open'));
-      if (!isOpen) {
-        item.classList.add('open');
-      }
+      const wasOpen = item.classList.contains('open');
+
+      // At most one panel open, which is what the CSS assumes. Closing the rest
+      // has to clear their aria-expanded too, or a screen reader is told three
+      // panels are expanded while two are display:none.
+      items.forEach(other => setOpen(other, false));
+      if (!wasOpen) setOpen(item, true);
     });
   });
 }

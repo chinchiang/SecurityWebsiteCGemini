@@ -886,20 +886,50 @@ h1, h2, h3, h4, h5, h6 {
   overflow: hidden;
 }
 
+/* Wrapper only. The heading exists so the accordion is reachable by heading
+   navigation; it must not bring h3's own margin and type scale with it. */
+.playbook-heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+/* Now a <button>. Everything from `border` down is the reset that keeps it
+   looking like the row it replaced — a button otherwise arrives with a border,
+   its own font, centred text and a shrink-to-fit width. */
 .playbook-header {
+  width: 100%;
   padding: 1.25rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   cursor: pointer;
   background: var(--bg-surface);
   user-select: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+/* :focus-visible rather than :focus, so a mouse click does not leave a ring
+   behind. Inset, because .playbook-item clips its children with overflow. */
+.playbook-header:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: -2px;
 }
 
 .playbook-title-group {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+/* A span, because a button may not contain a div. */
+.playbook-title-text {
+  display: block;
 }
 
 .playbook-icon {
