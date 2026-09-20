@@ -23,8 +23,56 @@ function stripJsComments(source) {
  * Same idea for markup: the comments in index.html quote the attributes they
  * explain (style="", data: URIs), so a guard reading the raw file can be
  * satisfied by prose long after the thing it describes is gone.
+ *
+ * Scanning with indexOf rather than a single `replace(/<!--[\s\S]*?-->/g, '')`,
+ * which CodeQL flagged as an incomplete multi-character sanitisation and was
+ * right to: a non-greedy pass leaves an unterminated `<!--` in place, which is
+ * the one case that would hand the guards prose to read. An unterminated
+ * comment swallows the rest of the document in a browser, so it does here too.
  */
-const MARKUP = HTML.replace(/<!--[\s\S]*?-->/g, '');
+function stripHtmlComments(source) {
+  let out = '';
+  let rest = source;
+
+  for (;;) {
+    const start = rest.indexOf('<!--');
+    if (start === -1) return out + rest;
+
+    out += rest.slice(0, start);
+
+    const end = rest.indexOf('-->', start + 4);
+    if (end === -1) return out;
+
+    rest = rest.slice(end + 3);
+  }
+}
+
+const MARKUP = stripHtmlComments(HTML);
+
+test('stripHtmlComments leaves no comment text for a guard to read', () => {
+  // Two guards below decide what index.html "still contains" from this output,
+  // so a stripper that lets prose through quietly weakens both of them.
+  const cases = [
+    ['<a><!-- style="x" --><b>', '<a><b>', 'a comment between elements'],
+    ['<a><!-- p --><!-- q --><b>', '<a><b>', 'adjacent comments'],
+    ['<a><!-- outer <!-- inner --><b>', '<a><b>', 'a second <!-- inside a comment'],
+    ['<a><!-- one --> <!-- two', '<a> ', 'an unterminated comment ends the document'],
+    // HTML's abrupt-closing rule would end this comment at the `>`. Reading it
+    // as unterminated strips more than a browser would, never less, which is the
+    // safe direction for something a guard then searches.
+    ['<a><!--><b>', '<a>', 'an abrupt <!-->'],
+    ['<a><b>', '<a><b>', 'markup with no comment at all']
+  ];
+
+  for (const [input, expected, why] of cases) {
+    assert.equal(stripHtmlComments(input), expected, why);
+  }
+
+  // The property that actually matters, stated directly.
+  for (const [input, , why] of cases) {
+    assert.doesNotMatch(stripHtmlComments(input), /<!--/, `residual <!-- after ${why}`);
+  }
+});
 
 test('no inline event handler attributes anywhere', () => {
   // Every one of these would force script-src 'unsafe-inline' in a CSP.
