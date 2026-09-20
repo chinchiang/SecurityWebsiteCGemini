@@ -17,6 +17,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const { loadApp } = require('./helpers/load-app.js');
+const { stripHtmlComments } = require('./helpers/markup.js');
 
 const ROOT = path.join(__dirname, '..');
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -186,7 +187,7 @@ test('the map survives a browser with no matchMedia', () => {
 // Comments stripped, because the markup explains itself: the comment next to the
 // footer quotes the `<a href="#">` it replaced, and the dead-link guard below
 // would otherwise find its own explanation and report it as the defect.
-const HTML = read('index.html').replace(/<!--[\s\S]*?-->/g, '');
+const HTML = stripHtmlComments(read('index.html'));
 
 test('no breakpoint hides the navigation outright', () => {
   // The original: `.nav-links { display: none }` below 640px, with no disclosure
