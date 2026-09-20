@@ -38,6 +38,47 @@
   -->
   <title>AegisGuard | 資安工具示範站（模擬資料）Security Toolkit Demo</title>
   <meta name="description" content="A front-end demo of security tooling UI: HTTP header grading, password strength estimation, a phishing URL heuristic, a CVE browser and incident playbooks. All data is simulated and no scanning, lookup or monitoring is performed. 純前端示範介面，所有資料均為模擬，不執行任何真實掃描或查詢。">
+  <!--
+    The same two strings again, for the unfurl.
+
+    A chat client, a forum and a social post look for these first. With none of
+    them present each client fell back to whatever it prefers: some do read the
+    <title> and description above, some pick their own text, and the image is
+    whichever one the scraper decides on — for this page, a stock shot of what
+    reads as a live operations centre. Saying it here is the only way the
+    disclosure travels with the link, since no client renders the in-page banner.
+
+    og:title and og:description are deliberately identical to the title and
+    description above rather than a second wording: one sentence to keep honest,
+    not two, and static-source.test.js asserts the copies stay in step.
+
+    The URLs have to be absolute — Open Graph has no relative form — so they name
+    the GitHub Pages site this repo publishes:
+    https://chinchiang.github.io/SecurityWebsiteCGemini/. A fork that publishes
+    elsewhere has to change these two lines; nothing else in the page is
+    origin-aware.
+
+    Twitter reads the og:* tags for everything except the card format, so
+    twitter:card is the only twitter:* tag here. Note the attribute names differ:
+    Open Graph is property=, Twitter is name=, and a swapped one is ignored in
+    silence.
+  -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AegisGuard（示範站 Demo）">
+  <meta property="og:title" content="AegisGuard | 資安工具示範站（模擬資料）Security Toolkit Demo">
+  <meta property="og:description" content="A front-end demo of security tooling UI: HTTP header grading, password strength estimation, a phishing URL heuristic, a CVE browser and incident playbooks. All data is simulated and no scanning, lookup or monitoring is performed. 純前端示範介面，所有資料均為模擬，不執行任何真實掃描或查詢。">
+  <meta property="og:url" content="https://chinchiang.github.io/SecurityWebsiteCGemini/">
+  <meta property="og:image" content="https://chinchiang.github.io/SecurityWebsiteCGemini/assets/security_hero.jpg">
+  <!-- The real pixel size of that file; a client that trusts a wrong one lays
+       out a gap and then reflows, or crops the card. -->
+  <meta property="og:image:width" content="1376">
+  <meta property="og:image:height" content="768">
+  <meta property="og:image:alt" content="模擬資安戰情室介面示意圖 Illustration of a simulated security operations interface">
+  <!-- The page ships both languages at this one URL, switched by the toggle in
+       the header, so both are declared rather than only the document's lang. -->
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
 </head>
