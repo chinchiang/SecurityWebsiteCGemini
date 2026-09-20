@@ -1257,3 +1257,46 @@ body.modal-open {
   .footer-grid { grid-template-columns: 1fr; }
   .hero-stats { grid-template-columns: 1fr; }
 }
+
+/* Motion preferences.
+   Everything below is motion the visitor did not ask for: two animations that
+   never stop, and a handful of transforms on appearance. For a visitor with a
+   vestibular disorder the ticker in particular is the worst kind — a constant
+   horizontal drift at the top of the viewport, on every page view, with no
+   control to stop it. */
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot { animation: none; }
+
+  /* `animation: none` on its own would park the strip at translateX(0) inside an
+     overflow: hidden bar, leaving the later headlines off-screen with no way to
+     scroll to them — the motion would be gone and so would the content. Wrapping
+     turns the ticker into a static list of the same items instead. */
+  .ticker-bar {
+    overflow: visible;
+    white-space: normal;
+    align-items: flex-start;
+    padding-right: 1.5rem;
+  }
+
+  .ticker-content {
+    animation: none;
+    display: block;
+    /* A flex item's min-width is `auto`, so the strip refuses to shrink below
+       its single-line min-content width: the first line runs off the side of the
+       viewport and only wraps out there, losing a few characters to
+       `body { overflow-x: hidden }`. Zero lets it wrap where the bar ends. */
+    min-width: 0;
+  }
+
+  .tool-panel.active { animation: none; }
+  .toast { animation: none; }
+
+  /* The dialog still has to become unfocusable the moment it closes, so this
+     drops the delay along with the fade rather than leaving it stranded. */
+  .modal-overlay,
+  .modal-overlay.active { transition: none; }
+  .modal-card { transition: none; transform: none; }
+
+  /* The colour change carries the meaning here; the width sweep is decoration. */
+  .entropy-bar { transition: background-color 0.4s ease; }
+}

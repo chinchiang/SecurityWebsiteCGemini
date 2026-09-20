@@ -27,7 +27,7 @@ const EXPOSED = [
   'cveActiveSeverity', 'cveSearchQuery',
   'initCVEExplorer', 'initPasswordEntropyEngine', 'initAuditQuiz', 'initPlaybookAccordion',
   'initHeaderScanner', 'initPhishingInspector', 'initDarkWebChecker',
-  'initLanguageToggle', 'initThemeToggle', 'initEmergencyModal',
+  'initLanguageToggle', 'initThemeToggle', 'initEmergencyModal', 'initThreatMapCanvas',
   'focusableWithin', 'FOCUSABLE_SELECTOR',
   'estimatePasswordStrength', 'formatCrackTime', 'crackTimeSeconds',
   'strengthTier', 'renderPasswordStrength', 'ATTACK_RATES', 'COMMON_PASSWORDS',
@@ -96,20 +96,39 @@ function loadApp(options = {}) {
     options.crypto === 'missing' ? { getRandomValues: globalThis.crypto.getRandomValues } :
     globalThis.crypto;
 
+  // Frames are counted, not run: invoking the callback immediately would recurse
+  // forever, because the last thing an animation loop does is ask for the next
+  // frame. The count is what tells "the animation was started" from "one still
+  // frame was painted", which is the whole of the reduced-motion contract, and
+  // step() runs exactly one frame for the tests that need the loop's own output.
+  const frames = {
+    requested: 0,
+    cancelled: [],
+    pending: null,
+    step() {
+      const fn = frames.pending;
+      if (!fn) throw new Error('load-app: no animation frame is pending');
+      frames.pending = null;
+      fn(0);
+    }
+  };
+  const requestAnimationFrame = (fn) => { frames.pending = fn; return ++frames.requested; };
+  const cancelAnimationFrame = (id) => { frames.cancelled.push(id); frames.pending = null; };
+
   const app = factory(
     dom.document,
     dom.window,
     dom.localStorage,
     dom.navigator,
-    () => 0,          // requestAnimationFrame: never paint
-    () => {},         // cancelAnimationFrame
+    requestAnimationFrame,
+    cancelAnimationFrame,
     () => 0,          // setInterval: never tick
     setTimeoutStub,
     cryptoStub,
     globalThis.TextEncoder
   );
 
-  return { app, dom, source, flushTimers, pendingTimers: () => queue.length };
+  return { app, dom, source, flushTimers, pendingTimers: () => queue.length, frames };
 }
 
 module.exports = { loadApp, readSource, APP_PATH, EXPOSED };

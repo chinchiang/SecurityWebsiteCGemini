@@ -2506,7 +2506,6 @@ function initThreatMapCanvas() {
     canvas.height = canvas.parentElement.clientHeight;
   }
   resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
 
   const nodes = [
     { name: 'Tokyo', x: 0.82, y: 0.38, color: '#00e5ff' },
@@ -2538,7 +2537,14 @@ function initThreatMapCanvas() {
 
   for (let i = 0; i < 8; i++) spawnPacket();
 
-  function animate() {
+  /**
+   * One frame of the map.
+   *
+   * @param {boolean} withPackets draw the packets in flight. False for the
+   *   reduced-motion render: the packets are the only thing that moves, and a
+   *   still frame of them would be eight dots parked on top of the nodes.
+   */
+  function draw(withPackets) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
@@ -2568,15 +2574,8 @@ function initThreatMapCanvas() {
       }
     }
 
-    for (let i = packets.length - 1; i >= 0; i--) {
+    for (let i = 0; withPackets && i < packets.length; i++) {
       const p = packets[i];
-      p.progress += p.speed;
-
-      if (p.progress >= 1) {
-        packets.splice(i, 1);
-        spawnPacket();
-        continue;
-      }
 
       const x1 = p.src.x * canvas.width;
       const y1 = p.src.y * canvas.height;
@@ -2618,11 +2617,68 @@ function initThreatMapCanvas() {
       ctx.font = '10px JetBrains Mono';
       ctx.fillText(n.name, nx + 12, ny + 3);
     });
-
-    requestAnimationFrame(animate);
   }
 
-  animate();
+  /** Move every packet along, retiring and respawning the ones that arrived. */
+  function advancePackets() {
+    // Backwards, because a retired packet is spliced out mid-loop. spawnPacket()
+    // pushes onto the end, which a descending index never revisits.
+    for (let i = packets.length - 1; i >= 0; i--) {
+      const p = packets[i];
+      p.progress += p.speed;
+
+      if (p.progress >= 1) {
+        packets.splice(i, 1);
+        spawnPacket();
+      }
+    }
+  }
+
+  // matchMedia is missing in a few embedded webviews, and this runs on load.
+  const reduceMotion = typeof window.matchMedia === 'function'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : null;
+
+  let frameId = 0;
+
+  function animate() {
+    advancePackets();
+    draw(true);
+    frameId = requestAnimationFrame(animate);
+  }
+
+  /**
+   * Start or stop the loop to match the visitor's motion preference.
+   *
+   * Re-run on change rather than sampled once, so turning the preference on
+   * mid-session actually stops the animation instead of leaving it running for
+   * the rest of the visit — and turning it off starts the map moving again.
+   */
+  function applyMotionPreference() {
+    if (reduceMotion && reduceMotion.matches) {
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = 0;
+      draw(false);
+      return;
+    }
+
+    if (!frameId) frameId = requestAnimationFrame(animate);
+  }
+
+  // addEventListener on a MediaQueryList is the modern form; Safari before 14
+  // only had addListener, and this is a progressive enhancement either way.
+  if (reduceMotion && typeof reduceMotion.addEventListener === 'function') {
+    reduceMotion.addEventListener('change', applyMotionPreference);
+  }
+
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    // Resizing a canvas clears it. While the loop is stopped nothing would ever
+    // paint it again, so the map would silently go blank.
+    if (!frameId) draw(false);
+  });
+
+  applyMotionPreference();
 }
 
 /* Emergency Modal Logic */

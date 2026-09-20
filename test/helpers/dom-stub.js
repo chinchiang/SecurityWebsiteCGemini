@@ -308,12 +308,49 @@ function createDom(options = {}) {
   };
   document.body = createElement(env, 'body');
 
+  // MediaQueryList stubs, one per query string, so a test can both set the
+  // initial answer and fire a `change` the way the OS setting does.
+  const mediaQueries = new Map();
+  const mediaMatches = options.media || {};
+
+  function matchMedia(query) {
+    if (!mediaQueries.has(query)) {
+      const listeners = [];
+      mediaQueries.set(query, {
+        media: query,
+        matches: Boolean(mediaMatches[query]),
+        addEventListener(type, fn) { if (type === 'change') listeners.push(fn); },
+        removeEventListener(type, fn) {
+          const i = listeners.indexOf(fn);
+          if (type === 'change' && i !== -1) listeners.splice(i, 1);
+        },
+        /** Flip the answer and tell whoever is listening, as the OS would. */
+        set(matches) {
+          this.matches = Boolean(matches);
+          listeners.forEach(fn => fn({ matches: this.matches, media: query }));
+        }
+      });
+    }
+    return mediaQueries.get(query);
+  }
+
+  const windowListeners = [];
+
   const window = {
     print() { window._printed = true; },
     _printed: false,
-    matchMedia: () => ({ matches: false, addEventListener() {} }),
+    matchMedia: options.matchMedia === 'missing' ? undefined : matchMedia,
     scrollTo() {},
-    addEventListener() {},
+    addEventListener(type, fn) { windowListeners.push({ type, fn }); },
+    removeEventListener(type, fn) {
+      const i = windowListeners.findIndex(l => l.type === type && l.fn === fn);
+      if (i !== -1) windowListeners.splice(i, 1);
+    },
+    dispatch(type, event = {}) {
+      const ev = { type, target: window, preventDefault() {}, ...event };
+      windowListeners.filter(l => l.type === type).forEach(l => l.fn(ev));
+      return ev;
+    },
     location: { href: 'https://example.test/', search: '' }
   };
 
@@ -353,6 +390,37 @@ function createDom(options = {}) {
   return {
     document, window, localStorage, navigator,
     clipboardWrites,
+    /** The MediaQueryList app.js asked for, so a test can flip it mid-session. */
+    mediaQuery: query => mediaQueries.get(query),
+    /**
+     * A <canvas> whose 2D context records what was drawn on it.
+     *
+     * The stub has no rendering, so "the map was painted" can only be asserted
+     * on the calls themselves — which is enough to tell a still frame from a
+     * blank one, and a frame with packets from one without.
+     */
+    addCanvas(id, size = { width: 800, height: 400 }) {
+      const calls = [];
+      const ctx = new Proxy({}, {
+        get: (_, name) => {
+          if (name === 'calls') return calls;
+          // Assignments to fillStyle/font/lineWidth land in `set` below; every
+          // read here is a drawing method.
+          return (...args) => { calls.push({ name, args }); };
+        },
+        set: (_, name, value) => { calls.push({ name, args: [value] }); return true; }
+      });
+
+      const canvas = createElement(env, 'canvas');
+      canvas.width = 0;
+      canvas.height = 0;
+      canvas.parentElement = { clientWidth: size.width, clientHeight: size.height };
+      canvas.getContext = () => ctx;
+      canvas.ctxCalls = calls;
+      byId.set(id, canvas);
+      canvas.id = id;
+      return canvas;
+    },
     /** The values that actually reached storage, for asserting persistence. */
     storedKeys: () => [...store.keys()],
     stored: k => (store.has(k) ? store.get(k) : null),
