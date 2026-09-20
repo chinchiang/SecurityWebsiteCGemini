@@ -1199,6 +1199,13 @@ body.modal-open {
   transition: var(--transition-fast);
 }
 
+/* The emergency column is plain text, not links — there is nothing to link to.
+   It still has to sit in the same type scale as the columns beside it. */
+.footer-links span {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
 .footer-links a:hover {
   color: var(--accent-cyan);
 }

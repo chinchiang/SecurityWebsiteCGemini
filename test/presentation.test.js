@@ -183,7 +183,10 @@ test('the map survives a browser with no matchMedia', () => {
 
 /* ---- navigation ---- */
 
-const HTML = read('index.html');
+// Comments stripped, because the markup explains itself: the comment next to the
+// footer quotes the `<a href="#">` it replaced, and the dead-link guard below
+// would otherwise find its own explanation and report it as the defect.
+const HTML = read('index.html').replace(/<!--[\s\S]*?-->/g, '');
 
 test('no breakpoint hides the navigation outright', () => {
   // The original: `.nav-links { display: none }` below 640px, with no disclosure
@@ -205,4 +208,86 @@ test('every navigation link points at a section that exists', () => {
 
   const ids = new Set([...HTML.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]));
   assert.deepEqual(targets.filter(t => !ids.has(t)), [], 'nav links to no such section');
+});
+
+/* ---- the footer ---- */
+
+// The wordmark is a brand, not translatable prose, and is excluded from the
+// i18n sweep below rather than being given a translation key.
+const FOOTER = /<footer[\s\S]*?<\/footer>/.exec(HTML)[0]
+  .replace(/<div class="logo-group">[\s\S]*?<\/div>\s*<\/div>/g, '');
+
+test('the footer contains no dead links', () => {
+  // An href="#" that nothing is bound to is a control that does nothing when
+  // used. Here it also lent a fake hotline and PGP key the look of real ones.
+  const dead = [...FOOTER.matchAll(/<a\b[^>]*href="#"[^>]*>/g)].map(m => m[0]);
+  assert.deepEqual(dead, [], 'if there is nothing to link to, do not use a link');
+});
+
+test('every line of footer prose is translated', () => {
+  // The copyright and the build string used to be hardcoded Chinese, and the
+  // three advisory links hardcoded Chinese labels: a visitor who switched to
+  // English got a footer that did not switch with the rest of the page.
+  const untranslated = [];
+  let examined = 0;
+
+  // The `<` that ends the text is a lookahead, not part of the match: consuming
+  // it would skip the element that starts there, and back-to-back openings are
+  // exactly the shape of this footer. Caught by mutating away one key and
+  // watching the guard stay green.
+  for (const [, attrs, text] of FOOTER.matchAll(/<\w+([^>]*)>([^<]+)(?=<)/g)) {
+    if (!/[A-Za-z一-鿿]/.test(text.trim())) continue;   // emoji, symbols
+    examined++;
+    if (!/\bdata-i18n=/.test(attrs)) untranslated.push(text.trim());
+  }
+
+  // Without this the loop is vacuous the moment the extraction stops matching,
+  // and a footer of untranslated prose reads as a pass.
+  assert.ok(examined > 10, `only ${examined} footer strings were examined`);
+  assert.deepEqual(untranslated, [], 'footer text with no data-i18n attribute');
+});
+
+test('the footer says the emergency contacts are not real', () => {
+  const { app } = loadApp();
+
+  for (const lang of ['zh-TW', 'en']) {
+    const dict = app.TRANSLATIONS[lang];
+    for (const key of ['footerHotline', 'footerPGP']) {
+      assert.match(dict[key], /placeholder|示範|非真實|no such/i,
+        `${key} in ${lang} presents a fictional contact as a real one`);
+    }
+    // And points at the channel that does exist, the way the modal's own note
+    // already does — saying "this is fake" is only half an answer mid-incident.
+    assert.match(dict.footerRealChannel, /organisation|organization|貴組織/i,
+      `footerRealChannel in ${lang} should name the real route`);
+  }
+});
+
+test('the footer brand line does not advertise a platform', () => {
+  // Same rule the <title> and the social description are already held to: the
+  // footer is read as an "about this site" line, and it claimed an enterprise
+  // telemetry and incident-containment platform.
+  const { app } = loadApp();
+
+  for (const lang of ['zh-TW', 'en']) {
+    const brand = app.TRANSLATIONS[lang].footerBrand;
+    assert.doesNotMatch(brand, /\blive\b|real-?time|即時|\bplatform\b|平台/i,
+      `footerBrand in ${lang} claims a capability the site does not have`);
+    assert.match(brand, /demo|simulated|示範|模擬/i,
+      `footerBrand in ${lang} must say this is a demo on simulated data`);
+  }
+});
+
+test('the copyright and build strings do not imply a released product', () => {
+  const { app } = loadApp();
+
+  for (const lang of ['zh-TW', 'en']) {
+    const dict = app.TRANSLATIONS[lang];
+    // It read "SEC-VER: 3.8.1-RELEASE", which is a version number for software
+    // that has none, next to a copyright for a company that does not exist.
+    assert.doesNotMatch(dict.footerBuild, /\bRELEASE\b|\d+\.\d+\.\d+/,
+      `footerBuild in ${lang} invents a release version`);
+    assert.match(dict.footerCopyright, /MIT/,
+      `footerCopyright in ${lang} should point at the licence the repo actually has`);
+  }
 });
