@@ -2,6 +2,32 @@
 <html lang="zh-TW" data-theme="dark">
 <head>
   <meta charset="UTF-8">
+  <!--
+    Content-Security-Policy, declared before anything it governs.
+
+    `default-src 'none'` is the baseline because this page fetches nothing it
+    does not ship: one stylesheet, one script, one image, and a favicon inlined
+    as a data: URI. There is no third-party subresource to exempt, which is what
+    makes a policy this tight possible at all.
+
+    script-src is 'self' with no 'unsafe-inline'. That is the payoff for 14f8abd
+    and the quiz refactor, which removed the last inline onsubmit and onclick
+    attributes: injected markup can no longer execute even if a future template
+    forgets to call escapeHtml().
+
+    style-src needs 'unsafe-inline' only because the markup below is still full
+    of inline style="" attributes. Move those into styles.css and the concession
+    can be dropped.
+
+    form-action 'none' because all four forms preventDefault() and post nowhere,
+    so a navigation from one is a bug worth having the browser refuse.
+
+    frame-ancestors is deliberately absent: a <meta> policy ignores it, so
+    naming it here would only imply a protection the page does not have.
+    Clickjacking defence needs a real response header from whatever serves this
+    directory, which a static host may not let us set.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; form-action 'none'; base-uri 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!--
     The title and description are the only part of the disclosure that travels:
