@@ -19,6 +19,61 @@ function stripJsComments(source) {
     .replace(/(^|[^:"'`\\])\/\/[^\n]*/g, '$1');
 }
 
+/**
+ * Same idea for markup: the comments in index.html quote the attributes they
+ * explain (style="", data: URIs), so a guard reading the raw file can be
+ * satisfied by prose long after the thing it describes is gone.
+ *
+ * Scanning with indexOf rather than a single `replace(/<!--[\s\S]*?-->/g, '')`,
+ * which CodeQL flagged as an incomplete multi-character sanitisation and was
+ * right to: a non-greedy pass leaves an unterminated `<!--` in place, which is
+ * the one case that would hand the guards prose to read. An unterminated
+ * comment swallows the rest of the document in a browser, so it does here too.
+ */
+function stripHtmlComments(source) {
+  let out = '';
+  let rest = source;
+
+  for (;;) {
+    const start = rest.indexOf('<!--');
+    if (start === -1) return out + rest;
+
+    out += rest.slice(0, start);
+
+    const end = rest.indexOf('-->', start + 4);
+    if (end === -1) return out;
+
+    rest = rest.slice(end + 3);
+  }
+}
+
+const MARKUP = stripHtmlComments(HTML);
+
+test('stripHtmlComments leaves no comment text for a guard to read', () => {
+  // Two guards below decide what index.html "still contains" from this output,
+  // so a stripper that lets prose through quietly weakens both of them.
+  const cases = [
+    ['<a><!-- style="x" --><b>', '<a><b>', 'a comment between elements'],
+    ['<a><!-- p --><!-- q --><b>', '<a><b>', 'adjacent comments'],
+    ['<a><!-- outer <!-- inner --><b>', '<a><b>', 'a second <!-- inside a comment'],
+    ['<a><!-- one --> <!-- two', '<a> ', 'an unterminated comment ends the document'],
+    // HTML's abrupt-closing rule would end this comment at the `>`. Reading it
+    // as unterminated strips more than a browser would, never less, which is the
+    // safe direction for something a guard then searches.
+    ['<a><!--><b>', '<a>', 'an abrupt <!-->'],
+    ['<a><b>', '<a><b>', 'markup with no comment at all']
+  ];
+
+  for (const [input, expected, why] of cases) {
+    assert.equal(stripHtmlComments(input), expected, why);
+  }
+
+  // The property that actually matters, stated directly.
+  for (const [input, , why] of cases) {
+    assert.doesNotMatch(stripHtmlComments(input), /<!--/, `residual <!-- after ${why}`);
+  }
+});
+
 test('no inline event handler attributes anywhere', () => {
   // Every one of these would force script-src 'unsafe-inline' in a CSP.
   const inHtml = [...HTML.matchAll(/\son[a-z]+\s*=\s*["']/gi)].map(m => m[0].trim());
@@ -26,6 +81,74 @@ test('no inline event handler attributes anywhere', () => {
 
   const inJs = [...stripJsComments(JS).matchAll(/\son[a-z]+\s*=\s*["']/gi)].map(m => m[0].trim());
   assert.deepEqual(inJs, [], 'rendered templates must not emit inline handlers');
+});
+
+test('a Content-Security-Policy is declared before anything it governs', () => {
+  const head = HTML.slice(0, HTML.indexOf('</head>'));
+  const meta = /<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]*)"\s*>/.exec(head);
+  assert.ok(meta, 'a <meta http-equiv="Content-Security-Policy"> belongs in <head>');
+
+  // A policy that appears after a subresource does not govern that subresource,
+  // so position is part of the guarantee, not a style preference.
+  const firstSubresource = HTML.search(/<(?:link|script|img|iframe|source)\b/i);
+  assert.ok(meta.index < firstSubresource,
+    'the policy must precede the first element that fetches something');
+
+  const directives = new Map(
+    meta[1].split(';').map(d => d.trim()).filter(Boolean).map(d => {
+      const [name, ...values] = d.split(/\s+/);
+      return [name, values];
+    })
+  );
+
+  // Nothing is fetched that this repository does not ship, so everything a
+  // directive does not name explicitly should fall through to a closed default.
+  assert.deepEqual(directives.get('default-src'), ["'none'"],
+    "default-src 'none' is what makes the unnamed directives safe");
+
+  // The reason the inline onsubmit/onclick attributes were removed in 14f8abd.
+  // Putting either keyword back would hand an injected string a way to execute.
+  const scriptSrc = directives.get('script-src') || [];
+  assert.deepEqual(scriptSrc, ["'self'"], "script-src must stay exactly 'self'");
+  for (const keyword of ["'unsafe-inline'", "'unsafe-eval'"]) {
+    assert.equal(scriptSrc.includes(keyword), false, `script-src must not allow ${keyword}`);
+  }
+
+  assert.deepEqual(directives.get('base-uri'), ["'none'"],
+    'base-uri must be closed so injected markup cannot re-root every relative URL');
+
+  // All four forms preventDefault(); a submission that navigates is a bug.
+  assert.deepEqual(directives.get('form-action'), ["'none'"], "form-action must be 'none'");
+
+  // Silently ignored in a meta policy. Naming it would imply a clickjacking
+  // protection the page does not have; that needs a response header.
+  assert.equal(directives.has('frame-ancestors'), false,
+    'frame-ancestors does nothing in a <meta> policy — do not imply otherwise');
+});
+
+test('the Content-Security-Policy permits everything index.html actually loads', () => {
+  const meta = /<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]*)"\s*>/.exec(HTML);
+  assert.ok(meta, 'the policy exists');
+  const policy = meta[1];
+
+  // script-src 'self' blocks an inline block as surely as an inline attribute,
+  // and the failure is silent: the page simply loses that behaviour.
+  const inlineScripts = [...MARKUP.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>/gi)].map(m => m[0]);
+  assert.deepEqual(inlineScripts, [], "an inline <script> cannot run under script-src 'self'");
+
+  // The favicon is an inlined SVG, which is an image source as far as CSP is
+  // concerned. Without data: the tab shows the browser's default icon.
+  if (/\b(?:href|src)="data:image/i.test(MARKUP)) {
+    assert.match(policy, /img-src[^;]*\bdata:/,
+      'index.html inlines an image as a data: URI, so img-src must allow data:');
+  }
+
+  // The concession is load-bearing only while the markup carries style="".
+  // If this branch ever stops running, style-src can be tightened to 'self'.
+  if (/\sstyle="/.test(MARKUP)) {
+    assert.match(policy, /style-src[^;]*'unsafe-inline'/,
+      "inline style attributes require 'unsafe-inline' in style-src");
+  }
 });
 
 test('the site makes no network requests, as the demo banner claims', () => {
