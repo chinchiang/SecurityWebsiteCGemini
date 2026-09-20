@@ -12,7 +12,7 @@
  *
  * It has since grown into the file for the stylesheet's other promises to a
  * visitor who is not looking at a desktop screen in the dark: the navigation
- * below 640px, the footer's claims, and the printed page.
+ * below 640px, the footer's claims, the printed page, and the fonts.
  */
 
 const test = require('node:test');
@@ -400,6 +400,77 @@ test('the footer brand line does not advertise a platform', () => {
     assert.match(brand, /demo|simulated|示範|模擬/i,
       `footerBrand in ${lang} must say this is a demo on simulated data`);
   }
+});
+
+/* ---- type ---- */
+
+// Families that arrive with a mainstream desktop or mobile OS, plus the three
+// keywords that resolve to whatever the OS uses itself (-apple-system and
+// BlinkMacSystemFont for UI text, ui-monospace for code). A stack naming none of
+// these has nothing between its wish-list and the browser's default font.
+const SYSTEM = [
+  '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Segoe UI', 'Roboto',
+  'Helvetica Neue', 'Helvetica', 'Arial', 'Noto Sans', 'DejaVu Sans',
+  'ui-monospace', 'SFMono-Regular', 'SF Mono', 'Menlo', 'Monaco', 'Consolas',
+  'Liberation Mono', 'DejaVu Sans Mono', 'Courier New'
+];
+
+const GENERIC = ['sans-serif', 'serif', 'monospace', 'system-ui', 'cursive', 'fantasy'];
+
+const families = stack => stack.split(',').map(f => f.trim().replace(/^['"]|['"]$/g, ''));
+
+test('no font stack leans on a family the page never loads', () => {
+  // Nothing is fetched — the third-party allow-list in static-source.test.js is
+  // deliberately empty, which is what keeps the CSP closed — and no font is
+  // shipped either, so 'Inter' and 'JetBrains Mono' render only for a visitor who
+  // happens to have them installed. As a first preference that is fine. As the
+  // only named family it is not: --font-mono was `'JetBrains Mono', monospace`,
+  // so every counter, score, hash and CVE id was set in whatever the visitor's
+  // browser has as its fixed-width font. Seeding a Chrome profile with that
+  // preference set to Courier New shows the difference the rest of the stack
+  // makes — the old value measures as Courier New, the new one as Consolas.
+  //
+  // Either half is a valid answer, so both are allowed for: a family this
+  // stylesheet actually declares an @font-face for counts as available.
+  const loaded = new Set([...CSS.matchAll(/@font-face[\s\S]*?font-family:\s*['"]?([^'";]+)/g)]
+    .map(m => m[1].trim()));
+
+  const stacks = [...CSS.matchAll(/(--font-[\w-]+):\s*([^;]+);/g)];
+  assert.ok(stacks.length >= 2, `only ${stacks.length} font stacks were examined`);
+
+  for (const [, name, stack] of stacks) {
+    const named = families(stack);
+
+    // Without a generic last, a stack that resolves to nothing is undefined
+    // territory rather than "use the default".
+    assert.ok(GENERIC.includes(named.at(-1)),
+      `${name} should end in a generic family, not ${named.at(-1)}`);
+
+    const available = named.filter(f => SYSTEM.includes(f) || loaded.has(f));
+    assert.ok(available.length,
+      `${name} names nothing a visitor will have: ${stack.trim()}`);
+  }
+});
+
+test('every font-family on the page goes through the two stacks', () => {
+  // Including the inline styles, which is where a one-off `font-family:
+  // 'JetBrains Mono', monospace` would land next: it would miss the fallbacks
+  // above and there would be no single place left to fix.
+  const offenders = [];
+  let examined = 0;
+
+  // An @font-face's own font-family is the name being defined, not a use of one.
+  const sheet = CSS.replace(/@font-face\s*\{[^}]*\}/g, '');
+
+  for (const [source, where] of [[sheet, 'styles.css'], [HTML, 'index.html'], [read('app.js'), 'app.js']]) {
+    for (const [, value] of source.matchAll(/font-family:\s*([^;"'}]+)/g)) {
+      examined++;
+      if (!/^var\(--font-[\w-]+\)$/.test(value.trim())) offenders.push(`${where}: ${value.trim()}`);
+    }
+  }
+
+  assert.ok(examined > 20, `only ${examined} font-family declarations were examined`);
+  assert.deepEqual(offenders, [], 'these bypass --font-sans / --font-mono');
 });
 
 test('the copyright and build strings do not imply a released product', () => {

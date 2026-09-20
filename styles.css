@@ -22,8 +22,19 @@
   --text-muted: #64748b;
   --text-highlight: #00e5ff;
 
+  /* Neither Inter nor JetBrains Mono is fetched or shipped: the third-party
+     allow-list is deliberately empty, which is what lets the CSP stay closed.
+     Both are therefore an opportunistic first choice — they render for a visitor
+     who happens to have them installed and for nobody else — so the rest of each
+     stack has to stand on its own. --font-mono used to be `'JetBrains Mono',
+     monospace` and nothing else, which handed the twenty-odd places that ask for
+     mono — the hero counters, every score, the hashes, the CVE ids — to whatever
+     the visitor's browser has set as its fixed-width font. That is a preference,
+     not a constant: with it left at Courier New, this page's mono text is a
+     typewriter face it was neither spaced nor sized for. Naming the families that
+     ship with an OS makes the choice the stylesheet's again. */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 
   --radius-sm: 6px;
   --radius-md: 12px;
