@@ -162,6 +162,8 @@ const TRANSLATIONS = {
     footerCol3: '緊急事件求助',
     modalTitle: '🚨 宣告重大資安事件 (Emergency)',
     modalSub: '示範重大資安事件通報流程；不會聯絡值班指揮官或啟動任何應變程序。',
+    // The button's only visible content is a × glyph. Read as an aria-label.
+    modalClose: '關閉對話框',
     modalTypeLabel: '事件類別 Category',
     optRansom: '受勒索軟體感染 / 檔案大規模加密',
     optCloud: '雲端或 Active Directory 未授權侵入',
@@ -306,6 +308,7 @@ const TRANSLATIONS = {
     footerCol3: 'Emergency Support',
     modalTitle: '🚨 Declare Emergency Incident',
     modalSub: 'Demonstrates an emergency-reporting workflow; it does not contact an Incident Commander or start any response action.',
+    modalClose: 'Close dialog',
     modalTypeLabel: 'Incident Category',
     optRansom: 'Active Ransomware / File Encryption',
     optCloud: 'Unauthorized Cloud / Active Directory Breach',
@@ -441,6 +444,16 @@ function setLanguage(lang) {
     const key = el.getAttribute('data-i18n');
     if (dictionary[key]) {
       el.innerHTML = dictionary[key];
+    }
+  });
+
+  // An accessible name carried in an attribute has to be translated too, and
+  // there is no text node to swap. Declaring it in the markup rather than
+  // wiring another id here means the next one cannot be forgotten.
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (dictionary[key]) {
+      el.setAttribute('aria-label', dictionary[key]);
     }
   });
 
@@ -2613,26 +2626,99 @@ function initThreatMapCanvas() {
 }
 
 /* Emergency Modal Logic */
+
+// Everything Tab can land on. tabindex="-1" elements (the dialog card) and
+// disabled controls are filtered out in JavaScript rather than with :not(),
+// which keeps every part of the list to a form that is trivially correct.
+const FOCUSABLE_SELECTOR = 'button, input, select, textarea, a[href], [tabindex]';
+
+/** Tab stops inside `root`, in document order — the order a trap has to wrap. */
+function focusableWithin(root) {
+  return [...root.querySelectorAll(FOCUSABLE_SELECTOR)]
+    .filter(el => !el.disabled && el.getAttribute('tabindex') !== '-1');
+}
+
 function initEmergencyModal() {
   const modal = document.getElementById('emergencyModal');
+  if (!modal) return;
+
   const openBtn = document.getElementById('openEmergencyModalBtn');
   const closeBtn = document.getElementById('closeEmergencyModalBtn');
   const cancelBtn = document.getElementById('cancelEmergencyBtn');
   const form = document.getElementById('emergencyForm');
+  const card = modal.querySelector('.modal-card');
 
-  if (!modal) return;
+  // What had focus before the dialog opened, so it can be handed back. Dropping
+  // focus on close sends it to the top of the document, and a keyboard user has
+  // to tab all the way back down to find where they were.
+  let opener = null;
+
+  const isOpen = () => modal.classList.contains('active');
 
   function openModal() {
+    opener = document.activeElement;
     modal.classList.add('active');
+    document.body.classList.add('modal-open');
+
+    // The card, not the first field: it is what carries role="dialog" and the
+    // aria-labelledby/describedby pair, so focusing it is what makes a screen
+    // reader announce the title and the demo disclosure before the form.
+    if (card) card.focus();
   }
 
   function closeModal() {
+    if (!isOpen()) return;
+
     modal.classList.remove('active');
+    document.body.classList.remove('modal-open');
+
+    if (opener && typeof opener.focus === 'function') opener.focus();
+    opener = null;
   }
 
   if (openBtn) openBtn.addEventListener('click', openModal);
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
   if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  // On the overlay, and only when the overlay is itself the target: a click that
+  // starts inside the card bubbles up here too, and dismissing the dialog
+  // because someone clicked a label would be worse than not closing at all.
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Bound to the document rather than the modal so Escape works even if focus
+  // has ended up outside — which is the state this handler also has to repair.
+  document.addEventListener('keydown', (e) => {
+    if (!isOpen()) return;
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeModal();
+      return;
+    }
+
+    if (e.key !== 'Tab') return;
+
+    // aria-modal is a promise to assistive technology; it does nothing to the
+    // browser's own tab order. Everything behind the overlay is still tabbable,
+    // so the wrap has to be done here or Tab walks straight out of the dialog.
+    const stops = focusableWithin(modal);
+    if (stops.length === 0) return;
+
+    const first = stops[0];
+    const last = stops[stops.length - 1];
+    const here = document.activeElement;
+    const outside = !stops.includes(here);
+
+    if (e.shiftKey && (here === first || outside)) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (here === last || outside)) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
 
   if (form) {
     form.addEventListener('submit', (e) => {

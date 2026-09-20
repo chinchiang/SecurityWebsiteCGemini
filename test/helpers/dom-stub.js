@@ -29,6 +29,43 @@ function isDescendantOf(node, ancestor) {
   return false;
 }
 
+/**
+ * The simple selector forms app.js actually uses: a tag name, a class, an
+ * attribute presence or value test, and combinations on one element (`a[href]`).
+ * Validated separately from matching so an unrecognised form throws rather than
+ * quietly matching nothing.
+ */
+const SIMPLE_SELECTOR = /^(?:[A-Za-z][\w-]*)?(?:\.[A-Za-z][\w-]*|\[[\w-]+(?:="[^"]*")?\])*$/;
+
+function matchesSimple(el, sel) {
+  let rest = sel;
+
+  const tag = /^[A-Za-z][\w-]*/.exec(rest);
+  if (tag) {
+    if (el.tagName !== tag[0].toUpperCase()) return false;
+    rest = rest.slice(tag[0].length);
+  }
+
+  while (rest) {
+    const cls = /^\.([A-Za-z][\w-]*)/.exec(rest);
+    if (cls) {
+      if (!el.classList.contains(cls[1])) return false;
+      rest = rest.slice(cls[0].length);
+      continue;
+    }
+
+    const attr = /^\[([\w-]+)(?:="([^"]*)")?\]/.exec(rest);
+    if (attr[2] === undefined) {
+      if (!el.hasAttribute(attr[1])) return false;
+    } else if (el.getAttribute(attr[1]) !== attr[2]) {
+      return false;
+    }
+    rest = rest.slice(attr[0].length);
+  }
+
+  return true;
+}
+
 function makeClassList() {
   const set = new Set();
   return {
@@ -79,7 +116,14 @@ function createElement(env, tagName) {
 
     /** Fire every listener of `type`, as a real browser would. */
     dispatch(type, event = {}) {
-      const ev = { type, target: el, preventDefault() {}, stopPropagation() {}, ...event };
+      const ev = {
+        type,
+        target: el,
+        defaultPrevented: false,
+        preventDefault() { ev.defaultPrevented = true; },
+        stopPropagation() {},
+        ...event
+      };
       this.listeners.filter(l => l.type === type).forEach(l => l.fn(ev));
       return ev;
     },
@@ -121,7 +165,11 @@ function createElement(env, tagName) {
     },
 
     closest() { return null; },
-    focus() {}, blur() {}, scrollIntoView() {},
+    // Focus is state, not a gesture: a focus trap and a focus restore can only
+    // be asserted on if moving focus is observable.
+    focus() { env.activeElement = this; },
+    blur() { if (env.activeElement === this) env.activeElement = null; },
+    scrollIntoView() {},
 
     querySelector(sel) { return env.select(sel, this)[0] || null; },
     querySelectorAll(sel) { return env.select(sel, this); },
@@ -150,9 +198,23 @@ function createDom(options = {}) {
   const byId = new Map();
   const byClass = new Map();     // class name -> elements registered by a test
   const i18nElements = [];
+  const i18nAriaElements = [];
   const scopedSteps = new Map(); // scope element -> Map(stepNumber -> element)
 
   const env = {
+    activeElement: null,
+
+    /** Everything under `node`, in the order it was appended. */
+    descendants(node) {
+      const out = [];
+      for (const child of node.children || []) {
+        if (child && typeof child === 'object' && child.tagName) {
+          out.push(child, ...env.descendants(child));
+        }
+      }
+      return out;
+    },
+
     select(sel, scope) {
       // `.quiz-step[data-step="N"]`, always queried against #quizWizard.
       const step = /^\.quiz-step\[data-step="(\d+)"\]$/.exec(sel);
@@ -172,6 +234,7 @@ function createDom(options = {}) {
       }
 
       if (sel === '[data-i18n]') return [...i18nElements];
+      if (sel === '[data-i18n-aria-label]') return [...i18nAriaElements];
 
       const cls = /^\.([A-Za-z][\w-]*)$/.exec(sel);
       if (cls) {
@@ -179,7 +242,18 @@ function createDom(options = {}) {
         return scope ? all.filter(el => isDescendantOf(el, scope)) : all;
       }
 
-      throw new Error(`dom-stub: unsupported selector ${JSON.stringify(sel)} — teach the stub instead of loosening it`);
+      // A comma-separated list of simple selectors, resolved by walking the
+      // scope. The walk is what makes the result document-ordered, which is the
+      // whole point for a focus trap: it wraps from the last stop to the first.
+      const parts = sel.split(',').map(p => p.trim()).filter(Boolean);
+      if (!parts.length || parts.some(p => !SIMPLE_SELECTOR.test(p))) {
+        throw new Error(`dom-stub: unsupported selector ${JSON.stringify(sel)} — teach the stub instead of loosening it`);
+      }
+      if (!scope) {
+        throw new Error(`dom-stub: ${JSON.stringify(sel)} must be scoped to an element; the stub keeps no document tree to walk`);
+      }
+
+      return env.descendants(scope).filter(el => parts.some(p => matchesSimple(el, p)));
     }
   };
 
@@ -189,9 +263,17 @@ function createDom(options = {}) {
   documentElement.lang = '';
   documentElement.style.setProperty = () => {};
 
+  // Listeners bound to the document, so a test can dispatch the keydown a focus
+  // trap and an Escape handler live on. DOMContentLoaded is recorded like any
+  // other type and simply never dispatched, which is how it behaved before.
+  const documentListeners = [];
+
   const document = {
     documentElement,
     body: null,
+
+    /** null until something is focused, as in a document with no focus yet. */
+    get activeElement() { return env.activeElement; },
 
     getElementById(id) {
       if (!byId.has(id)) {
@@ -204,8 +286,25 @@ function createDom(options = {}) {
     createElement(tag) { return createElement(env, tag); },
     querySelector(sel) { return env.select(sel, null)[0] || null; },
     querySelectorAll(sel) { return env.select(sel, null); },
-    addEventListener() {},   // DOMContentLoaded never fires in these tests
-    removeEventListener() {}
+    addEventListener(type, fn) { documentListeners.push({ type, fn }); },
+    removeEventListener(type, fn) {
+      const i = documentListeners.findIndex(l => l.type === type && l.fn === fn);
+      if (i !== -1) documentListeners.splice(i, 1);
+    },
+
+    /** Fire the document-level listeners of `type`. Never called implicitly. */
+    dispatch(type, event = {}) {
+      const ev = {
+        type,
+        target: document,
+        defaultPrevented: false,
+        preventDefault() { ev.defaultPrevented = true; },
+        stopPropagation() {},
+        ...event
+      };
+      documentListeners.filter(l => l.type === type).forEach(l => l.fn(ev));
+      return ev;
+    }
   };
   document.body = createElement(env, 'body');
 
@@ -257,6 +356,17 @@ function createDom(options = {}) {
     /** The values that actually reached storage, for asserting persistence. */
     storedKeys: () => [...store.keys()],
     stored: k => (store.has(k) ? store.get(k) : null),
+    /**
+     * Put a purpose-built element behind an id, instead of the div that
+     * getElementById would otherwise invent. Needed wherever the tag matters:
+     * a focus trap selects on `button, input, select`, and an auto-created
+     * <div> would be skipped by all three.
+     */
+    registerId(id, el) {
+      el.setAttribute('id', id);
+      byId.set(id, el);
+      return el;
+    },
     /** Register an element so document.querySelectorAll('.cls') can find it. */
     registerClass(name, el) {
       if (!byClass.has(name)) byClass.set(name, []);
@@ -264,6 +374,8 @@ function createDom(options = {}) {
       return el;
     },
     registerI18n(el) { i18nElements.push(el); return el; },
+    /** Same, for an accessible name carried in an attribute. */
+    registerI18nAria(el) { i18nAriaElements.push(el); return el; },
     createElement: tag => createElement(env, tag),
     getById: id => document.getElementById(id)
   };

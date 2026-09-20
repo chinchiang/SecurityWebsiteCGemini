@@ -1074,13 +1074,37 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   opacity: 0;
+  /* opacity and pointer-events hide the dialog from the mouse and from nobody
+     else. A keyboard user tabbing past the footer used to land on the incident
+     category select, the contact field and the submit button of an invisible
+     form, with no way to tell where focus had gone. visibility: hidden is what
+     actually removes them, and it takes the dialog out of the accessibility
+     tree too.
+
+     The 0s duration with a 0.3s delay is what keeps the fade-out: visibility is
+     a discrete property, so giving it the same 0.3s duration as the opacity
+     would hold it at `hidden` for the entire transition — in both directions.
+     Opening would then leave the dialog unfocusable for 300ms and the
+     focus-on-open in app.js would silently do nothing. Delaying instead means
+     the flip to hidden waits for the fade to finish, and .active below cancels
+     the delay so opening is immediate. */
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
 }
 
 .modal-overlay.active {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
+  /* No delay on the way in: the dialog has to be focusable this frame. */
+  transition: opacity 0.3s ease, visibility 0s linear 0s;
+}
+
+/* Set on <body> while the dialog is open. Scrolling the page behind a modal
+   moves content the user cannot reach and loses their place when it closes. */
+body.modal-open {
+  overflow: hidden;
 }
 
 .modal-card {
@@ -1100,6 +1124,13 @@ h1, h2, h3, h4, h5, h6 {
   transform: scale(1);
 }
 
+/* The card takes focus on open so the dialog's name and its demo disclosure are
+   announced. It carries tabindex="-1", so it is never a tab stop and a ring
+   drawn around the whole dialog would only be confusing. */
+.modal-card:focus {
+  outline: none;
+}
+
 .modal-close {
   position: absolute;
   top: 1.25rem;
@@ -1112,6 +1143,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .modal-close:hover {
+  color: var(--text-primary);
+}
+
+/* The first tab stop inside the dialog, and a transparent borderless button —
+   so it needs an indicator that does not depend on its own chrome. */
+.modal-close:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
   color: var(--text-primary);
 }
 

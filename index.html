@@ -429,12 +429,22 @@
     </div>
   </footer>
 
-  <!-- Emergency Incident Modal -->
+  <!-- Emergency Incident Modal
+       role="dialog" sits on the card, not on the overlay: the overlay is the
+       backdrop and the click-to-dismiss target, not part of the dialog.
+       tabindex="-1" is there so app.js can move focus onto the card on open —
+       it is never a tab stop, which is what makes the focus trap's
+       tabindex !== "-1" filter skip it.
+       The overlay is hidden with visibility, not just opacity; see styles.css
+       for why that distinction decides whether the closed form is tabbable. -->
   <div class="modal-overlay" id="emergencyModal">
-    <div class="modal-card">
-      <button class="modal-close" id="closeEmergencyModalBtn" type="button">&times;</button>
-      <h3 style="color: var(--accent-rose); font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="modalTitle">🚨 宣告重大資安事件 (Emergency)</h3>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="modalSub">示範重大資安事件通報流程；不會聯絡值班指揮官或啟動任何應變程序。</p>
+    <div class="modal-card" role="dialog" aria-modal="true" tabindex="-1"
+         aria-labelledby="emergencyModalTitle" aria-describedby="emergencyModalDesc">
+      <!-- data-i18n-aria-label, because the only label here is a × glyph, which
+           a screen reader announces as "times" or as nothing at all. -->
+      <button class="modal-close" id="closeEmergencyModalBtn" type="button" data-i18n-aria-label="modalClose">&times;</button>
+      <h3 id="emergencyModalTitle" style="color: var(--accent-rose); font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="modalTitle">🚨 宣告重大資安事件 (Emergency)</h3>
+      <p id="emergencyModalDesc" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="modalSub">示範重大資安事件通報流程；不會聯絡值班指揮官或啟動任何應變程序。</p>
 
       <div class="demo-note" data-i18n="noteEmergency">⚠️ 示範功能：本表單不會傳送資料、通知 SOC、聯絡任何人員或建立事件單。若發生真實事件，請使用貴組織正式核准的緊急通報管道。</div>
       

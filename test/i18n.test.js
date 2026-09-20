@@ -46,6 +46,32 @@ test('every data-i18n attribute in index.html resolves in both languages', () =>
   assert.deepEqual(unresolved, [], 'data-i18n keys with no translation');
 });
 
+test('every data-i18n-aria-label in index.html resolves in both languages', () => {
+  // A missing key here fails silently and invisibly: setLanguage skips the
+  // element, and the control keeps whatever accessible name it was born with —
+  // for the modal close button, the bare × glyph, i.e. none.
+  const { app } = loadApp();
+  const used = [...INDEX_HTML.matchAll(/data-i18n-aria-label="([^"]+)"/g)].map(m => m[1]);
+  assert.ok(used.length > 0, 'index.html uses data-i18n-aria-label');
+
+  const unresolved = [...new Set(used)].filter(
+    k => !app.TRANSLATIONS['zh-TW'][k] || !app.TRANSLATIONS['en'][k]
+  );
+  assert.deepEqual(unresolved, [], 'data-i18n-aria-label keys with no translation');
+});
+
+test('an element with an i18n aria-label carries no conflicting text', () => {
+  // aria-label overrides the element's content outright, so an element carrying
+  // both is one where the visible text is not what gets announced. A bare glyph
+  // — &times;, an emoji — is the legitimate case, and the reason for the label:
+  // it is what the element has instead of a name, not a second one.
+  for (const tag of INDEX_HTML.matchAll(/<([a-z]+)\b[^>]*data-i18n-aria-label="[^"]*"[^>]*>([^<]*)</g)) {
+    const words = tag[2].replace(/&(?:[a-z]+|#\d+|#x[0-9a-f]+);/gi, '');
+    assert.doesNotMatch(words, /[A-Za-z一-鿿]/,
+      `${tag[1]} has both an aria-label and visible text: "${tag[2].trim()}"`);
+  }
+});
+
 test('the English dictionary contains no Chinese text', () => {
   const { app } = loadApp();
   const leaked = Object.entries(app.TRANSLATIONS['en'])
