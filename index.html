@@ -407,24 +407,31 @@
         <div class="footer-column">
           <h5 data-i18n="footerCol2">國際權威機構</h5>
           <ul class="footer-links">
-            <li><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener">CISA KEV 漏洞目錄</a></li>
-            <li><a href="https://nvd.nist.gov" target="_blank" rel="noopener">NIST NVD 資料庫</a></li>
-            <li><a href="https://www.first.org" target="_blank" rel="noopener">FIRST 應變小組聯盟</a></li>
+            <li><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener" data-i18n="footerCISA">CISA KEV 漏洞目錄</a></li>
+            <li><a href="https://nvd.nist.gov" target="_blank" rel="noopener" data-i18n="footerNVD">NIST NVD 資料庫</a></li>
+            <li><a href="https://www.first.org" target="_blank" rel="noopener" data-i18n="footerFIRST">FIRST 應變小組聯盟</a></li>
           </ul>
         </div>
 
         <div class="footer-column">
-          <h5 data-i18n="footerCol3">緊急事件求助</h5>
+          <h5 data-i18n="footerCol3">緊急事件求助（示範）</h5>
+          <!-- Not <a href="#"> any more. These were dead links wrapped around a
+               plausible phone number and key fingerprint: on a site that says on
+               every panel that its data is simulated, the footer was the one
+               place appearing to offer a real way to reach someone mid-incident.
+               There is nothing to link to, so they are no longer links, and they
+               say what they are. -->
           <ul class="footer-links">
-            <li><a href="#" id="footerHotlineLink">SOC 熱線: +1 (800) 555-AEGIS</a></li>
-            <li><a href="#" id="footerEncryptedEmail">PGP Key: 0x8F921A2B</a></li>
+            <li><span data-i18n="footerHotline">SOC 熱線（示範佔位號碼，非真實專線）：+1 (800) 555-0199</span></li>
+            <li><span data-i18n="footerPGP">PGP 公鑰（示範佔位指紋，無對應金鑰）：0x8F921A2B</span></li>
+            <li><span data-i18n="footerRealChannel">若發生真實資安事件，請改用貴組織正式核准的緊急通報管道。</span></li>
           </ul>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <div>© 2026 AegisGuard Cyber Security. 版權所有，專為資安專業人員打造。</div>
-        <div style="font-family: var(--font-mono);">SEC-VER: 3.8.1-RELEASE</div>
+        <div data-i18n="footerCopyright">© 2026 AegisGuard Portal — 虛構品牌的前端示範專案，以 MIT 授權釋出。</div>
+        <div style="font-family: var(--font-mono);" data-i18n="footerBuild">BUILD: DEMO（非發行版本）</div>
       </div>
     </div>
   </footer>

@@ -156,10 +156,22 @@ const TRANSLATIONS = {
     playbookToggle: '展開／收合 ▾',
     auditTitle: '企業資安防禦成熟度評估',
     auditDesc: '回答 5 個關鍵策略問題，快速衡量貴單位的資安成熟度指數與改善建議。',
-    footerBrand: '企業級網路安全情報遙測、漏洞診斷與資安事件處置平台。',
+    footerBrand: '前端資安示範專案：安全標頭評分、密碼熵值、CVE 查詢與應變劇本，全部使用模擬資料。',
     footerCol1: '核心檢測工具',
     footerCol2: '國際權威機構',
-    footerCol3: '緊急事件求助',
+    footerCISA: 'CISA KEV 已遭利用漏洞目錄',
+    footerNVD: 'NIST NVD 漏洞資料庫',
+    footerFIRST: 'FIRST 事件應變小組聯盟',
+    footerCol3: '緊急事件求助（示範）',
+    // Both of these were <a href="#"> with a plausible-looking phone number and
+    // key fingerprint behind them. Nothing was ever wired up, so on a page whose
+    // whole premise is "this data is simulated" the footer was the one place
+    // offering what looked like a real way to reach someone in an incident.
+    footerHotline: 'SOC 熱線（示範佔位號碼，非真實專線）：+1 (800) 555-0199',
+    footerPGP: 'PGP 公鑰（示範佔位指紋，無對應金鑰）：0x8F921A2B',
+    footerRealChannel: '若發生真實資安事件，請改用貴組織正式核准的緊急通報管道。',
+    footerCopyright: '© 2026 AegisGuard Portal — 虛構品牌的前端示範專案，以 MIT 授權釋出。',
+    footerBuild: 'BUILD: DEMO（非發行版本）',
     modalTitle: '🚨 宣告重大資安事件 (Emergency)',
     modalSub: '示範重大資安事件通報流程；不會聯絡值班指揮官或啟動任何應變程序。',
     // The button's only visible content is a × glyph. Read as an aria-label.
@@ -302,10 +314,18 @@ const TRANSLATIONS = {
     playbookToggle: 'Expand / collapse ▾',
     auditTitle: 'Security Posture Maturity Calculator',
     auditDesc: 'Answer 5 quick strategic questions to benchmark your organization\'s cybersecurity defense score.',
-    footerBrand: 'Enterprise Cyber Threat Telemetry, Vulnerability Diagnostics, and Incident Containment Platform.',
+    footerBrand: 'A front-end security demo: header scoring, password entropy, CVE lookup and response playbooks, all on simulated data.',
     footerCol1: 'Core Tools',
     footerCol2: 'Advisories',
-    footerCol3: 'Emergency Support',
+    footerCISA: 'CISA Known Exploited Vulnerabilities catalog',
+    footerNVD: 'NIST NVD vulnerability database',
+    footerFIRST: 'FIRST incident response teams',
+    footerCol3: 'Emergency Support (Demo)',
+    footerHotline: 'SOC hotline (placeholder number, not a real line): +1 (800) 555-0199',
+    footerPGP: 'PGP key (placeholder fingerprint, no such key): 0x8F921A2B',
+    footerRealChannel: 'In a real incident, use your own organisation\'s approved emergency channel instead.',
+    footerCopyright: '© 2026 AegisGuard Portal — a front-end demo under a fictional brand, released under the MIT licence.',
+    footerBuild: 'BUILD: DEMO (not a release)',
     modalTitle: '🚨 Declare Emergency Incident',
     modalSub: 'Demonstrates an emergency-reporting workflow; it does not contact an Incident Commander or start any response action.',
     modalClose: 'Close dialog',
@@ -2506,7 +2526,6 @@ function initThreatMapCanvas() {
     canvas.height = canvas.parentElement.clientHeight;
   }
   resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
 
   const nodes = [
     { name: 'Tokyo', x: 0.82, y: 0.38, color: '#00e5ff' },
@@ -2538,7 +2557,14 @@ function initThreatMapCanvas() {
 
   for (let i = 0; i < 8; i++) spawnPacket();
 
-  function animate() {
+  /**
+   * One frame of the map.
+   *
+   * @param {boolean} withPackets draw the packets in flight. False for the
+   *   reduced-motion render: the packets are the only thing that moves, and a
+   *   still frame of them would be eight dots parked on top of the nodes.
+   */
+  function draw(withPackets) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
@@ -2568,15 +2594,8 @@ function initThreatMapCanvas() {
       }
     }
 
-    for (let i = packets.length - 1; i >= 0; i--) {
+    for (let i = 0; withPackets && i < packets.length; i++) {
       const p = packets[i];
-      p.progress += p.speed;
-
-      if (p.progress >= 1) {
-        packets.splice(i, 1);
-        spawnPacket();
-        continue;
-      }
 
       const x1 = p.src.x * canvas.width;
       const y1 = p.src.y * canvas.height;
@@ -2618,11 +2637,68 @@ function initThreatMapCanvas() {
       ctx.font = '10px JetBrains Mono';
       ctx.fillText(n.name, nx + 12, ny + 3);
     });
-
-    requestAnimationFrame(animate);
   }
 
-  animate();
+  /** Move every packet along, retiring and respawning the ones that arrived. */
+  function advancePackets() {
+    // Backwards, because a retired packet is spliced out mid-loop. spawnPacket()
+    // pushes onto the end, which a descending index never revisits.
+    for (let i = packets.length - 1; i >= 0; i--) {
+      const p = packets[i];
+      p.progress += p.speed;
+
+      if (p.progress >= 1) {
+        packets.splice(i, 1);
+        spawnPacket();
+      }
+    }
+  }
+
+  // matchMedia is missing in a few embedded webviews, and this runs on load.
+  const reduceMotion = typeof window.matchMedia === 'function'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : null;
+
+  let frameId = 0;
+
+  function animate() {
+    advancePackets();
+    draw(true);
+    frameId = requestAnimationFrame(animate);
+  }
+
+  /**
+   * Start or stop the loop to match the visitor's motion preference.
+   *
+   * Re-run on change rather than sampled once, so turning the preference on
+   * mid-session actually stops the animation instead of leaving it running for
+   * the rest of the visit — and turning it off starts the map moving again.
+   */
+  function applyMotionPreference() {
+    if (reduceMotion && reduceMotion.matches) {
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = 0;
+      draw(false);
+      return;
+    }
+
+    if (!frameId) frameId = requestAnimationFrame(animate);
+  }
+
+  // addEventListener on a MediaQueryList is the modern form; Safari before 14
+  // only had addListener, and this is a progressive enhancement either way.
+  if (reduceMotion && typeof reduceMotion.addEventListener === 'function') {
+    reduceMotion.addEventListener('change', applyMotionPreference);
+  }
+
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    // Resizing a canvas clears it. While the loop is stopped nothing would ever
+    // paint it again, so the map would silently go blank.
+    if (!frameId) draw(false);
+  });
+
+  applyMotionPreference();
 }
 
 /* Emergency Modal Logic */

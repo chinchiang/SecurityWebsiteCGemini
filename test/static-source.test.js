@@ -19,33 +19,10 @@ function stripJsComments(source) {
     .replace(/(^|[^:"'`\\])\/\/[^\n]*/g, '$1');
 }
 
-/**
- * Same idea for markup: the comments in index.html quote the attributes they
- * explain (style="", data: URIs), so a guard reading the raw file can be
- * satisfied by prose long after the thing it describes is gone.
- *
- * Scanning with indexOf rather than a single `replace(/<!--[\s\S]*?-->/g, '')`,
- * which CodeQL flagged as an incomplete multi-character sanitisation and was
- * right to: a non-greedy pass leaves an unterminated `<!--` in place, which is
- * the one case that would hand the guards prose to read. An unterminated
- * comment swallows the rest of the document in a browser, so it does here too.
- */
-function stripHtmlComments(source) {
-  let out = '';
-  let rest = source;
-
-  for (;;) {
-    const start = rest.indexOf('<!--');
-    if (start === -1) return out + rest;
-
-    out += rest.slice(0, start);
-
-    const end = rest.indexOf('-->', start + 4);
-    if (end === -1) return out;
-
-    rest = rest.slice(end + 3);
-  }
-}
+// Same idea for markup, but shared: test/presentation.test.js strips the same
+// file for the same reason. See the helper for why it is a scanner and not a
+// regex. The test below stays here, next to the guards that depend on it.
+const { stripHtmlComments } = require('./helpers/markup.js');
 
 const MARKUP = stripHtmlComments(HTML);
 
