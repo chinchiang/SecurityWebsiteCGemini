@@ -365,6 +365,73 @@ test('both languages the page ships are declared to the unfurl', () => {
   assert.match(MARKUP, /<html lang="zh-TW"/, 'og:locale should agree with the document');
 });
 
+/* ---- the page with no JavaScript ---- */
+
+const NOSCRIPT = /<noscript>([\s\S]*?)<\/noscript>/.exec(MARKUP);
+const NOSCRIPT_TEXT = NOSCRIPT ? NOSCRIPT[1].replace(/<[^>]*>/g, ' ') : '';
+
+test('a visitor with no JavaScript is told so, in both languages', () => {
+  // Without this the page was a working navbar and a set of section headings over
+  // an empty ticker, a blank canvas and three empty containers, with nothing
+  // saying why or that it was fixable.
+  assert.ok(NOSCRIPT, 'index.html needs a <noscript>');
+
+  // Ahead of everything it describes, so it is the first thing read rather than
+  // an explanation found after giving up.
+  assert.ok(MARKUP.indexOf('<noscript>') < MARKUP.indexOf('<header'),
+    'the notice belongs at the top of the body');
+
+  // data-i18n is applied by app.js, which is the one thing that has not run, so
+  // a translated notice would be an empty one. Both languages are in the markup.
+  assert.doesNotMatch(NOSCRIPT[1], /data-i18n/,
+    'nothing in here can be translated at runtime; write both languages out');
+  // Counted rather than pattern-matched, because a handful of Latin words appear
+  // in the Chinese half too ("HTTP", "CVE", "JavaScript"): a sentence's worth is
+  // the thing being checked for, not the presence of the alphabet.
+  assert.match(NOSCRIPT_TEXT, /[一-鿿]{10,}/, 'the Chinese half is missing');
+  const words = NOSCRIPT_TEXT.match(/[A-Za-z]{2,}/g) || [];
+  assert.ok(words.length >= 40, `the English half is missing or short: ${words.length} words`);
+
+  // The class has to be styled, or this is a wall of unstyled text at the top of
+  // the page — which is how the notice would read as broken rather than helpful.
+  assert.match(NOSCRIPT[1], /class="noscript-banner"/);
+  assert.match(CSS, /\.noscript-banner\s*\{/, 'styles.css should style the notice');
+});
+
+test('the notice names each thing that stops working, in both languages', () => {
+  // Checked against a render of index.html with app.js not loaded: every one of
+  // these containers is empty, the canvas is blank, and three of the four tools
+  // cannot even be brought on screen because switching panels is initToolTabs().
+  // Paired so that a feature added to one half of the notice and not the other
+  // fails: that is the likely drift, not a missing item.
+  const PAIRS = [
+    ['跑馬燈', /\bticker\b/i],
+    ['威脅地圖', /threat map/i],
+    ['CVE', /\bCVE\b/],
+    ['劇本', /playbook/i],
+    ['問卷', /\bquiz\b/i],
+    ['分頁', /\btabs?\b/i],
+    ['語言', /language/i],
+    ['深淺色', /theme/i],
+    ['瀏覽器', /browser/i]
+  ];
+
+  // The extraction above is one regex away from producing an empty string, and
+  // every assertion below would then be about nothing.
+  assert.ok(NOSCRIPT_TEXT.length > 300, `the notice is only ${NOSCRIPT_TEXT.length} characters`);
+  assert.ok(PAIRS.length >= 9, 'the list itself should cover everything that breaks');
+
+  for (const [zh, en] of PAIRS) {
+    assert.ok(NOSCRIPT_TEXT.includes(zh), `the Chinese half does not mention ${zh}`);
+    assert.match(NOSCRIPT_TEXT, en, `the English half does not mention ${en}`);
+  }
+
+  // And the reason to turn it back on, which is the honest one for a page of
+  // security tools: they run locally and send nothing.
+  assert.match(NOSCRIPT_TEXT, /不會把你輸入的任何內容送到/);
+  assert.match(NOSCRIPT_TEXT, /nothing you type is sent/i);
+});
+
 test('index.html tags are balanced for the containers the app writes into', () => {
   const count = (re) => (HTML.match(re) || []).length;
   assert.equal(count(/<div\b/g), count(/<\/div>/g), '<div> balance');

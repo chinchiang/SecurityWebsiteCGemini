@@ -218,6 +218,30 @@ h1, h2, h3, h4, h5, h6 {
   100% { transform: scale(0.95); opacity: 1; }
 }
 
+/* The no-JavaScript notice. Only ever rendered with scripting off, which is also
+   the state in which the theme toggle cannot be reached, so the dark palette it
+   inherits is the only one it can appear in. */
+.noscript-banner {
+  padding: 1rem 1.25rem;
+  border-bottom: 2px solid var(--accent-amber);
+  background: rgba(245, 158, 11, 0.12);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.noscript-banner p {
+  margin: 0;
+  max-width: 100ch;
+}
+
+.noscript-banner p + p {
+  margin-top: 0.6rem;
+}
+
+.noscript-banner strong {
+  color: var(--accent-amber);
+}
+
 /* Ticker Bar */
 .ticker-bar {
   background: rgba(14, 23, 38, 0.95);

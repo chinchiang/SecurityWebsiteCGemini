@@ -84,6 +84,40 @@
 </head>
 <body>
 
+  <!--
+    Bilingual and hardcoded, both on purpose: data-i18n is applied by app.js,
+    which is precisely what has not run if this is on screen, so a translated
+    version of this notice would be a blank one.
+
+    Every claim in it was read off a render of this page with app.js not loaded:
+    #threatTickerContent, #cveListContainer, #playbookAccordion and #quizWizard
+    are all empty, the canvas is a blank box, and only the first tool panel is
+    reachable because switching panels is what initToolTabs() does. The last
+    sentence is the part worth saying to someone who turns JavaScript off on
+    purpose, which on a page of security tools is a likely visitor: the reason to
+    turn it back on here is that the tools compute locally and send nothing.
+  -->
+  <noscript>
+    <div class="noscript-banner">
+      <p>
+        <strong>此頁的互動功能需要 JavaScript。</strong>
+        目前跑馬燈、全球威脅地圖、CVE 漏洞情報資料庫、事件應變劇本與資安成熟度問卷都是空的；
+        工具箱只有第一個分頁（HTTP 安全標頭）看得到，切換分頁與送出檢測都不會有反應；
+        語言切換、深淺色切換與緊急通報對話框也都打不開。文字內容仍然可以閱讀。
+        這些工具全部在你自己的瀏覽器裡計算，不會把你輸入的任何內容送到任何伺服器。
+      </p>
+      <p>
+        <strong>The interactive parts of this page need JavaScript.</strong>
+        Right now the ticker, the global threat map, the CVE database, the incident
+        playbooks and the security maturity quiz are all empty; only the first
+        toolkit tab (HTTP security headers) is reachable, and switching tabs or
+        submitting a check does nothing; the language toggle, the theme toggle and
+        the emergency dialog do not open. The prose is still readable. Every tool
+        here computes in your own browser — nothing you type is sent to any server.
+      </p>
+    </div>
+  </noscript>
+
   <!-- Sticky Top Navigation -->
   <header class="navbar">
     <div class="container nav-container">
