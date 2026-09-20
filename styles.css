@@ -1334,3 +1334,82 @@ body.modal-open {
   /* The colour change carries the meaning here; the width sweep is decoration. */
   .entropy-bar { transition: background-color 0.4s ease; }
 }
+
+/* ------------------------------------------------------------------------- *
+ * Print
+ *
+ * The quiz's last screen offers to "print / download the assessment report",
+ * and window.print() printed the whole page instead: the sticky navbar, the
+ * ticker, the threat-map canvas, five sections of unrelated tooling and the
+ * footer, with the report itself somewhere in the middle of that.
+ *
+ * Legibility was the worse half. Browsers do not print background colours by
+ * default, so every colour picked against a dark surface landed on white paper:
+ * #f8fafc body text on white is blank paper. Redefining the palette fixes that
+ * once instead of rule by rule — and it is the only thing that can, because the
+ * score is written with an inline style="color: var(--accent-cyan)" that no
+ * stylesheet rule is allowed to override.
+ * ------------------------------------------------------------------------- */
+@media print {
+  /* [data-theme="light"] is named so this also wins against the light palette:
+     equal specificity, later in the file. */
+  :root,
+  [data-theme="light"],
+  [data-theme="dark"] {
+    --bg-dark: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-glass: #ffffff;
+
+    --border-color: #9ca3af;
+    --border-active: #4b5563;
+    --border-focus: #1f2937;
+
+    /* Dark enough to read as ink while still telling the score tiers apart. */
+    --accent-cyan: #0e5a6b;
+    --accent-blue: #1d4ed8;
+    --accent-emerald: #0f5132;
+    --accent-amber: #7c4a03;
+    --accent-rose: #991b1b;
+
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --text-muted: #4b5563;
+    --text-highlight: #0e5a6b;
+
+    --shadow-glow-cyan: none;
+    --shadow-glow-rose: none;
+    --shadow-card: none;
+  }
+
+  @page { margin: 1.5cm; }
+
+  body {
+    /* Two fixed radial gradients, which a print pipeline has no good answer for. */
+    background-image: none;
+    background-attachment: scroll;
+  }
+
+  /* Everything that is not the report. The sections are hidden as a group and
+     the printed one put back, so a section added later cannot quietly join the
+     printout — and so this does not become a list of the other five. */
+  .navbar,
+  .ticker-bar,
+  .demo-banner,
+  .footer,
+  .toast-container,
+  .modal-overlay,
+  main > section { display: none; }
+
+  #audit-calculator { display: block; }
+
+  /* Deliberately not hidden: .demo-note. A printed "assessment report" is
+     exactly the artefact that gets forwarded without the page around it, so the
+     note saying the scoring is a demonstration has to travel with it. */
+  #printReportBtn,
+  #restartQuizBtn { display: none; }
+
+  .section { padding: 0; }
+  .card { border: 1px solid var(--border-color); }
+}

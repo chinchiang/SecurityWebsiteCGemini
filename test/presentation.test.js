@@ -9,6 +9,10 @@
  * horizontal drift at the top of the viewport, on every page view, with no
  * control to stop it. `prefers-reduced-motion` is how that visitor asks, and
  * nothing on the page was listening.
+ *
+ * It has since grown into the file for the stylesheet's other promises to a
+ * visitor who is not looking at a desktop screen in the dark: the navigation
+ * below 640px, the footer's claims, and the printed page.
  */
 
 const test = require('node:test');
@@ -180,6 +184,107 @@ test('the map survives a browser with no matchMedia', () => {
 
   app.initThreatMapCanvas();
   assert.equal(frames.requested, 1, 'with no way to ask, animate as before');
+});
+
+/* ---- the printed page ---- */
+
+// Empty rather than null when the block is missing, so each guard below fails on
+// its own assertion instead of on a TypeError from the shared parser.
+const PRINT = atRuleBody(CSS, '@media print') || '';
+
+/** Every selector the print block hides, flattened out of its comma lists. */
+const printHides = () => rules(PRINT)
+  .filter(r => /display:\s*none/.test(r.body))
+  .flatMap(r => r.selector.split(',').map(s => s.trim()));
+
+/** WCAG relative luminance of a #rrggbb colour. */
+function luminance(hex) {
+  const channels = [1, 3, 5]
+    .map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+
+const contrast = (a, b) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+test('printing the report prints the report, not the whole page', () => {
+  // The quiz's last screen offers to print or download "the assessment report".
+  // window.print() printed the page: 7 sheets of navbar, ticker, threat map,
+  // five sections of unrelated tooling and footer, with the report inside.
+  assert.ok(PRINT, 'styles.css needs a @media print block');
+  const hidden = printHides();
+
+  // Hidden as a group with the printed one put back, rather than a list of the
+  // other five, so a section added later cannot quietly join the printout.
+  assert.ok(hidden.includes('main > section'), 'every section should start hidden');
+  const shown = rules(PRINT)
+    .find(r => r.selector.split(',').some(s => s.trim() === '#audit-calculator'));
+  assert.ok(shown, '#audit-calculator needs putting back');
+  assert.match(shown.body, /display:\s*block/);
+
+  // The page furniture, none of which belongs on a printed report — and the two
+  // controls inside the report that do nothing on paper.
+  for (const sel of ['.navbar', '.ticker-bar', '.demo-banner', '.footer',
+    '.toast-container', '.modal-overlay', '#printReportBtn', '#restartQuizBtn']) {
+    assert.ok(hidden.includes(sel), `${sel} would be printed`);
+  }
+});
+
+test('the printed report is ink on paper, not white on white', () => {
+  // Browsers omit background colours from a printout by default, so every colour
+  // chosen against a dark surface lands on white paper. --text-primary is
+  // #f8fafc: blank paper. Reading the fill operators out of the two PDFs shows
+  // it — the pre-change printout drew text in `.9725 .9804 .9882 rg` on an
+  // unpainted page, and that fill is absent from the printout now.
+  //
+  // Restating the palette is also the only fix available: the score is written
+  // with an inline style="color: var(--accent-cyan)", which no stylesheet rule
+  // may override, but which resolves through these variables.
+  const palette = rules(PRINT).find(r => /:root/.test(r.selector));
+  assert.ok(palette, 'the print block should restate the palette');
+  assert.match(palette.selector, /\[data-theme="light"\]/,
+    'the print palette has to beat the light theme too, not only the default one');
+
+  const vars = new Map([...palette.body.matchAll(/(--[\w-]+):\s*([^;]+);/g)]
+    .map(m => [m[1], m[2].trim()]));
+
+  const paper = vars.get('--bg-dark');
+  assert.ok(paper && luminance(paper) > 0.9, `--bg-dark should be paper white, got ${paper}`);
+
+  let examined = 0;
+  for (const [name, value] of vars) {
+    if (!/^--(?:text|accent)-/.test(name)) continue;
+    assert.match(value, /^#[0-9a-f]{6}$/i, `${name} should be a plain hex colour in print`);
+    examined++;
+
+    // The accents are not decoration here: the score tier is a colour, so it has
+    // to survive as ink rather than as a pale wash.
+    const floor = name.startsWith('--text-') ? 7 : 4.5;
+    const ratio = contrast(value, paper);
+    assert.ok(ratio >= floor,
+      `${name} (${value}) is ${ratio.toFixed(1)}:1 on paper and needs ${floor}:1`);
+  }
+  assert.ok(examined >= 8, `only ${examined} print colours were examined`);
+});
+
+test('the disclosure is printed along with the report', () => {
+  // A printed "security maturity assessment report" is exactly the artefact that
+  // gets forwarded without the page around it, and the demo banner is not on the
+  // paper. The note saying the scoring is a demonstration mapping to no
+  // published framework is what has to travel with it.
+  assert.equal(printHides().some(s => /\bdemo-note\b/.test(s)), false,
+    'the print block must not hide the disclosure');
+
+  const { app, dom } = loadApp();
+  app.renderAuditQuiz();
+  const html = dom.getById('quizWizard').innerHTML;
+  const resultStep = html.slice(html.indexOf('id="quizResultStep"'));
+
+  assert.ok(resultStep.length > 100, 'the result step should be part of the render');
+  assert.match(resultStep, /class="demo-note/, 'the report itself should carry the note');
 });
 
 /* ---- navigation ---- */
