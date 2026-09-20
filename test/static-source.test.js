@@ -277,6 +277,31 @@ test('every element app.js writes into exists in index.html', () => {
   assert.deepEqual(missing, [], 'getElementById targets present in neither index.html nor a template');
 });
 
+test('every button says what kind of button it is', () => {
+  // A <button> with no type attribute is type="submit". 9813238 fixed that for
+  // index.html and stopped there, so the three buttons the quiz writes from a
+  // template kept the default — including the option buttons, where pressing
+  // Enter is the ordinary way to answer.
+  //
+  // The damage is latent rather than live: #quizWizard is a <div>, and the four
+  // real forms all preventDefault. Latent is not fixed. The failure mode is a
+  // submit that reloads the page and silently discards the audit in progress,
+  // and it arrives the moment the wizard is moved inside a <form> — by which
+  // point nothing connects the reload to a missing attribute three years old.
+  const offenders = [];
+  let examined = 0;
+
+  for (const [source, where] of [[MARKUP, 'index.html'], [stripJsComments(JS), 'app.js templates']]) {
+    for (const [tag] of source.matchAll(/<button\b[^>]*>/g)) {
+      examined++;
+      if (!/\btype="(?:button|submit|reset)"/.test(tag)) offenders.push(`${where}: ${tag.trim()}`);
+    }
+  }
+
+  assert.ok(examined > 15, `only ${examined} buttons were examined`);
+  assert.deepEqual(offenders, [], 'these default to type="submit"');
+});
+
 test('the toast container is announced to assistive technology', () => {
   const match = /<div[^>]*id="toastContainer"[^>]*>/.exec(HTML);
   assert.ok(match, 'toast container exists');

@@ -2453,7 +2453,7 @@ function renderAuditQuiz() {
         <h3 style="margin: 0.5rem 0 1rem;">${q.title}</h3>
         <div class="quiz-options">
           ${q.opts.map(o => `
-            <button class="quiz-opt-btn" data-score="${o.score}">
+            <button class="quiz-opt-btn" type="button" data-score="${o.score}">
               <span>${o.text}</span>
               <span class="mono">+${o.score} pts</span>
             </button>
@@ -2475,8 +2475,8 @@ function renderAuditQuiz() {
         <p id="quizTierBadge" style="font-weight: 700; margin-bottom: 1rem; font-size: 1.2rem;"></p>
         <p id="quizRecommendation" style="color: var(--text-secondary); max-width: 540px; margin: 0 auto 1.5rem;"></p>
         <div class="demo-note demo-note-inline" style="max-width: 560px; margin: 0 auto 1.5rem; text-align: left;">${escapeHtml(t('noteAudit'))}</div>
-        <button class="btn btn-primary" id="printReportBtn">${isZh ? '列印 / 下載資安成熟度評估報告 📄' : 'Download / Print Security Assessment Report 📄'}</button>
-        <button class="btn btn-secondary" id="restartQuizBtn" style="margin-left: 0.5rem;">${isZh ? '重新評估' : 'Restart Audit'}</button>
+        <button class="btn btn-primary" type="button" id="printReportBtn">${isZh ? '列印 / 下載資安成熟度評估報告 📄' : 'Download / Print Security Assessment Report 📄'}</button>
+        <button class="btn btn-secondary" type="button" id="restartQuizBtn" style="margin-left: 0.5rem;">${isZh ? '重新評估' : 'Restart Audit'}</button>
       </div>
     </div>
   `;
