@@ -180,3 +180,29 @@ test('the map survives a browser with no matchMedia', () => {
   app.initThreatMapCanvas();
   assert.equal(frames.requested, 1, 'with no way to ask, animate as before');
 });
+
+/* ---- navigation ---- */
+
+const HTML = read('index.html');
+
+test('no breakpoint hides the navigation outright', () => {
+  // The original: `.nav-links { display: none }` below 640px, with no disclosure
+  // button and no other route to the five sections — on most phones.
+  const offenders = rules(CSS)
+    .filter(r => /\bnav(-links)?\b/.test(r.selector) && /display:\s*none/.test(r.body))
+    .map(r => r.selector);
+
+  assert.deepEqual(offenders, [],
+    'hiding the nav removes the only route to these sections; let it wrap instead');
+});
+
+test('every navigation link points at a section that exists', () => {
+  const nav = /<nav>([\s\S]*?)<\/nav>/.exec(HTML);
+  assert.ok(nav, '<nav> exists');
+
+  const targets = [...nav[1].matchAll(/href="#([^"]+)"/g)].map(m => m[1]);
+  assert.ok(targets.length >= 5, `expected the five section links, found ${targets.length}`);
+
+  const ids = new Set([...HTML.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]));
+  assert.deepEqual(targets.filter(t => !ids.has(t)), [], 'nav links to no such section');
+});

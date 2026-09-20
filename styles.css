@@ -1252,7 +1252,34 @@ body.modal-open {
 }
 
 @media (max-width: 640px) {
-  .nav-links { display: none; }
+  /* The navigation used to be `display: none` here, with nothing in its place:
+     every section link simply disappeared below 640px, which is most phones.
+     Letting the header wrap and the links run onto a second row keeps all five
+     reachable without inventing a disclosure button — and without adding a tab
+     stop that only exists to reveal links that were already in the markup. */
+  .nav-container {
+    height: auto;
+    flex-wrap: wrap;
+    row-gap: 0.75rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .nav-container nav {
+    order: 3;
+    width: 100%;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+
+  .nav-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
   .hero-title { font-size: 2.25rem; }
   .footer-grid { grid-template-columns: 1fr; }
   .hero-stats { grid-template-columns: 1fr; }
