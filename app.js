@@ -68,7 +68,9 @@ const TRANSLATIONS = {
     telemetryTitle: '模擬遙測介面',
     telemetrySub: '範例延遲: 14ms • 範例封包丟失率: 0%',
     btnRefresh: '重新整理',
-    mapTitle: '全球網路攻擊即時動態地圖',
+    // 「即時動態地圖」：畫布畫的是隨機產生的點與線，沒有任何一筆來自網路。
+    // 標題是整個區段最先被讀到的一句話，說明文字裡的「模擬」救不了它。
+    mapTitle: '全球網路攻擊動態地圖（模擬資料）',
     mapDesc: '模擬追蹤全球網路攻擊流量、惡意程式 C2 中繼站連線與 DDoS 洗流量中心動態。',
     legC2: 'C2 中繼連線',
     legRansom: '勒索/漏洞利用',
@@ -234,8 +236,11 @@ const TRANSLATIONS = {
     telemetryTitle: 'Simulated Telemetry UI',
     telemetrySub: 'Sample latency: 14ms • Sample packet loss: 0%',
     btnRefresh: 'Refresh',
-    mapTitle: 'Live Cyber Attack Vector Map',
-    mapDesc: 'Simulated real-time tracking of global cyber attack traffic, malware command & control nodes, and scrubbing center telemetry.',
+    mapTitle: 'Simulated Cyber Attack Vector Map',
+    // "real-time" is dropped rather than left standing behind "Simulated": the
+    // zh-TW line says 模擬追蹤 and claims no timing, and there is no interval here
+    // for anything to be real-time with respect to.
+    mapDesc: 'Simulated tracking of global cyber attack traffic, malware command & control nodes, and scrubbing center telemetry.',
     legC2: 'C2 Ping',
     legRansom: 'Ransomware / Exploit',
     legDdos: 'DDoS Scrubbing',
@@ -329,7 +334,10 @@ const TRANSLATIONS = {
     filterHigh: 'High',
     filterMed: 'Medium',
     playbookTitle: 'Incident Response Playbooks',
-    playbookDesc: 'Interactive SOP workflows for SOC analysts during live cyber security incidents.',
+    // "during live cyber security incidents" was an embellishment the zh-TW line
+    // does not have (在面對資安事件時), and on this page "live" reads as a claim
+    // about what the page is connected to rather than about the incident.
+    playbookDesc: 'Interactive SOP workflows for SOC analysts responding to a cyber security incident.',
     playbookToggle: 'Expand / collapse ▾',
     auditTitle: 'Security Posture Maturity Calculator',
     auditDesc: 'Answer 5 quick strategic questions to benchmark your organization\'s cybersecurity defense score.',

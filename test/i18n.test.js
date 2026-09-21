@@ -209,6 +209,51 @@ test('every name the page carries is translatable, and none of them claims a liv
   assert.ok(examined >= 12, `only ${examined} names examined; the sweep found less than the page carries`);
 });
 
+/**
+ * Words that say the claim is a demonstration. Deliberately strong markers only:
+ * `未` or `not` would match half the dictionary and let a claim pass on a word
+ * that has nothing to do with it.
+ */
+const DISCLAIMS = /模擬|虛構|示範|範例|不提供|demo|simulat|sample|fiction|example/i;
+
+test('nothing the page says about itself claims a live service undisclaimed', () => {
+  // CLAIMS_LIVE used to be applied to the accessible names only, which is where
+  // the wrong one had been found. It reaches the whole dictionary here, and found
+  // three more: mapTitle called a canvas of random dots 「即時動態地圖」 / "Live
+  // Cyber Attack Vector Map" — the first line of that section, and the loudest
+  // claim on the page — and the English playbookDesc had SOC analysts working
+  // "during live cyber security incidents", an embellishment the zh-TW line does
+  // not have.
+  //
+  // The rule is not "never say live": 「不提供即時監控」 and "no live monitoring"
+  // are the honest sentences, and 「即時搜尋」 of a fabricated list is true of the
+  // search. So a value may make the claim as long as the same string says what it
+  // is — which is the only form a visitor reads as one thought.
+  const { app } = loadApp();
+  const claimed = [];
+  const offenders = [];
+
+  for (const [lang, dict] of Object.entries(app.TRANSLATIONS)) {
+    for (const [key, value] of Object.entries(dict)) {
+      const claim = CLAIMS_LIVE.exec(value);
+      if (!claim) continue;
+      claimed.push(`${lang}.${key}`);
+      if (!DISCLAIMS.test(value)) offenders.push(`${lang}.${key} [${claim[0]}]: ${value}`);
+    }
+  }
+
+  // The anti-vacuity anchor is named rather than counted: heroSubtitle is where
+  // both dictionaries say outright that there is no live monitoring here, so it is
+  // the one value that has to keep matching. If it stops, CLAIMS_LIVE stopped
+  // matching — and a sweep that finds nothing reports a page with nothing wrong.
+  for (const lang of ['zh-TW', 'en']) {
+    assert.ok(claimed.includes(`${lang}.heroSubtitle`),
+      `CLAIMS_LIVE no longer matches ${lang}.heroSubtitle, so this sweep found nothing to check`);
+  }
+  assert.deepEqual(offenders, [],
+    'say in the same string that this is a demonstration, or drop the claim');
+});
+
 test('the English dictionary contains no Chinese text', () => {
   const { app } = loadApp();
   const leaked = Object.entries(app.TRANSLATIONS['en'])
