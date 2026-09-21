@@ -486,6 +486,29 @@ test('the toast container is announced to assistive technology', () => {
   assert.match(match[0], /aria-live="polite"/);
 });
 
+test('every label labels a control that exists', () => {
+  // A <label> is a promise that clicking it focuses something and that a screen
+  // reader will read it out as that thing's name. With no `for` and no control
+  // nested inside, it keeps the appearance and delivers neither — and there is
+  // nothing on screen to show it. The SHA-256 caption was one: the value below it
+  // is a <span>, which a <label> cannot label at all.
+  const labels = [...MARKUP.matchAll(/<label\b[^>]*>/g)].map(m => m[0]);
+  assert.ok(labels.length >= 6, `only ${labels.length} labels found; the sweep is broken`);
+
+  // Every id that a `for` may legitimately point at: the labelable elements.
+  const controls = new Set(
+    [...MARKUP.matchAll(/<(?:input|select|textarea|button|meter|progress|output)\b[^>]*\bid="([^"]+)"/g)]
+      .map(m => m[1])
+  );
+
+  for (const tag of labels) {
+    const target = /\bfor="([^"]+)"/.exec(tag);
+    assert.ok(target, `${tag} has no for=; it is a caption, so do not call it a label`);
+    assert.ok(controls.has(target[1]),
+      `${tag} points at #${target[1]}, which is no form control on this page`);
+  }
+});
+
 test('anything app.js reveals in place is announced when it appears', () => {
   // WCAG 4.1.3. Three tools answer by unhiding a container below their form,
   // 500-600ms after the submit, with focus still on the button. A sighted visitor

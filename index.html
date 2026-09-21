@@ -408,7 +408,13 @@
               </div>
 
               <div style="margin-top: 1.75rem;">
-                <label class="form-label" data-i18n="p2ShaLabel">前端純 Hash 計算 (SHA-256)</label>
+                <!-- Not a <label>: the thing below is a computed value in a
+                     <span>, not a form control, and a <label> with no `for` and no
+                     control inside it labels nothing at all. Screen readers expose
+                     it as a label and then have nothing to attach it to, which is
+                     worse than the plain caption it always was. .form-label is a
+                     class, so the appearance is unchanged. -->
+                <span class="form-label" data-i18n="p2ShaLabel">前端純 Hash 計算 (SHA-256)</span>
                 <div class="hash-output-box">
                   <span id="sha256HashOutput">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
                   <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" id="copyHashBtn" data-i18n="p2Copy" type="button">複製 Hash</button>
