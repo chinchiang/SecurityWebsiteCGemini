@@ -5,10 +5,14 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { loadApp } = require('./helpers/load-app.js');
+const { stripHtmlComments } = require('./helpers/markup.js');
 
-const INDEX_HTML = fs.readFileSync(
+// Comments are stripped because index.html's comments quote the markup they
+// explain — a sweep that reads them examines attributes that are not on the page,
+// and, worse, holds the explanation of an old value to the rule that replaced it.
+const INDEX_HTML = stripHtmlComments(fs.readFileSync(
   path.join(__dirname, '..', 'index.html'), 'utf8'
-);
+));
 
 /** Han, Bopomofo and CJK punctuation — anything that should not reach English UI. */
 const CJK = /[　-〿㄀-ㄯ㐀-䶿一-鿿＀-￯]/;
@@ -84,18 +88,25 @@ test('an attribute whose key does not resolve keeps the value the markup gave it
     'an unresolved key wiped the accessible name instead of leaving it');
 });
 
-test('every data-i18n-aria-label in index.html resolves in both languages', () => {
+test('every data-i18n-<attribute> in index.html resolves in both languages', () => {
   // A missing key here fails silently and invisibly: setLanguage skips the
   // element, and the control keeps whatever accessible name it was born with —
   // for the modal close button, the bare × glyph, i.e. none.
   const { app } = loadApp();
-  const used = [...INDEX_HTML.matchAll(/data-i18n-aria-label="([^"]+)"/g)].map(m => m[1]);
-  assert.ok(used.length > 0, 'index.html uses data-i18n-aria-label');
+  const used = [...INDEX_HTML.matchAll(/data-i18n-([a-z][\w-]*)="([^"]+)"/g)];
+  assert.ok(used.length >= 4, `only ${used.length} translated attributes found; the sweep is broken`);
 
-  const unresolved = [...new Set(used)].filter(
-    k => !app.TRANSLATIONS['zh-TW'][k] || !app.TRANSLATIONS['en'][k]
-  );
-  assert.deepEqual(unresolved, [], 'data-i18n-aria-label keys with no translation');
+  for (const [, attribute, key] of used) {
+    // An attribute setLanguage does not iterate is markup that looks translated
+    // and is not, which is the failure this whole mechanism exists to prevent.
+    assert.ok(app.TRANSLATED_ATTRIBUTES.includes(attribute),
+      `data-i18n-${attribute} is not an attribute setLanguage translates`);
+
+    for (const lang of ['zh-TW', 'en']) {
+      assert.ok(app.TRANSLATIONS[lang][key],
+        `${lang}.${key} is missing, so ${attribute} would keep the other language's text`);
+    }
+  }
 });
 
 test('an element with an i18n aria-label carries no conflicting text', () => {
@@ -108,6 +119,54 @@ test('an element with an i18n aria-label carries no conflicting text', () => {
     assert.doesNotMatch(words, /[A-Za-z一-鿿]/,
       `${tag[1]} has both an aria-label and visible text: "${tag[2].trim()}"`);
   }
+});
+
+/**
+ * A name that would have the page assert a service it does not run. The ticker
+ * region was called "Live Threat Stream"; a name is read out to exactly the
+ * visitor who cannot see the 「示範網站聲明」banner two elements below it.
+ */
+const CLAIMS_LIVE = /\blive\b|real-?time|monitoring|platform|即時|實時|平台/i;
+
+test('every name the page carries is translatable, and none of them claims a live service', () => {
+  // The whole page in one sweep rather than the four names that happened to be
+  // wrong: aria-label, title and alt are the attributes whose value a visitor
+  // reads, and three of the five on the page were hardcoded English that no
+  // language switch could reach. Both directions are checked here, because they
+  // are two halves of one pairing: a name must declare a key, and a declared key
+  // must have the zh-TW string as its pre-JavaScript fallback.
+  const { app } = loadApp();
+  let examined = 0;
+
+  for (const [tag] of INDEX_HTML.matchAll(/<[a-z][^>]*>/g)) {
+    for (const attribute of app.TRANSLATED_ATTRIBUTES) {
+      // `(?:^|\s)` so that data-i18n-alt="…" is not read as alt="…".
+      const shown = new RegExp(`(?:^|\\s)${attribute}="([^"]*)"`).exec(tag);
+      const declared = new RegExp(`data-i18n-${attribute}="([^"]+)"`).exec(tag);
+      if (!shown && !declared) continue;
+      examined++;
+
+      // alt="" is the one legitimate untranslatable value: it declares the image
+      // decorative, and there is no text to translate.
+      if (shown && shown[1] === '') {
+        assert.equal(attribute, 'alt', `${attribute}="" names nothing; remove it instead`);
+        assert.equal(declared, null, `an empty ${attribute} with a translation key is a contradiction`);
+        continue;
+      }
+
+      assert.ok(declared, `${attribute}=${JSON.stringify(shown[1])} cannot be translated; add data-i18n-${attribute}`);
+      assert.ok(shown, `data-i18n-${attribute}="${declared[1]}" has no static ${attribute} to fall back to`);
+      assert.equal(shown[1], app.TRANSLATIONS['zh-TW'][declared[1]],
+        `the static ${attribute} and zh-TW.${declared[1]} disagree about what this is called`);
+
+      for (const lang of ['zh-TW', 'en']) {
+        assert.doesNotMatch(app.TRANSLATIONS[lang][declared[1]], CLAIMS_LIVE,
+          `${lang}.${declared[1]} is announced as a live service this page does not run`);
+      }
+    }
+  }
+
+  assert.ok(examined >= 6, `only ${examined} names examined; the sweep found less than the page carries`);
 });
 
 test('the English dictionary contains no Chinese text', () => {

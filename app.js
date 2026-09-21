@@ -42,8 +42,16 @@ const TRANSLATIONS = {
     navPlaybooks: '應變劇本 Playbooks',
     navAudit: '成熟度評估 Audit',
     sysStatus: 'DEMO MODE • 模擬介面',
+    // The language button's own label is the two language names, which is what a
+    // screen reader should read out; this is its tooltip, not its name.
+    langToggle: '切換語言',
+    // Read as both the name and the tooltip of a button whose only content is 🌙.
+    themeToggle: '切換深色／淺色主題',
     btnEmergency: '🚨 緊急通報 Emergency',
     tickerLabel: '模擬威脅快訊',
+    // The name of the ticker region. It used to be the hardcoded English "Live
+    // Threat Stream": nothing here is live, and the items are made up.
+    tickerRegion: '模擬威脅快訊（示範資料）',
     heroBadge: '⚡ 主動防禦協定已啟用 ACTIVE DEFENSE PROTOCOL',
     heroTitle: '新世代資安 <span>威脅情報與診斷指揮中心</span>',
     heroSubtitle: '以前端模擬介面展示網域安全標頭、密碼熵值、CVE 情報與事件應變劇本；不提供即時監控或真實掃描。',
@@ -204,8 +212,11 @@ const TRANSLATIONS = {
     navPlaybooks: 'Playbooks',
     navAudit: 'Audit Score',
     sysStatus: 'DEMO MODE • SIMULATED UI',
+    langToggle: 'Switch language',
+    themeToggle: 'Toggle dark / light theme',
     btnEmergency: '🚨 Emergency Incident',
     tickerLabel: 'SIMULATED THREAT FEED',
+    tickerRegion: 'Simulated threat headlines (demo data)',
     heroBadge: '⚡ ACTIVE DEFENSE PROTOCOL ACTIVE',
     heroTitle: 'Next-Gen Cyber <span>Intelligence & Diagnostics</span>',
     heroSubtitle: 'A front-end demonstration of security-header scoring, password entropy, CVE intelligence, and incident-response playbooks; it provides no live monitoring or real scanning.',
