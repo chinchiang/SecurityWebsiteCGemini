@@ -238,24 +238,198 @@ test('no user-facing message is hardcoded in a template', () => {
   }
 });
 
-test('the tab title and social description do not advertise a live service', () => {
-  // These two travel: they are what a search result, a chat unfurl and a browser
-  // tab show, none of which render the in-page demo banner. They previously
+// Comments stripped: the block above the social tags discusses `<title>` and
+// `<meta name="description">` by name, and the extraction below would otherwise
+// read the prose about a tag instead of the tag.
+const HEAD = MARKUP.slice(0, MARKUP.indexOf('</head>'));
+
+/** The content of a <meta> in the head, by property= or name=. */
+const meta = key => {
+  const m = new RegExp(`<meta\\s+(?:property|name)="${key}"\\s+content="([^"]*)"`).exec(HEAD);
+  return m ? m[1] : null;
+};
+
+test('nothing that travels with the link advertises a live service', () => {
+  // These are what a search result, a chat unfurl and a browser tab show, none of
+  // which render the in-page demo banner. The title and description previously
   // promised "live threat vectors" and a "Defense Portal", so the page read as an
-  // operational security service everywhere except on the page itself.
-  const head = HTML.slice(0, HTML.indexOf('</head>'));
-  const title = /<title>([^<]*)<\/title>/.exec(head);
-  const desc = /<meta\s+name="description"\s+content="([^"]*)"/.exec(head);
-
+  // operational security service everywhere except on the page itself — and the
+  // og:* tags are the same claim again, to a different set of readers.
+  const title = /<title>([^<]*)<\/title>/.exec(HEAD);
   assert.ok(title, '<title> exists');
-  assert.ok(desc, 'a description meta tag exists');
 
-  for (const [what, text] of [['title', title[1]], ['description', desc[1]]]) {
+  const travelling = [
+    ['title', title[1]],
+    ['description', meta('description')],
+    ['og:title', meta('og:title')],
+    ['og:description', meta('og:description')],
+    ['og:site_name', meta('og:site_name')],
+    ['og:image:alt', meta('og:image:alt')]
+  ];
+
+  for (const [what, text] of travelling) {
+    assert.ok(text, `${what} is missing`);
     assert.doesNotMatch(text, /\blive\b|real-?time|即時|monitoring platform/i,
       `the ${what} claims a capability the site does not have`);
     assert.match(text, /demo|simulated|示範|模擬/i,
       `the ${what} must say that this is a demo with simulated data`);
   }
+});
+
+test('the social tags are one wording, not a second one to keep honest', () => {
+  // A preview card is the copy most likely to be forgotten when the disclosure is
+  // reworded, because nothing on the page displays it. Keeping it byte-identical
+  // to the title and description means there is only ever one sentence to fix.
+  const title = /<title>([^<]*)<\/title>/.exec(HEAD)[1];
+  assert.equal(meta('og:title'), title, 'og:title has drifted from <title>');
+  assert.equal(meta('og:description'), meta('description'),
+    'og:description has drifted from the description meta');
+});
+
+test('the social tags use the attribute name their vocabulary requires', () => {
+  // og:* is read from property= and twitter:* from name=. A swapped attribute is
+  // not an error anywhere: the tag is simply ignored, and the card falls back to
+  // whatever the client would have guessed.
+  const offenders = [];
+  let examined = 0;
+
+  for (const [tag, attrName, key] of HEAD.matchAll(/<meta\s+(property|name)="((?:og|twitter):[\w:]+)"/g)) {
+    examined++;
+    const wanted = key.startsWith('og:') ? 'property' : 'name';
+    if (attrName !== wanted) offenders.push(`${key} uses ${attrName}=, not ${wanted}=`);
+  }
+
+  assert.ok(examined >= 10, `only ${examined} social tags were examined`);
+  assert.deepEqual(offenders, []);
+});
+
+/**
+ * The pixel size out of a JPEG's frame header, so the declared og:image
+ * dimensions are checked against the file rather than against another
+ * declaration. A JPEG after the two-byte SOI is a run of segments: 0xFF, a
+ * marker, then a 16-bit big-endian length that counts itself. The frame headers
+ * SOF0–SOF15 (0xC0–0xCF, less the three markers in that range that are not frame
+ * headers) carry height and then width, which is the order that catches a
+ * transposed pair.
+ */
+function jpegSize(buf) {
+  const NO_LENGTH = new Set([0x01, 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9]);
+
+  for (let i = 2; i + 9 < buf.length;) {
+    if (buf[i] !== 0xFF) { i++; continue; }        // fill bytes between segments
+    const marker = buf[i + 1];
+
+    if (marker >= 0xC0 && marker <= 0xCF && ![0xC4, 0xC8, 0xCC].includes(marker)) {
+      return { height: buf.readUInt16BE(i + 5), width: buf.readUInt16BE(i + 7) };
+    }
+    i += NO_LENGTH.has(marker) ? 2 : 2 + buf.readUInt16BE(i + 2);
+  }
+  throw new Error('no frame header found: is this a JPEG?');
+}
+
+test('the card points at a picture this repo actually publishes', () => {
+  // Open Graph has no relative form, so these are the one place in the page that
+  // hardcodes its own origin, and the one place that can silently come to name
+  // someone else's file.
+  const SITE = 'https://chinchiang.github.io/SecurityWebsiteCGemini/';
+  const url = meta('og:url');
+  const image = meta('og:image');
+
+  assert.equal(url, SITE, 'og:url should be the page this repo publishes');
+  assert.ok(image && image.startsWith(SITE),
+    `og:image should live under ${SITE}, got ${image}`);
+
+  // And the file has to be in the repo, or the card is a broken image.
+  const relative = image.slice(SITE.length);
+  assert.ok(fs.existsSync(path.join(ROOT, relative)), `${relative} is not in the repo`);
+  assert.ok(MARKUP.includes(`src="${relative}"`),
+    'the card should show the image the page itself shows');
+
+  // The declared size is a promise about the bytes: a client that trusts a wrong
+  // one reserves the wrong box and then reflows, or crops the card.
+  const { width, height } = jpegSize(fs.readFileSync(path.join(ROOT, relative)));
+  assert.equal(Number(meta('og:image:width')), width);
+  assert.equal(Number(meta('og:image:height')), height);
+
+  // Below 600x315 no client will render a large-image card at all, which is the
+  // format twitter:card asks for.
+  assert.equal(meta('twitter:card'), 'summary_large_image');
+  assert.ok(width >= 600 && height >= 315, `${width}x${height} is too small for a large card`);
+});
+
+test('both languages the page ships are declared to the unfurl', () => {
+  // The toggle switches language at this one URL, so a card in either language is
+  // a correct rendering of it.
+  assert.equal(meta('og:locale'), 'zh_TW');
+  assert.equal(meta('og:locale:alternate'), 'en_US');
+  assert.match(MARKUP, /<html lang="zh-TW"/, 'og:locale should agree with the document');
+});
+
+/* ---- the page with no JavaScript ---- */
+
+const NOSCRIPT = /<noscript>([\s\S]*?)<\/noscript>/.exec(MARKUP);
+const NOSCRIPT_TEXT = NOSCRIPT ? NOSCRIPT[1].replace(/<[^>]*>/g, ' ') : '';
+
+test('a visitor with no JavaScript is told so, in both languages', () => {
+  // Without this the page was a working navbar and a set of section headings over
+  // an empty ticker, a blank canvas and three empty containers, with nothing
+  // saying why or that it was fixable.
+  assert.ok(NOSCRIPT, 'index.html needs a <noscript>');
+
+  // Ahead of everything it describes, so it is the first thing read rather than
+  // an explanation found after giving up.
+  assert.ok(MARKUP.indexOf('<noscript>') < MARKUP.indexOf('<header'),
+    'the notice belongs at the top of the body');
+
+  // data-i18n is applied by app.js, which is the one thing that has not run, so
+  // a translated notice would be an empty one. Both languages are in the markup.
+  assert.doesNotMatch(NOSCRIPT[1], /data-i18n/,
+    'nothing in here can be translated at runtime; write both languages out');
+  // Counted rather than pattern-matched, because a handful of Latin words appear
+  // in the Chinese half too ("HTTP", "CVE", "JavaScript"): a sentence's worth is
+  // the thing being checked for, not the presence of the alphabet.
+  assert.match(NOSCRIPT_TEXT, /[一-鿿]{10,}/, 'the Chinese half is missing');
+  const words = NOSCRIPT_TEXT.match(/[A-Za-z]{2,}/g) || [];
+  assert.ok(words.length >= 40, `the English half is missing or short: ${words.length} words`);
+
+  // The class has to be styled, or this is a wall of unstyled text at the top of
+  // the page — which is how the notice would read as broken rather than helpful.
+  assert.match(NOSCRIPT[1], /class="noscript-banner"/);
+  assert.match(CSS, /\.noscript-banner\s*\{/, 'styles.css should style the notice');
+});
+
+test('the notice names each thing that stops working, in both languages', () => {
+  // Checked against a render of index.html with app.js not loaded: every one of
+  // these containers is empty, the canvas is blank, and three of the four tools
+  // cannot even be brought on screen because switching panels is initToolTabs().
+  // Paired so that a feature added to one half of the notice and not the other
+  // fails: that is the likely drift, not a missing item.
+  const PAIRS = [
+    ['跑馬燈', /\bticker\b/i],
+    ['威脅地圖', /threat map/i],
+    ['CVE', /\bCVE\b/],
+    ['劇本', /playbook/i],
+    ['問卷', /\bquiz\b/i],
+    ['分頁', /\btabs?\b/i],
+    ['語言', /language/i],
+    ['深淺色', /theme/i],
+    ['瀏覽器', /browser/i]
+  ];
+
+  // The extraction above is one regex away from producing an empty string, and
+  // every assertion below would then be about nothing.
+  assert.ok(NOSCRIPT_TEXT.length > 300, `the notice is only ${NOSCRIPT_TEXT.length} characters`);
+  assert.ok(PAIRS.length >= 9, 'the list itself should cover everything that breaks');
+
+  for (const [zh, en] of PAIRS) {
+    assert.ok(NOSCRIPT_TEXT.includes(zh), `the Chinese half does not mention ${zh}`);
+    assert.match(NOSCRIPT_TEXT, en, `the English half does not mention ${en}`);
+  }
+
+  // And the reason to turn it back on, which is the honest one for a page of
+  // security tools: they run locally and send nothing.
+  assert.match(NOSCRIPT_TEXT, /不會把你輸入的任何內容送到/);
+  assert.match(NOSCRIPT_TEXT, /nothing you type is sent/i);
 });
 
 test('index.html tags are balanced for the containers the app writes into', () => {

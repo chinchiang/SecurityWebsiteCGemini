@@ -193,6 +193,9 @@ function createElement(env, tagName) {
  * @param {'ok'|'reject'|'missing'} [options.clipboard] navigator.clipboard
  *   behaviour. 'reject' is a denied permission or an unfocused document;
  *   'missing' is an insecure context, where the API is not exposed at all.
+ * @param {string[]} [options.absentIds] ids getElementById should answer null
+ *   for. Without it every id exists, and a `if (!el) return` guard is
+ *   unreachable from a test.
  */
 function createDom(options = {}) {
   const byId = new Map();
@@ -200,6 +203,7 @@ function createDom(options = {}) {
   const i18nElements = [];
   const i18nAriaElements = [];
   const scopedSteps = new Map(); // scope element -> Map(stepNumber -> element)
+  const absentIds = new Set(options.absentIds || []);
 
   const env = {
     activeElement: null,
@@ -276,6 +280,12 @@ function createDom(options = {}) {
     get activeElement() { return env.activeElement; },
 
     getElementById(id) {
+      // An id the page does not have. Every other id is invented on demand,
+      // which is what most tests want, but it left `if (!el) return` — the guard
+      // a page with one element missing is written for — with no way to be
+      // reached, and so no way to be tested.
+      if (absentIds.has(id)) return null;
+
       if (!byId.has(id)) {
         const el = createElement(env, 'div');
         el.id = id;

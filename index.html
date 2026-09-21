@@ -38,10 +38,85 @@
   -->
   <title>AegisGuard | 資安工具示範站（模擬資料）Security Toolkit Demo</title>
   <meta name="description" content="A front-end demo of security tooling UI: HTTP header grading, password strength estimation, a phishing URL heuristic, a CVE browser and incident playbooks. All data is simulated and no scanning, lookup or monitoring is performed. 純前端示範介面，所有資料均為模擬，不執行任何真實掃描或查詢。">
+  <!--
+    The same two strings again, for the unfurl.
+
+    A chat client, a forum and a social post look for these first. With none of
+    them present each client fell back to whatever it prefers: some do read the
+    <title> and description above, some pick their own text, and the image is
+    whichever one the scraper decides on — for this page, a stock shot of what
+    reads as a live operations centre. Saying it here is the only way the
+    disclosure travels with the link, since no client renders the in-page banner.
+
+    og:title and og:description are deliberately identical to the title and
+    description above rather than a second wording: one sentence to keep honest,
+    not two, and static-source.test.js asserts the copies stay in step.
+
+    The URLs have to be absolute — Open Graph has no relative form — so they name
+    the GitHub Pages site this repo publishes:
+    https://chinchiang.github.io/SecurityWebsiteCGemini/. A fork that publishes
+    elsewhere has to change these two lines; nothing else in the page is
+    origin-aware.
+
+    Twitter reads the og:* tags for everything except the card format, so
+    twitter:card is the only twitter:* tag here. Note the attribute names differ:
+    Open Graph is property=, Twitter is name=, and a swapped one is ignored in
+    silence.
+  -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AegisGuard（示範站 Demo）">
+  <meta property="og:title" content="AegisGuard | 資安工具示範站（模擬資料）Security Toolkit Demo">
+  <meta property="og:description" content="A front-end demo of security tooling UI: HTTP header grading, password strength estimation, a phishing URL heuristic, a CVE browser and incident playbooks. All data is simulated and no scanning, lookup or monitoring is performed. 純前端示範介面，所有資料均為模擬，不執行任何真實掃描或查詢。">
+  <meta property="og:url" content="https://chinchiang.github.io/SecurityWebsiteCGemini/">
+  <meta property="og:image" content="https://chinchiang.github.io/SecurityWebsiteCGemini/assets/security_hero.jpg">
+  <!-- The real pixel size of that file; a client that trusts a wrong one lays
+       out a gap and then reflows, or crops the card. -->
+  <meta property="og:image:width" content="1376">
+  <meta property="og:image:height" content="768">
+  <meta property="og:image:alt" content="模擬資安戰情室介面示意圖 Illustration of a simulated security operations interface">
+  <!-- The page ships both languages at this one URL, switched by the toggle in
+       the header, so both are declared rather than only the document's lang. -->
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
 </head>
 <body>
+
+  <!--
+    Bilingual and hardcoded, both on purpose: data-i18n is applied by app.js,
+    which is precisely what has not run if this is on screen, so a translated
+    version of this notice would be a blank one.
+
+    Every claim in it was read off a render of this page with app.js not loaded:
+    #threatTickerContent, #cveListContainer, #playbookAccordion and #quizWizard
+    are all empty, the canvas is a blank box, and only the first tool panel is
+    reachable because switching panels is what initToolTabs() does. The last
+    sentence is the part worth saying to someone who turns JavaScript off on
+    purpose, which on a page of security tools is a likely visitor: the reason to
+    turn it back on here is that the tools compute locally and send nothing.
+  -->
+  <noscript>
+    <div class="noscript-banner">
+      <p>
+        <strong>此頁的互動功能需要 JavaScript。</strong>
+        目前跑馬燈、全球威脅地圖、CVE 漏洞情報資料庫、事件應變劇本與資安成熟度問卷都是空的；
+        工具箱只有第一個分頁（HTTP 安全標頭）看得到，切換分頁與送出檢測都不會有反應；
+        語言切換、深淺色切換與緊急通報對話框也都打不開。文字內容仍然可以閱讀。
+        這些工具全部在你自己的瀏覽器裡計算，不會把你輸入的任何內容送到任何伺服器。
+      </p>
+      <p>
+        <strong>The interactive parts of this page need JavaScript.</strong>
+        Right now the ticker, the global threat map, the CVE database, the incident
+        playbooks and the security maturity quiz are all empty; only the first
+        toolkit tab (HTTP security headers) is reachable, and switching tabs or
+        submitting a check does nothing; the language toggle, the theme toggle and
+        the emergency dialog do not open. The prose is still readable. Every tool
+        here computes in your own browser — nothing you type is sent to any server.
+      </p>
+    </div>
+  </noscript>
 
   <!-- Sticky Top Navigation -->
   <header class="navbar">
@@ -112,8 +187,13 @@
               <div class="stat-value" id="statScannedDomains">24,819</div>
               <div class="stat-label" data-i18n="statScanned">模擬網域計數</div>
             </div>
+            <!-- The static value is the one app.js writes here on load, so a
+                 visitor whose JavaScript never runs is told the same number.
+                 It was 8,410, next to an explorer holding five entries; the
+                 label already said "sample", and now the count agrees with it.
+                 cve.test.js keeps this in step with CVE_DATABASE.length. -->
             <div class="stat-item">
-              <div class="stat-value" id="statMonitoredCVEs">8,410</div>
+              <div class="stat-value" id="statMonitoredCVEs">5</div>
               <div class="stat-label" data-i18n="statCVEs">範例 CVE 計數</div>
             </div>
             <div class="stat-item">

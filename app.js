@@ -2860,17 +2860,25 @@ function initEmergencyModal() {
 
 /* Dynamic Counters Animation */
 function initCounters() {
-  const scanned = document.getElementById('statScannedDomains');
+  // The CVE stat read 8,410 while the explorer below it holds CVE_DATABASE, and
+  // this element was looked up only to be tested for existence and then never
+  // written to. Of the three hero stats it is the one with a real number behind
+  // it, so it now reports that number instead of an invented one. index.html
+  // carries the same value statically, for the visitor whose JS never runs.
   const monitored = document.getElementById('statMonitoredCVEs');
+  if (monitored) monitored.textContent = CVE_DATABASE.length.toLocaleString();
 
-  if (!scanned || !monitored) return;
+  // Guarded one at a time rather than all three together: the old single guard
+  // meant a page missing any one of these elements got none of the behaviour.
+  const scanned = document.getElementById('statScannedDomains');
+  if (scanned) {
+    let scannedCount = 24819;
 
-  let scannedCount = 24819;
-
-  setInterval(() => {
-    scannedCount += Math.floor(Math.random() * 3) + 1;
-    scanned.textContent = scannedCount.toLocaleString();
-  }, 3000);
+    setInterval(() => {
+      scannedCount += Math.floor(Math.random() * 3) + 1;
+      scanned.textContent = scannedCount.toLocaleString();
+    }, 3000);
+  }
 
   const refreshBtn = document.getElementById('refreshTelemetryBtn');
   if (refreshBtn) {

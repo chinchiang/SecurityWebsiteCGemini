@@ -22,8 +22,19 @@
   --text-muted: #64748b;
   --text-highlight: #00e5ff;
 
+  /* Neither Inter nor JetBrains Mono is fetched or shipped: the third-party
+     allow-list is deliberately empty, which is what lets the CSP stay closed.
+     Both are therefore an opportunistic first choice — they render for a visitor
+     who happens to have them installed and for nobody else — so the rest of each
+     stack has to stand on its own. --font-mono used to be `'JetBrains Mono',
+     monospace` and nothing else, which handed the twenty-odd places that ask for
+     mono — the hero counters, every score, the hashes, the CVE ids — to whatever
+     the visitor's browser has set as its fixed-width font. That is a preference,
+     not a constant: with it left at Courier New, this page's mono text is a
+     typewriter face it was neither spaced nor sized for. Naming the families that
+     ship with an OS makes the choice the stylesheet's again. */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 
   --radius-sm: 6px;
   --radius-md: 12px;
@@ -205,6 +216,30 @@ h1, h2, h3, h4, h5, h6 {
   0% { transform: scale(0.95); opacity: 1; }
   50% { transform: scale(1.3); opacity: 0.5; }
   100% { transform: scale(0.95); opacity: 1; }
+}
+
+/* The no-JavaScript notice. Only ever rendered with scripting off, which is also
+   the state in which the theme toggle cannot be reached, so the dark palette it
+   inherits is the only one it can appear in. */
+.noscript-banner {
+  padding: 1rem 1.25rem;
+  border-bottom: 2px solid var(--accent-amber);
+  background: rgba(245, 158, 11, 0.12);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.noscript-banner p {
+  margin: 0;
+  max-width: 100ch;
+}
+
+.noscript-banner p + p {
+  margin-top: 0.6rem;
+}
+
+.noscript-banner strong {
+  color: var(--accent-amber);
 }
 
 /* Ticker Bar */
@@ -1333,4 +1368,83 @@ body.modal-open {
 
   /* The colour change carries the meaning here; the width sweep is decoration. */
   .entropy-bar { transition: background-color 0.4s ease; }
+}
+
+/* ------------------------------------------------------------------------- *
+ * Print
+ *
+ * The quiz's last screen offers to "print / download the assessment report",
+ * and window.print() printed the whole page instead: the sticky navbar, the
+ * ticker, the threat-map canvas, five sections of unrelated tooling and the
+ * footer, with the report itself somewhere in the middle of that.
+ *
+ * Legibility was the worse half. Browsers do not print background colours by
+ * default, so every colour picked against a dark surface landed on white paper:
+ * #f8fafc body text on white is blank paper. Redefining the palette fixes that
+ * once instead of rule by rule — and it is the only thing that can, because the
+ * score is written with an inline style="color: var(--accent-cyan)" that no
+ * stylesheet rule is allowed to override.
+ * ------------------------------------------------------------------------- */
+@media print {
+  /* [data-theme="light"] is named so this also wins against the light palette:
+     equal specificity, later in the file. */
+  :root,
+  [data-theme="light"],
+  [data-theme="dark"] {
+    --bg-dark: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-glass: #ffffff;
+
+    --border-color: #9ca3af;
+    --border-active: #4b5563;
+    --border-focus: #1f2937;
+
+    /* Dark enough to read as ink while still telling the score tiers apart. */
+    --accent-cyan: #0e5a6b;
+    --accent-blue: #1d4ed8;
+    --accent-emerald: #0f5132;
+    --accent-amber: #7c4a03;
+    --accent-rose: #991b1b;
+
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --text-muted: #4b5563;
+    --text-highlight: #0e5a6b;
+
+    --shadow-glow-cyan: none;
+    --shadow-glow-rose: none;
+    --shadow-card: none;
+  }
+
+  @page { margin: 1.5cm; }
+
+  body {
+    /* Two fixed radial gradients, which a print pipeline has no good answer for. */
+    background-image: none;
+    background-attachment: scroll;
+  }
+
+  /* Everything that is not the report. The sections are hidden as a group and
+     the printed one put back, so a section added later cannot quietly join the
+     printout — and so this does not become a list of the other five. */
+  .navbar,
+  .ticker-bar,
+  .demo-banner,
+  .footer,
+  .toast-container,
+  .modal-overlay,
+  main > section { display: none; }
+
+  #audit-calculator { display: block; }
+
+  /* Deliberately not hidden: .demo-note. A printed "assessment report" is
+     exactly the artefact that gets forwarded without the page around it, so the
+     note saying the scoring is a demonstration has to travel with it. */
+  #printReportBtn,
+  #restartQuizBtn { display: none; }
+
+  .section { padding: 0; }
+  .card { border: 1px solid var(--border-color); }
 }
