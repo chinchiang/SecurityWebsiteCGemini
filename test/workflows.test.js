@@ -120,3 +120,37 @@ test('dependabot keeps the action pins current', () => {
   assert.match(config, /package-ecosystem:\s*github-actions/,
     'pinned SHAs are only safe if something updates them');
 });
+
+test('every path into the same action is pinned to one SHA', () => {
+  // init and analyze are two entry points into github/codeql-action, and CodeQL
+  // refuses to run when they disagree: analyze aborts with "Loaded a
+  // configuration file for version X, but running version Y". That is how #8 and
+  // #9 each failed — one half of an upgrade cannot go green on its own.
+  // dependabot.yml groups the two into one pull request so it never proposes a
+  // split, but grouping is a setting on a bot; nothing in the repository noticed
+  // if the file said something else. This does.
+  const refs = [];
+  for (const { name, body } of workflows()) {
+    for (const m of body.matchAll(/^\s*(?:-\s*)?uses:\s*(\S+?)@([0-9a-f]{40})/gm)) {
+      // The sub-path is dropped: codeql-action/init and codeql-action/analyze are
+      // one action, and one release of it.
+      refs.push({ where: `${name} → ${m[1]}`, action: m[1].split('/').slice(0, 2).join('/'), sha: m[2] });
+    }
+  }
+
+  // Two floors, because there are two ways for this to pass while proving
+  // nothing: a workflow set that pins nothing, and an extraction that quietly
+  // stopped matching. The second floor is the one that matters — the rule is only
+  // exercised where one action is reached by more than one `uses:`.
+  assert.ok(refs.length >= 4, `only ${refs.length} pinned actions found; the sweep is broken`);
+  const byAction = new Map();
+  for (const ref of refs) byAction.set(ref.action, [...(byAction.get(ref.action) || []), ref]);
+  assert.ok([...byAction.values()].some(group => group.length > 1),
+    'no action is reached by two uses:, so this guard is checking nothing');
+
+  for (const [action, group] of byAction) {
+    const distinct = new Set(group.map(ref => ref.sha));
+    assert.equal(distinct.size, 1,
+      `${action} is pinned to ${distinct.size} SHAs: ${group.map(r => `${r.where}@${r.sha.slice(0, 10)}`).join(', ')}`);
+  }
+});
