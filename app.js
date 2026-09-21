@@ -36,6 +36,11 @@ let currentLang = storage.get('aegis-lang') || 'zh-TW';
 
 const TRANSLATIONS = {
   'zh-TW': {
+    // The first focusable thing on the page, and the only one whose job is to be
+    // skipped past: the navigation, the ticker and the disclosure banner sit above
+    // the content on every visit, so without this a keyboard user tabs through all
+    // of them before reaching anything they came for.
+    skipToContent: '跳到主要內容',
     navThreatMap: '威脅地圖 Threat Map',
     navToolkit: '安檢工具 Toolkit',
     navCVE: 'CVE 情報 Intel',
@@ -206,6 +211,7 @@ const TRANSLATIONS = {
     noteEmergency: '⚠️ 示範功能：本表單不會傳送資料、通知 SOC、聯絡任何人員或建立事件單。若發生真實事件，請使用貴組織正式核准的緊急通報管道。'
   },
   'en': {
+    skipToContent: 'Skip to main content',
     navThreatMap: 'Threat Map',
     navToolkit: 'Security Toolkit',
     navCVE: 'CVE Intel',

@@ -84,6 +84,16 @@
 </head>
 <body>
 
+  <!-- First in the document because "first focusable element" is the whole of
+       what this is: a route past the header, the ticker and the banner to the
+       content, for the visitor who reaches them with the Tab key rather than with
+       their eyes. Off-screen until focused, so it costs a sighted visitor nothing.
+       It points at <main>, which carries tabindex="-1" for it: a fragment link to
+       an element that cannot hold focus scrolls the page and leaves focus where it
+       was, so the next Tab would go back into the navigation and the link would
+       have done nothing for the one input method it exists to serve. -->
+  <a class="skip-link" href="#main" data-i18n="skipToContent">跳到主要內容</a>
+
   <!--
     Bilingual and hardcoded, both on purpose: data-i18n is applied by app.js,
     which is precisely what has not run if this is on screen, so a translated
@@ -178,7 +188,7 @@
     </div>
   </aside>
 
-  <main>
+  <main id="main" tabindex="-1">
     <!-- Hero Section -->
     <section class="hero-section" id="hero">
       <div class="container hero-grid">

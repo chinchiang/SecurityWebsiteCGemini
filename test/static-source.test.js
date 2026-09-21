@@ -433,7 +433,10 @@ test('the notice names each thing that stops working, in both languages', () => 
 });
 
 test('index.html tags are balanced for the containers the app writes into', () => {
-  const count = (re) => (HTML.match(re) || []).length;
+  // MARKUP, not HTML: a comment that names the element it explains — the skip
+  // link's says it points at <main> — is an opening tag with no closing one as far
+  // as a count is concerned, and the report would be an imbalance that is not there.
+  const count = (re) => (MARKUP.match(re) || []).length;
   assert.equal(count(/<div\b/g), count(/<\/div>/g), '<div> balance');
   assert.equal(count(/<section\b/g), count(/<\/section>/g), '<section> balance');
   assert.equal(count(/<aside\b/g), count(/<\/aside>/g), '<aside> balance');
@@ -484,11 +487,13 @@ test('the toast container is announced to assistive technology', () => {
 });
 
 test('the simulated-data banner is present and rendered before the tools', () => {
-  const bannerAt = HTML.indexOf('class="demo-banner"');
-  const mainAt = HTML.indexOf('<main');
+  // MARKUP for the same reason as the balance count above: the first `<main` in
+  // the raw file is inside a comment that sits above the banner.
+  const bannerAt = MARKUP.indexOf('class="demo-banner"');
+  const mainAt = MARKUP.indexOf('<main');
   assert.notEqual(bannerAt, -1, 'demo banner exists');
   assert.ok(bannerAt < mainAt, 'banner must precede <main> so it is seen first');
-  assert.match(HTML.slice(bannerAt, bannerAt + 400), /data-i18n="demoBanner"/);
+  assert.match(MARKUP.slice(bannerAt, bannerAt + 400), /data-i18n="demoBanner"/);
 });
 
 test('every tool panel carries a disclosure note', () => {
