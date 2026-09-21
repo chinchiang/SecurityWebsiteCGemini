@@ -46,6 +46,44 @@ test('every data-i18n attribute in index.html resolves in both languages', () =>
   assert.deepEqual(unresolved, [], 'data-i18n keys with no translation');
 });
 
+test('a language switch reaches text that lives in an attribute', () => {
+  // setLanguage handled aria-label and nothing else, so `title="Toggle Theme"`
+  // and the hero image's alt text were English in both languages. This walks
+  // app.js's own list rather than naming the attributes again: a fourth entry
+  // added without teaching the loop about it fails here.
+  const { app, dom } = loadApp();
+  assert.deepEqual(app.TRANSLATED_ATTRIBUTES, ['aria-label', 'title', 'alt'],
+    'the three attributes on the page that carry readable text');
+
+  const elements = app.TRANSLATED_ATTRIBUTES.map(attribute => {
+    const el = dom.createElement('span');
+    el.setAttribute(`data-i18n-${attribute}`, 'modalClose');
+    return dom.registerI18nAttr(attribute, el);
+  });
+
+  for (const lang of ['en', 'zh-TW']) {
+    app.setLanguage(lang);
+    app.TRANSLATED_ATTRIBUTES.forEach((attribute, i) => {
+      assert.equal(elements[i].getAttribute(attribute), app.TRANSLATIONS[lang].modalClose,
+        `${attribute} kept its old value through a switch to ${lang}`);
+    });
+  }
+});
+
+test('an attribute whose key does not resolve keeps the value the markup gave it', () => {
+  // A typo in the key should leave a stale name, not erase the name: for a
+  // control whose only content is a glyph, an empty aria-label is no name at all.
+  const { app, dom } = loadApp();
+  const el = dom.createElement('button');
+  el.setAttribute('aria-label', '關閉對話框');
+  el.setAttribute('data-i18n-aria-label', 'noSuchKeyInEitherDictionary');
+  dom.registerI18nAttr('aria-label', el);
+
+  app.setLanguage('en');
+  assert.equal(el.getAttribute('aria-label'), '關閉對話框',
+    'an unresolved key wiped the accessible name instead of leaving it');
+});
+
 test('every data-i18n-aria-label in index.html resolves in both languages', () => {
   // A missing key here fails silently and invisibly: setLanguage skips the
   // element, and the control keeps whatever accessible name it was born with —

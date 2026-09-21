@@ -21,6 +21,7 @@ const APP_PATH = process.env.AEGIS_APP_PATH
  */
 const EXPOSED = [
   'escapeHtml', 't', 'setLanguage', 'currentLang', 'showToast', 'storage',
+  'TRANSLATED_ATTRIBUTES',
   'TRANSLATIONS', 'TICKER_ITEMS', 'CVE_DATABASE', 'QUIZ_QUESTIONS', 'PLAYBOOK_DATA',
   'renderAuditQuiz', 'renderPlaybooks', 'renderCVEs', 'showQuizResult',
   'quizCurrentStep', 'quizTotalScore',

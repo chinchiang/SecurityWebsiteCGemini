@@ -455,6 +455,12 @@ function initLanguageToggle() {
   });
 }
 
+/**
+ * Attributes whose value is text a visitor reads, so a language switch has to
+ * reach them. An element opts in with data-i18n-<attribute>="dictionaryKey".
+ */
+const TRANSLATED_ATTRIBUTES = ['aria-label', 'title', 'alt'];
+
 function setLanguage(lang) {
   currentLang = lang;
   document.documentElement.lang = lang;
@@ -469,14 +475,20 @@ function setLanguage(lang) {
     }
   });
 
-  // An accessible name carried in an attribute has to be translated too, and
-  // there is no text node to swap. Declaring it in the markup rather than
-  // wiring another id here means the next one cannot be forgotten.
-  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
-    const key = el.getAttribute('data-i18n-aria-label');
-    if (dictionary[key]) {
-      el.setAttribute('aria-label', dictionary[key]);
-    }
+  // Text carried in an attribute rather than in a text node, which means there
+  // is nothing to swap with innerHTML: the accessible name (aria-label), the
+  // tooltip (title) and an image's description (alt). Only aria-label used to be
+  // handled here, so `title="Toggle Theme"` and the hero image's alt stayed in
+  // English in both languages. One rule for all three — data-i18n-<attribute>
+  // sets <attribute> — so the next one is a markup change rather than another
+  // loop, and the list is a constant the guards can read.
+  TRANSLATED_ATTRIBUTES.forEach(attribute => {
+    document.querySelectorAll(`[data-i18n-${attribute}]`).forEach(el => {
+      const key = el.getAttribute(`data-i18n-${attribute}`);
+      if (dictionary[key]) {
+        el.setAttribute(attribute, dictionary[key]);
+      }
+    });
   });
 
   // Update input placeholders
