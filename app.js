@@ -72,6 +72,10 @@ const TRANSLATIONS = {
     // 標題是整個區段最先被讀到的一句話，說明文字裡的「模擬」救不了它。
     mapTitle: '全球網路攻擊動態地圖（模擬資料）',
     mapDesc: '模擬追蹤全球網路攻擊流量、惡意程式 C2 中繼站連線與 DDoS 洗流量中心動態。',
+    // 畫布的文字替代。選擇說出「它在那裡、而且沒有可讀的內容」，而不是用
+    // aria-hidden 把它整個藏掉：這一區的標題就是這張圖，讓讀螢幕的訪客知道
+    // 自己沒有漏掉任何資訊，比讓那塊區域安靜地消失誠實。
+    mapCanvas: '模擬的全球攻擊流量動畫：圖形由隨機數值產生，不代表任何真實的連線或事件。',
     legC2: 'C2 中繼連線',
     legRansom: '勒索/漏洞利用',
     legDdos: 'DDoS 洗流量',
@@ -241,6 +245,7 @@ const TRANSLATIONS = {
     // zh-TW line says 模擬追蹤 and claims no timing, and there is no interval here
     // for anything to be real-time with respect to.
     mapDesc: 'Simulated tracking of global cyber attack traffic, malware command & control nodes, and scrubbing center telemetry.',
+    mapCanvas: 'Animation of simulated global attack traffic: the shapes are generated from random values and represent no real connection or event.',
     legC2: 'C2 Ping',
     legRansom: 'Ransomware / Exploit',
     legDdos: 'DDoS Scrubbing',

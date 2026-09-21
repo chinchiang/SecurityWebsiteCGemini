@@ -256,7 +256,15 @@
         </div>
 
         <div class="map-container">
-          <canvas id="threatCanvas"></canvas>
+          <!-- A bare <canvas> is announced as nothing at all: it has no implicit
+               role and no content a screen reader can fall back to, so this
+               section was a heading, a description, a colour key, and then
+               silence where the thing they describe should be. role="img" with a
+               name is the text alternative (WCAG 1.1.1), and the name says the
+               figure carries no readable information — which is true, the points
+               are random — so that a visitor knows they have missed nothing
+               rather than wondering what was in the box. -->
+          <canvas id="threatCanvas" role="img" aria-label="模擬的全球攻擊流量動畫：圖形由隨機數值產生，不代表任何真實的連線或事件。" data-i18n-aria-label="mapCanvas"></canvas>
           <div class="map-legend">
             <div class="legend-item"><span class="legend-dot" style="background: var(--accent-cyan);"></span> <span data-i18n="legC2">C2 中繼連線</span></div>
             <div class="legend-item"><span class="legend-dot" style="background: var(--accent-rose);"></span> <span data-i18n="legRansom">勒索/漏洞利用</span></div>

@@ -486,6 +486,31 @@ test('the toast container is announced to assistive technology', () => {
   assert.match(match[0], /aria-live="polite"/);
 });
 
+test('every canvas is either named or declared to carry nothing', () => {
+  // A <canvas> has no implicit role and no fallback content, so one with no ARIA
+  // is announced as nothing whatsoever — not even as an image that could not be
+  // described. The threat map was a heading, a description and a colour key with
+  // silence in the middle where the figure they all refer to should be.
+  //
+  // Two honest answers, and this insists on one of them: aria-hidden="true" says
+  // the figure adds nothing the surrounding text does not already say, or a role
+  // plus a translatable name says what it is. What is not allowed is neither.
+  const canvases = [...MARKUP.matchAll(/<canvas\b[^>]*>/g)].map(m => m[0]);
+  assert.ok(canvases.length >= 1, 'no <canvas> found; the sweep is broken');
+
+  for (const tag of canvases) {
+    if (/aria-hidden="true"/.test(tag)) continue;
+    assert.match(tag, /role="(img|figure)"/,
+      `${tag} has no role, so a screen reader announces nothing for it`);
+    // The static value is the fallback before app.js runs; the key is what makes
+    // it follow the language switch. i18n.test.js holds the two to each other.
+    // `(?:^|\s)` because data-i18n-aria-label="…" ends in aria-label="…", so a
+    // bare match reads the key as the name and a canvas with only the key passes.
+    assert.match(tag, /(?:^|\s)aria-label="[^"]+"/, `${tag} has a role but no name`);
+    assert.match(tag, /data-i18n-aria-label="[^"]+"/, `${tag}'s name cannot be translated`);
+  }
+});
+
 test('the simulated-data banner is present and rendered before the tools', () => {
   // MARKUP for the same reason as the balance count above: the first `<main` in
   // the raw file is inside a comment that sits above the banner.
