@@ -50,7 +50,7 @@ function addModal(dom) {
 
   const closeBtn = dom.registerId('closeEmergencyModalBtn', dom.createElement('button'));
   closeBtn.setAttribute('data-i18n-aria-label', 'modalClose');
-  dom.registerI18nAria(closeBtn);
+  dom.registerI18nAttr('aria-label', closeBtn);
 
   const form = dom.registerId('emergencyForm', dom.createElement('form'));
   const incidentType = dom.registerId('incidentType', dom.createElement('select'));

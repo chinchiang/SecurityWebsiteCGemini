@@ -37,6 +37,19 @@ function isDescendantOf(node, ancestor) {
  */
 const SIMPLE_SELECTOR = /^(?:[A-Za-z][\w-]*)?(?:\.[A-Za-z][\w-]*|\[[\w-]+(?:="[^"]*")?\])*$/;
 
+/**
+ * Attributes a browser reflects into a same-named property, so that reading
+ * `el.placeholder` after setAttribute('placeholder', …) answers what the field
+ * actually shows.
+ *
+ * Deliberately short: reflecting an attribute the stub does not otherwise model
+ * would be inventing behaviour. But leaving out one that app.js writes is worse
+ * than either — the property keeps its stale value, so a test reads the old text
+ * out of an element whose DOM already holds the new one, and both halves look
+ * right in isolation.
+ */
+const REFLECTED_ATTRIBUTES = ['id', 'placeholder'];
+
 function matchesSimple(el, sel) {
   let rest = sel;
 
@@ -145,7 +158,7 @@ function createElement(env, tagName) {
 
     setAttribute(name, value) {
       this.attributes[name] = String(value);
-      if (name === 'id') this.id = String(value);
+      if (REFLECTED_ATTRIBUTES.includes(name)) this[name] = String(value);
     },
     getAttribute(name) {
       return Object.prototype.hasOwnProperty.call(this.attributes, name)
@@ -201,7 +214,7 @@ function createDom(options = {}) {
   const byId = new Map();
   const byClass = new Map();     // class name -> elements registered by a test
   const i18nElements = [];
-  const i18nAriaElements = [];
+  const i18nAttrElements = new Map(); // translated attribute -> elements
   const scopedSteps = new Map(); // scope element -> Map(stepNumber -> element)
   const absentIds = new Set(options.absentIds || []);
 
@@ -238,7 +251,13 @@ function createDom(options = {}) {
       }
 
       if (sel === '[data-i18n]') return [...i18nElements];
-      if (sel === '[data-i18n-aria-label]') return [...i18nAriaElements];
+
+      // `[data-i18n-aria-label]`, `[data-i18n-title]`, `[data-i18n-alt]`: one
+      // registry per attribute rather than a special case per attribute, so a
+      // fourth one needs nothing here. An attribute no test has registered for
+      // answers with an empty list, which is what a page without it would.
+      const i18nAttr = /^\[data-i18n-([a-z][\w-]*)\]$/.exec(sel);
+      if (i18nAttr) return [...(i18nAttrElements.get(i18nAttr[1]) || [])];
 
       const cls = /^\.([A-Za-z][\w-]*)$/.exec(sel);
       if (cls) {
@@ -452,8 +471,15 @@ function createDom(options = {}) {
       return el;
     },
     registerI18n(el) { i18nElements.push(el); return el; },
-    /** Same, for an accessible name carried in an attribute. */
-    registerI18nAria(el) { i18nAriaElements.push(el); return el; },
+    /**
+     * Same, for text carried in an attribute: `registerI18nAttr('title', el)`
+     * makes `el` answer `document.querySelectorAll('[data-i18n-title]')`.
+     */
+    registerI18nAttr(attribute, el) {
+      if (!i18nAttrElements.has(attribute)) i18nAttrElements.set(attribute, []);
+      i18nAttrElements.get(attribute).push(el);
+      return el;
+    },
     createElement: tag => createElement(env, tag),
     getById: id => document.getElementById(id)
   };

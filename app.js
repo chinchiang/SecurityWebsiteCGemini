@@ -42,8 +42,16 @@ const TRANSLATIONS = {
     navPlaybooks: '應變劇本 Playbooks',
     navAudit: '成熟度評估 Audit',
     sysStatus: 'DEMO MODE • 模擬介面',
+    // The language button's own label is the two language names, which is what a
+    // screen reader should read out; this is its tooltip, not its name.
+    langToggle: '切換語言',
+    // Read as both the name and the tooltip of a button whose only content is 🌙.
+    themeToggle: '切換深色／淺色主題',
     btnEmergency: '🚨 緊急通報 Emergency',
     tickerLabel: '模擬威脅快訊',
+    // The name of the ticker region. It used to be the hardcoded English "Live
+    // Threat Stream": nothing here is live, and the items are made up.
+    tickerRegion: '模擬威脅快訊（示範資料）',
     heroBadge: '⚡ 主動防禦協定已啟用 ACTIVE DEFENSE PROTOCOL',
     heroTitle: '新世代資安 <span>威脅情報與診斷指揮中心</span>',
     heroSubtitle: '以前端模擬介面展示網域安全標頭、密碼熵值、CVE 情報與事件應變劇本；不提供即時監控或真實掃描。',
@@ -204,8 +212,11 @@ const TRANSLATIONS = {
     navPlaybooks: 'Playbooks',
     navAudit: 'Audit Score',
     sysStatus: 'DEMO MODE • SIMULATED UI',
+    langToggle: 'Switch language',
+    themeToggle: 'Toggle dark / light theme',
     btnEmergency: '🚨 Emergency Incident',
     tickerLabel: 'SIMULATED THREAT FEED',
+    tickerRegion: 'Simulated threat headlines (demo data)',
     heroBadge: '⚡ ACTIVE DEFENSE PROTOCOL ACTIVE',
     heroTitle: 'Next-Gen Cyber <span>Intelligence & Diagnostics</span>',
     heroSubtitle: 'A front-end demonstration of security-header scoring, password entropy, CVE intelligence, and incident-response playbooks; it provides no live monitoring or real scanning.',
@@ -455,6 +466,12 @@ function initLanguageToggle() {
   });
 }
 
+/**
+ * Attributes whose value is text a visitor reads, so a language switch has to
+ * reach them. An element opts in with data-i18n-<attribute>="dictionaryKey".
+ */
+const TRANSLATED_ATTRIBUTES = ['aria-label', 'title', 'alt', 'placeholder'];
+
 function setLanguage(lang) {
   currentLang = lang;
   document.documentElement.lang = lang;
@@ -469,34 +486,22 @@ function setLanguage(lang) {
     }
   });
 
-  // An accessible name carried in an attribute has to be translated too, and
-  // there is no text node to swap. Declaring it in the markup rather than
-  // wiring another id here means the next one cannot be forgotten.
-  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
-    const key = el.getAttribute('data-i18n-aria-label');
-    if (dictionary[key]) {
-      el.setAttribute('aria-label', dictionary[key]);
-    }
+  // Text carried in an attribute rather than in a text node, which means there
+  // is nothing to swap with innerHTML: the accessible name (aria-label), the
+  // tooltip (title), an image's description (alt) and a field's hint
+  // (placeholder). Only aria-label used to be handled here; the six placeholders
+  // were each looked up by id below, and every other attribute was simply
+  // forgotten. One rule for all of them — data-i18n-<attribute> sets
+  // <attribute> — so the next one is a markup change rather than another entry in
+  // a list nobody remembers to extend, and the list is a constant the guards read.
+  TRANSLATED_ATTRIBUTES.forEach(attribute => {
+    document.querySelectorAll(`[data-i18n-${attribute}]`).forEach(el => {
+      const key = el.getAttribute(`data-i18n-${attribute}`);
+      if (dictionary[key]) {
+        el.setAttribute(attribute, dictionary[key]);
+      }
+    });
   });
-
-  // Update input placeholders
-  const domainInput = document.getElementById('domainInput');
-  if (domainInput) domainInput.placeholder = dictionary.p1Placeholder;
-
-  const passInput = document.getElementById('passInput');
-  if (passInput) passInput.placeholder = dictionary.p2Placeholder;
-
-  const phishingUrlInput = document.getElementById('phishingUrlInput');
-  if (phishingUrlInput) phishingUrlInput.placeholder = dictionary.p3Placeholder;
-
-  const darkwebEmailInput = document.getElementById('darkwebEmailInput');
-  if (darkwebEmailInput) darkwebEmailInput.placeholder = dictionary.p4Placeholder;
-
-  const cveSearchInput = document.getElementById('cveSearchInput');
-  if (cveSearchInput) cveSearchInput.placeholder = dictionary.cveSearchPh;
-
-  const reporterContact = document.getElementById('reporterContact');
-  if (reporterContact) reporterContact.placeholder = dictionary.modalContactPh;
 
   // Update ticker stream
   const tickerContainer = document.getElementById('threatTickerContent');

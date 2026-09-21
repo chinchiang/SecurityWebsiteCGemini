@@ -146,15 +146,25 @@
           <span class="pulse-dot"></span>
           <span id="sysStatusText" data-i18n="sysStatus">DEMO MODE • 模擬介面</span>
         </div>
-        <button class="btn btn-outline" id="langToggleBtn" style="padding: 0.35rem 0.75rem; font-family: var(--font-mono); font-size: 0.8rem;" aria-label="Toggle Language" type="button">🌐 EN / 繁中</button>
-        <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme" aria-label="Toggle Theme" type="button">🌙</button>
+        <!-- No aria-label on the language button: it has a visible label, and an
+             aria-label replaces it outright rather than adding to it (WCAG 2.5.3
+             Label in Name — what is announced has to contain what is shown). The
+             two language names are the label. title is a tooltip, not a name, so
+             it is additive and safe to translate.
+             The theme button is the opposite case: 🌙 is all it has, so the
+             label is what it is announced as rather than a second name. -->
+        <button class="btn btn-outline" id="langToggleBtn" style="padding: 0.35rem 0.75rem; font-family: var(--font-mono); font-size: 0.8rem;" title="切換語言" data-i18n-title="langToggle" type="button">🌐 EN / 繁中</button>
+        <button class="icon-btn" id="themeToggleBtn" title="切換深色／淺色主題" data-i18n-title="themeToggle" aria-label="切換深色／淺色主題" data-i18n-aria-label="themeToggle" type="button">🌙</button>
         <button class="btn btn-primary" id="openEmergencyModalBtn" data-i18n="btnEmergency" type="button">🚨 緊急通報 Emergency</button>
       </div>
     </div>
   </header>
 
-  <!-- Live Threat Feed Ticker -->
-  <div class="ticker-bar" role="region" aria-label="Live Threat Stream">
+  <!-- The ticker's region name. It was hardcoded English, and it called a list
+       of invented headlines a live stream; the visible label beside it has said
+       「模擬威脅快訊」all along. A region is only worth landmarking if its name
+       says what is in it, so the name now says the same thing the page does. -->
+  <div class="ticker-bar" role="region" aria-label="模擬威脅快訊（示範資料）" data-i18n-aria-label="tickerRegion">
     <div class="ticker-label" data-i18n="tickerLabel">模擬威脅快訊</div>
     <div class="ticker-content" id="threatTickerContent">
       <!-- Dynamically rendered via app.js -->
@@ -204,7 +214,14 @@
         </div>
 
         <div class="hero-media">
-          <img src="assets/security_hero.jpg" alt="AegisGuard Security Operations Center Visualization" width="600" height="340">
+          <!-- alt="" on purpose, which declares the image decorative and takes it
+               out of the accessibility tree. It is a stock illustration: it
+               carries nothing the heading and subtitle beside it do not already
+               say, and the description it used to carry asserted a Security
+               Operations Center that this demo does not have. An empty alt is a
+               decision; a missing alt attribute makes a screen reader read the
+               file name, so the attribute stays. -->
+          <img src="assets/security_hero.jpg" alt="" width="600" height="340">
           <div class="hero-overlay-card">
             <div class="hero-overlay-info">
               <div class="hero-overlay-icon">✓</div>
@@ -302,7 +319,7 @@
                 <div class="form-group">
                   <label class="form-label" for="domainInput" data-i18n="p1Label">目標網域或 URL</label>
                   <div class="input-row">
-                    <input type="text" id="domainInput" class="form-input" placeholder="例如：secure-portal.company.com" required>
+                    <input type="text" id="domainInput" class="form-input" placeholder="例如：secure-portal.company.com" data-i18n-placeholder="p1Placeholder" required>
                     <button type="submit" class="btn btn-primary" id="runHeaderScanBtn" data-i18n="p1Btn">開始健檢 ⚡</button>
                   </div>
                 </div>
@@ -332,7 +349,7 @@
 
               <div class="form-group">
                 <label class="form-label" for="passInput" data-i18n="p2Label">輸入測試密碼 / 密鑰字串</label>
-                <input type="password" id="passInput" class="form-input" placeholder="請在此輸入密碼..." autocomplete="off">
+                <input type="password" id="passInput" class="form-input" placeholder="請在此輸入密碼..." data-i18n-placeholder="p2Placeholder" autocomplete="off">
               </div>
 
               <div class="entropy-meter">
@@ -379,7 +396,7 @@
                 <div class="form-group">
                   <label class="form-label" for="phishingUrlInput" data-i18n="p3Label">要檢測的可疑 URL</label>
                   <div class="input-row">
-                    <input type="text" id="phishingUrlInput" class="form-input" placeholder="例如：http://login-paypalls-update.com/signin" required>
+                    <input type="text" id="phishingUrlInput" class="form-input" placeholder="例如：http://login-paypalls-update.com/signin" data-i18n-placeholder="p3Placeholder" required>
                     <button type="submit" class="btn btn-primary" id="inspectUrlBtn" data-i18n="p3Btn">分析 URL 結構</button>
                   </div>
                 </div>
@@ -401,7 +418,7 @@
                 <div class="form-group">
                   <label class="form-label" for="darkwebEmailInput" data-i18n="p4Label">企業 Email 或 網域名稱</label>
                   <div class="input-row">
-                    <input type="email" id="darkwebEmailInput" class="form-input" placeholder="employee@company.com" required>
+                    <input type="email" id="darkwebEmailInput" class="form-input" placeholder="employee@company.com" data-i18n-placeholder="p4Placeholder" required>
                     <button type="submit" class="btn btn-primary" id="checkDarkwebBtn" data-i18n="p4Btn">查詢外洩紀錄</button>
                   </div>
                 </div>
@@ -430,7 +447,7 @@
 
         <div class="cve-toolbar">
           <div class="form-group" style="flex: 1; margin-bottom: 0;">
-            <input type="text" id="cveSearchInput" class="form-input" placeholder="搜尋 CVE 編號、軟體名稱 (如 Linux, Apache, Chrome) 或關鍵字...">
+            <input type="text" id="cveSearchInput" class="form-input" placeholder="搜尋 CVE 編號、軟體名稱 (如 Linux, Apache, Chrome) 或關鍵字..." data-i18n-placeholder="cveSearchPh">
           </div>
           <ul class="filter-pills">
             <li><button class="filter-btn active" data-severity="ALL" data-i18n="filterAll" type="button">全部等級</button></li>
@@ -545,9 +562,12 @@
   <div class="modal-overlay" id="emergencyModal">
     <div class="modal-card" role="dialog" aria-modal="true" tabindex="-1"
          aria-labelledby="emergencyModalTitle" aria-describedby="emergencyModalDesc">
-      <!-- data-i18n-aria-label, because the only label here is a × glyph, which
-           a screen reader announces as "times" or as nothing at all. -->
-      <button class="modal-close" id="closeEmergencyModalBtn" type="button" data-i18n-aria-label="modalClose">&times;</button>
+      <!-- A translated accessible name, because the only label here is a × glyph,
+           which a screen reader announces as "times" or as nothing at all. The
+           static value is the fallback for the moment before app.js has run and
+           for a key that fails to resolve; it is the zh-TW string, as everywhere
+           else on the page. -->
+      <button class="modal-close" id="closeEmergencyModalBtn" type="button" aria-label="關閉對話框" data-i18n-aria-label="modalClose">&times;</button>
       <h3 id="emergencyModalTitle" style="color: var(--accent-rose); font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="modalTitle">🚨 宣告重大資安事件 (Emergency)</h3>
       <p id="emergencyModalDesc" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="modalSub">示範重大資安事件通報流程；不會聯絡值班指揮官或啟動任何應變程序。</p>
 
@@ -566,7 +586,7 @@
 
         <div class="form-group">
           <label class="form-label" for="reporterContact" data-i18n="modalContactLabel">通報人電話 / Slack 帳號</label>
-          <input type="text" id="reporterContact" class="form-input" placeholder="@security-lead 或 +886 912-345-678" required>
+          <input type="text" id="reporterContact" class="form-input" placeholder="@security-lead 或 +886 912-345-678" data-i18n-placeholder="modalContactPh" required>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
