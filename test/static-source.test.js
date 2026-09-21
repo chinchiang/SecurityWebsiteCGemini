@@ -433,7 +433,10 @@ test('the notice names each thing that stops working, in both languages', () => 
 });
 
 test('index.html tags are balanced for the containers the app writes into', () => {
-  const count = (re) => (HTML.match(re) || []).length;
+  // MARKUP, not HTML: a comment that names the element it explains — the skip
+  // link's says it points at <main> — is an opening tag with no closing one as far
+  // as a count is concerned, and the report would be an imbalance that is not there.
+  const count = (re) => (MARKUP.match(re) || []).length;
   assert.equal(count(/<div\b/g), count(/<\/div>/g), '<div> balance');
   assert.equal(count(/<section\b/g), count(/<\/section>/g), '<section> balance');
   assert.equal(count(/<aside\b/g), count(/<\/aside>/g), '<aside> balance');
@@ -483,12 +486,104 @@ test('the toast container is announced to assistive technology', () => {
   assert.match(match[0], /aria-live="polite"/);
 });
 
+test('every label labels a control that exists', () => {
+  // A <label> is a promise that clicking it focuses something and that a screen
+  // reader will read it out as that thing's name. With no `for` and no control
+  // nested inside, it keeps the appearance and delivers neither — and there is
+  // nothing on screen to show it. The SHA-256 caption was one: the value below it
+  // is a <span>, which a <label> cannot label at all.
+  const labels = [...MARKUP.matchAll(/<label\b[^>]*>/g)].map(m => m[0]);
+  assert.ok(labels.length >= 6, `only ${labels.length} labels found; the sweep is broken`);
+
+  // Every id that a `for` may legitimately point at: the labelable elements.
+  const controls = new Set(
+    [...MARKUP.matchAll(/<(?:input|select|textarea|button|meter|progress|output)\b[^>]*\bid="([^"]+)"/g)]
+      .map(m => m[1])
+  );
+
+  for (const tag of labels) {
+    const target = /\bfor="([^"]+)"/.exec(tag);
+    assert.ok(target, `${tag} has no for=; it is a caption, so do not call it a label`);
+    assert.ok(controls.has(target[1]),
+      `${tag} points at #${target[1]}, which is no form control on this page`);
+  }
+});
+
+test('anything app.js reveals in place is announced when it appears', () => {
+  // WCAG 4.1.3. Three tools answer by unhiding a container below their form,
+  // 500-600ms after the submit, with focus still on the button. A sighted visitor
+  // sees the block appear; a screen reader said nothing about any of it, so the
+  // only evidence the check had run was the toast saying it had.
+  //
+  // Read out of app.js rather than listed here, so a fourth tool that answers the
+  // same way is held to the same rule without anyone remembering to add it.
+  const js = stripJsComments(JS);
+  const revealed = new Set();
+
+  for (const m of js.matchAll(/(\w+)\.style\.display\s*=\s*'block'/g)) {
+    // Resolved backwards from the reveal rather than from a name-to-id map: two
+    // render functions both call their container `results`, and one map would
+    // quietly answer with whichever was declared last.
+    const binding = `${m[1]} = document.getElementById('`;
+    const at = js.lastIndexOf(binding, m.index);
+    assert.notEqual(at, -1, `app.js reveals ${m[1]}, which resolves to no getElementById above it`);
+    revealed.add(js.slice(at + binding.length, js.indexOf("'", at + binding.length)));
+  }
+
+  assert.ok(revealed.size >= 3, `only ${revealed.size} revealed containers found; the sweep is broken`);
+
+  for (const id of revealed) {
+    const tag = new RegExp(`<[a-z]+\\b[^>]*\\bid="${id}"[^>]*>`).exec(MARKUP);
+    assert.ok(tag, `app.js reveals #${id}, which is on no element in index.html`);
+    assert.match(tag[0], /role="status"/,
+      `#${id} appears with no announcement; a screen reader is told nothing happened`);
+    assert.match(tag[0], /aria-live="polite"/,
+      `#${id} must not interrupt: assertive would talk over whatever is being read`);
+  }
+
+  // Deliberately out of scope, and worth saying so: #sha256HashOutput is rewritten
+  // on every keystroke in the password field. A live region there would read 64
+  // hex characters per character typed, which is why it is updated in place and
+  // left silent rather than being announced like a result.
+  assert.doesNotMatch(
+    /<span[^>]*id="sha256HashOutput"[^>]*>/.exec(MARKUP)[0], /aria-live/,
+    'the hash output is continuous, not a status message'
+  );
+});
+
+test('every canvas is either named or declared to carry nothing', () => {
+  // A <canvas> has no implicit role and no fallback content, so one with no ARIA
+  // is announced as nothing whatsoever — not even as an image that could not be
+  // described. The threat map was a heading, a description and a colour key with
+  // silence in the middle where the figure they all refer to should be.
+  //
+  // Two honest answers, and this insists on one of them: aria-hidden="true" says
+  // the figure adds nothing the surrounding text does not already say, or a role
+  // plus a translatable name says what it is. What is not allowed is neither.
+  const canvases = [...MARKUP.matchAll(/<canvas\b[^>]*>/g)].map(m => m[0]);
+  assert.ok(canvases.length >= 1, 'no <canvas> found; the sweep is broken');
+
+  for (const tag of canvases) {
+    if (/aria-hidden="true"/.test(tag)) continue;
+    assert.match(tag, /role="(img|figure)"/,
+      `${tag} has no role, so a screen reader announces nothing for it`);
+    // The static value is the fallback before app.js runs; the key is what makes
+    // it follow the language switch. i18n.test.js holds the two to each other.
+    // `(?:^|\s)` because data-i18n-aria-label="…" ends in aria-label="…", so a
+    // bare match reads the key as the name and a canvas with only the key passes.
+    assert.match(tag, /(?:^|\s)aria-label="[^"]+"/, `${tag} has a role but no name`);
+    assert.match(tag, /data-i18n-aria-label="[^"]+"/, `${tag}'s name cannot be translated`);
+  }
+});
+
 test('the simulated-data banner is present and rendered before the tools', () => {
-  const bannerAt = HTML.indexOf('class="demo-banner"');
-  const mainAt = HTML.indexOf('<main');
+  // MARKUP for the same reason as the balance count above: the first `<main` in
+  // the raw file is inside a comment that sits above the banner.
+  const bannerAt = MARKUP.indexOf('class="demo-banner"');
+  const mainAt = MARKUP.indexOf('<main');
   assert.notEqual(bannerAt, -1, 'demo banner exists');
   assert.ok(bannerAt < mainAt, 'banner must precede <main> so it is seen first');
-  assert.match(HTML.slice(bannerAt, bannerAt + 400), /data-i18n="demoBanner"/);
+  assert.match(MARKUP.slice(bannerAt, bannerAt + 400), /data-i18n="demoBanner"/);
 });
 
 test('every tool panel carries a disclosure note', () => {

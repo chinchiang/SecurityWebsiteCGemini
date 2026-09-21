@@ -50,6 +50,43 @@ test('every data-i18n attribute in index.html resolves in both languages', () =>
   assert.deepEqual(unresolved, [], 'data-i18n keys with no translation');
 });
 
+test('the text index.html ships is the text the zh-TW dictionary holds', () => {
+  // The static content of a data-i18n element is not decoration: it is what the
+  // page says between paint and app.js running, what it says forever with
+  // JavaScript off — the <noscript> notice promises "the prose is still readable"
+  // — and what a scraper that does not execute scripts reads.
+  //
+  // Nothing checked it, so five had drifted, and one had drifted badly: the footer
+  // still read 「企業級網路安全情報遙測、漏洞診斷與資安事件處置平台。」 while the
+  // dictionary had been corrected to 「前端資安示範專案…全部使用模擬資料」. The
+  // guard against advertising a platform in the footer reads the dictionary, so it
+  // passed the whole time. gaugeLbl had lost its 「（示範值，非真實檢測）」 and
+  // three footer links had lost words from their names.
+  //
+  // The dictionary is the source of truth, because it is what every other guard
+  // here reads and what the earlier corrections were made in.
+  const { app } = loadApp();
+  const offenders = [];
+  let examined = 0;
+
+  // Elements whose content is text rather than more elements. A nested element of
+  // the same tag would cut the match short — and would then be reported as a
+  // mismatch rather than passing quietly, which is the right way round.
+  for (const [, tag, key, content] of INDEX_HTML.matchAll(
+    /<([a-z0-9]+)\b[^>]*data-i18n="([^"]+)"[^>]*>([\s\S]*?)<\/\1>/g
+  )) {
+    examined++;
+    const expected = app.TRANSLATIONS['zh-TW'][key];
+    if (content.trim() !== expected) {
+      offenders.push(`<${tag} data-i18n="${key}">: ${JSON.stringify(content.trim())} vs ${JSON.stringify(expected)}`);
+    }
+  }
+
+  assert.ok(examined >= 80, `only ${examined} translated elements found; the sweep is broken`);
+  assert.deepEqual(offenders, [],
+    'the pre-JavaScript text disagrees with zh-TW; copy the dictionary value into index.html');
+});
+
 test('a language switch reaches text that lives in an attribute', () => {
   // setLanguage handled aria-label and nothing else, so `title="Toggle Theme"`
   // and the hero image's alt text were English in both languages. Beyond the
@@ -207,6 +244,51 @@ test('every name the page carries is translatable, and none of them claims a liv
   }
 
   assert.ok(examined >= 12, `only ${examined} names examined; the sweep found less than the page carries`);
+});
+
+/**
+ * Words that say the claim is a demonstration. Deliberately strong markers only:
+ * `未` or `not` would match half the dictionary and let a claim pass on a word
+ * that has nothing to do with it.
+ */
+const DISCLAIMS = /模擬|虛構|示範|範例|不提供|demo|simulat|sample|fiction|example/i;
+
+test('nothing the page says about itself claims a live service undisclaimed', () => {
+  // CLAIMS_LIVE used to be applied to the accessible names only, which is where
+  // the wrong one had been found. It reaches the whole dictionary here, and found
+  // three more: mapTitle called a canvas of random dots 「即時動態地圖」 / "Live
+  // Cyber Attack Vector Map" — the first line of that section, and the loudest
+  // claim on the page — and the English playbookDesc had SOC analysts working
+  // "during live cyber security incidents", an embellishment the zh-TW line does
+  // not have.
+  //
+  // The rule is not "never say live": 「不提供即時監控」 and "no live monitoring"
+  // are the honest sentences, and 「即時搜尋」 of a fabricated list is true of the
+  // search. So a value may make the claim as long as the same string says what it
+  // is — which is the only form a visitor reads as one thought.
+  const { app } = loadApp();
+  const claimed = [];
+  const offenders = [];
+
+  for (const [lang, dict] of Object.entries(app.TRANSLATIONS)) {
+    for (const [key, value] of Object.entries(dict)) {
+      const claim = CLAIMS_LIVE.exec(value);
+      if (!claim) continue;
+      claimed.push(`${lang}.${key}`);
+      if (!DISCLAIMS.test(value)) offenders.push(`${lang}.${key} [${claim[0]}]: ${value}`);
+    }
+  }
+
+  // The anti-vacuity anchor is named rather than counted: heroSubtitle is where
+  // both dictionaries say outright that there is no live monitoring here, so it is
+  // the one value that has to keep matching. If it stops, CLAIMS_LIVE stopped
+  // matching — and a sweep that finds nothing reports a page with nothing wrong.
+  for (const lang of ['zh-TW', 'en']) {
+    assert.ok(claimed.includes(`${lang}.heroSubtitle`),
+      `CLAIMS_LIVE no longer matches ${lang}.heroSubtitle, so this sweep found nothing to check`);
+  }
+  assert.deepEqual(offenders, [],
+    'say in the same string that this is a demonstration, or drop the claim');
 });
 
 test('the English dictionary contains no Chinese text', () => {

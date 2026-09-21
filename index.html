@@ -84,6 +84,16 @@
 </head>
 <body>
 
+  <!-- First in the document because "first focusable element" is the whole of
+       what this is: a route past the header, the ticker and the banner to the
+       content, for the visitor who reaches them with the Tab key rather than with
+       their eyes. Off-screen until focused, so it costs a sighted visitor nothing.
+       It points at <main>, which carries tabindex="-1" for it: a fragment link to
+       an element that cannot hold focus scrolls the page and leaves focus where it
+       was, so the next Tab would go back into the navigation and the link would
+       have done nothing for the one input method it exists to serve. -->
+  <a class="skip-link" href="#main" data-i18n="skipToContent">跳到主要內容</a>
+
   <!--
     Bilingual and hardcoded, both on purpose: data-i18n is applied by app.js,
     which is precisely what has not run if this is on screen, so a translated
@@ -178,7 +188,7 @@
     </div>
   </aside>
 
-  <main>
+  <main id="main" tabindex="-1">
     <!-- Hero Section -->
     <section class="hero-section" id="hero">
       <div class="container hero-grid">
@@ -241,12 +251,20 @@
       <div class="container">
         <div class="section-header">
           <span class="section-tag">// GLOBAL TELEMETRY</span>
-          <h2 class="section-title" data-i18n="mapTitle">全球網路攻擊即時動態地圖</h2>
+          <h2 class="section-title" data-i18n="mapTitle">全球網路攻擊動態地圖（模擬資料）</h2>
           <p class="section-desc" data-i18n="mapDesc">模擬追蹤全球網路攻擊流量、惡意程式 C2 中繼站連線與 DDoS 洗流量中心動態。</p>
         </div>
 
         <div class="map-container">
-          <canvas id="threatCanvas"></canvas>
+          <!-- A bare <canvas> is announced as nothing at all: it has no implicit
+               role and no content a screen reader can fall back to, so this
+               section was a heading, a description, a colour key, and then
+               silence where the thing they describe should be. role="img" with a
+               name is the text alternative (WCAG 1.1.1), and the name says the
+               figure carries no readable information — which is true, the points
+               are random — so that a visitor knows they have missed nothing
+               rather than wondering what was in the box. -->
+          <canvas id="threatCanvas" role="img" aria-label="模擬的全球攻擊流量動畫：圖形由隨機數值產生，不代表任何真實的連線或事件。" data-i18n-aria-label="mapCanvas"></canvas>
           <div class="map-legend">
             <div class="legend-item"><span class="legend-dot" style="background: var(--accent-cyan);"></span> <span data-i18n="legC2">C2 中繼連線</span></div>
             <div class="legend-item"><span class="legend-dot" style="background: var(--accent-rose);"></span> <span data-i18n="legRansom">勒索/漏洞利用</span></div>
@@ -325,10 +343,23 @@
                 </div>
               </form>
 
-              <div class="results-container" id="headerResultsContainer" style="display: none;">
+              <!-- role="status" on all three result containers (WCAG 4.1.3). The
+                   result of pressing 開始健檢 appears 600ms later, below the form,
+                   with focus left on the submit button: on screen that is obvious,
+                   and to a screen reader it was nothing at all. Focus is
+                   deliberately not moved there instead — it arrives after a delay,
+                   by which time the visitor may have tabbed on, and yanking focus
+                   out from under them is a worse fault than the silence.
+                   The reveal flips display from none, so the region enters the
+                   accessibility tree together with its first contents, which not
+                   every screen reader announces; the completion toast — an
+                   always-rendered live region — is what covers that first time.
+                   Every later re-scan and every language switch changes a region
+                   that is already there, which is the reliable case. -->
+              <div class="results-container" id="headerResultsContainer" style="display: none;" role="status" aria-live="polite">
                 <div class="gauge-row">
                   <div>
-                    <span style="font-size: 0.85rem; color: var(--text-muted); display: block;" data-i18n="gaugeLbl">整體安全評級</span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); display: block;" data-i18n="gaugeLbl">整體安全評級（示範值，非真實檢測）</span>
                     <strong id="headerScoreLabel" style="font-size: 1.2rem; color: var(--accent-cyan);">A+ 安全極佳</strong>
                   </div>
                   <div class="gauge-score" id="headerScoreNumber" style="color: var(--accent-emerald);">94 / 100</div>
@@ -377,7 +408,13 @@
               </div>
 
               <div style="margin-top: 1.75rem;">
-                <label class="form-label" data-i18n="p2ShaLabel">前端純 Hash 計算 (SHA-256)</label>
+                <!-- Not a <label>: the thing below is a computed value in a
+                     <span>, not a form control, and a <label> with no `for` and no
+                     control inside it labels nothing at all. Screen readers expose
+                     it as a label and then have nothing to attach it to, which is
+                     worse than the plain caption it always was. .form-label is a
+                     class, so the appearance is unchanged. -->
+                <span class="form-label" data-i18n="p2ShaLabel">前端純 Hash 計算 (SHA-256)</span>
                 <div class="hash-output-box">
                   <span id="sha256HashOutput">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
                   <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" id="copyHashBtn" data-i18n="p2Copy" type="button">複製 Hash</button>
@@ -402,7 +439,7 @@
                 </div>
               </form>
 
-              <div id="phishingResults" style="display: none; margin-top: 1.5rem;" class="results-container">
+              <div id="phishingResults" style="display: none; margin-top: 1.5rem;" class="results-container" role="status" aria-live="polite">
                 <!-- Dynamically updated -->
               </div>
             </div>
@@ -424,7 +461,7 @@
                 </div>
               </form>
 
-              <div id="darkwebResults" style="display: none; margin-top: 1.5rem;" class="results-container">
+              <div id="darkwebResults" style="display: none; margin-top: 1.5rem;" class="results-container" role="status" aria-live="polite">
                 <!-- Dynamically updated -->
               </div>
             </div>
@@ -506,7 +543,12 @@
             <div class="logo-icon">🛡️</div>
             <div class="logo-text">Aegis<span>Guard</span></div>
           </div>
-          <p data-i18n="footerBrand">企業級網路安全情報遙測、漏洞診斷與資安事件處置平台。</p>
+          <!-- b10ef97 corrected this line in the dictionary and left the markup
+               saying 「企業級…資安事件處置平台。」, which is what the page said
+               until app.js ran and what it said forever with JavaScript off. The
+               platform guard reads the dictionary, so it never noticed. The static
+               text of every data-i18n element is now held to the zh-TW value. -->
+          <p data-i18n="footerBrand">前端資安示範專案：安全標頭評分、密碼熵值、CVE 查詢與應變劇本，全部使用模擬資料。</p>
         </div>
 
         <div class="footer-column">
@@ -522,9 +564,9 @@
         <div class="footer-column">
           <h5 data-i18n="footerCol2">國際權威機構</h5>
           <ul class="footer-links">
-            <li><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener" data-i18n="footerCISA">CISA KEV 漏洞目錄</a></li>
-            <li><a href="https://nvd.nist.gov" target="_blank" rel="noopener" data-i18n="footerNVD">NIST NVD 資料庫</a></li>
-            <li><a href="https://www.first.org" target="_blank" rel="noopener" data-i18n="footerFIRST">FIRST 應變小組聯盟</a></li>
+            <li><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener" data-i18n="footerCISA">CISA KEV 已遭利用漏洞目錄</a></li>
+            <li><a href="https://nvd.nist.gov" target="_blank" rel="noopener" data-i18n="footerNVD">NIST NVD 漏洞資料庫</a></li>
+            <li><a href="https://www.first.org" target="_blank" rel="noopener" data-i18n="footerFIRST">FIRST 事件應變小組聯盟</a></li>
           </ul>
         </div>
 

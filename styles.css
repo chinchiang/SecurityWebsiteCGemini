@@ -111,6 +111,41 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0 1.5rem;
 }
 
+/* Skip link — moved out of the viewport rather than hidden.
+   display: none and visibility: hidden would both remove it from the tab order,
+   and being in the tab order, first, is the entire point of it; an off-screen
+   transform leaves it focusable and costs a sighted visitor nothing. z-index
+   clears the sticky navbar's 1000, which it would otherwise unfold behind.
+   The ink is a literal because the paint has to work under both palettes:
+   --accent-cyan is the one accent the light theme leaves alone, while
+   --bg-dark is near-white there, so naming it here would put cyan on cyan. */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 1rem;
+  z-index: 2000;
+  transform: translateY(-150%);
+  padding: 0.6rem 1.1rem;
+  background: var(--accent-cyan);
+  color: #04121b;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* The link lands focus here. An outline around the whole of <main> would be a
+   cyan box the height of the document, so the arrival is signalled by the scroll
+   and by the screen reader reading the content, the way .modal-card:focus does. */
+#main:focus {
+  outline: none;
+}
+
 /* Navigation Header */
 .navbar {
   position: sticky;
@@ -1429,6 +1464,7 @@ body.modal-open {
   /* Everything that is not the report. The sections are hidden as a group and
      the printed one put back, so a section added later cannot quietly join the
      printout — and so this does not become a list of the other five. */
+  .skip-link,
   .navbar,
   .ticker-bar,
   .demo-banner,

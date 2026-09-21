@@ -227,7 +227,7 @@ test('printing the report prints the report, not the whole page', () => {
 
   // The page furniture, none of which belongs on a printed report — and the two
   // controls inside the report that do nothing on paper.
-  for (const sel of ['.navbar', '.ticker-bar', '.demo-banner', '.footer',
+  for (const sel of ['.skip-link', '.navbar', '.ticker-bar', '.demo-banner', '.footer',
     '.toast-container', '.modal-overlay', '#printReportBtn', '#restartQuizBtn']) {
     assert.ok(hidden.includes(sel), `${sel} would be printed`);
   }
@@ -293,6 +293,100 @@ test('the disclosure is printed along with the report', () => {
 // footer quotes the `<a href="#">` it replaced, and the dead-link guard below
 // would otherwise find its own explanation and report it as the defect.
 const HTML = stripHtmlComments(read('index.html'));
+
+/* ---- the skip link ---- */
+
+/** Every element in the body that a browser would stop on with Tab, in order. */
+function tabStops(app) {
+  // Derived from app.js's own selector rather than a second list of tags here:
+  // the focus trap and this sweep have to agree on what a tab stop is.
+  const tags = app.FOCUSABLE_SELECTOR.split(',')
+    .map(s => s.trim())
+    .filter(s => /^[a-z]/.test(s))
+    .map(s => s.replace(/\[.*$/, ''));
+
+  const body = HTML.slice(HTML.indexOf('<body'));
+  const stops = [];
+  for (const m of body.matchAll(new RegExp(`<(${tags.join('|')})\\b[^>]*>`, 'g'))) {
+    // An <a> with no href is not focusable, and neither is anything parked at
+    // tabindex="-1" — <main> is the target of the link, not a stop before it.
+    if (m[1] === 'a' && !/\shref=/.test(m[0])) continue;
+    if (/\btabindex="-\d/.test(m[0])) continue;
+    stops.push(m[0]);
+  }
+  return stops;
+}
+
+/** translateY(...) in a rule body, as a number, or null if it has none. */
+const translateY = body => {
+  const m = /transform:\s*translateY\(\s*(-?[\d.]+)/.exec(body);
+  return m ? parseFloat(m[1]) : null;
+};
+
+const zIndex = selector => {
+  const rule = rules(CSS).find(r => r.selector === selector);
+  assert.ok(rule, `${selector} rule exists`);
+  const m = /z-index:\s*(\d+)/.exec(rule.body);
+  return m ? parseInt(m[1], 10) : null;
+};
+
+test('the first thing the Tab key reaches is a way past the header', () => {
+  // WCAG 2.4.1. Above the content sit the wordmark, five nav links, the language
+  // and theme buttons and the emergency button: nine tab stops between the top of
+  // the page and anything a visitor came for, on every visit, repeated after every
+  // reload. A sighted visitor's eye skips them for free.
+  const { app } = loadApp();
+  const stops = tabStops(app);
+
+  // A floor, because "the first match is the skip link" is also what an extraction
+  // that matched one thing would say.
+  assert.ok(stops.length >= 20, `only ${stops.length} tab stops found; the sweep is broken`);
+  assert.match(stops[0], /class="skip-link"/,
+    `the first tab stop is ${stops[0].trim()}, so the header has to be tabbed through`);
+
+  const link = stops[0];
+  const target = /href="#([^"]+)"/.exec(link);
+  assert.ok(target, 'the skip link needs a destination');
+  assert.match(link, /data-i18n="([^"]+)"/, 'the skip link must be translated like any other prose');
+
+  // The one part of this that fails silently: a fragment link to an element that
+  // cannot hold focus scrolls the page and leaves focus in the header, so the next
+  // Tab returns to the nav link after the wordmark and the visitor is back where
+  // they started — with the page scrolled, which makes it look like it worked.
+  const targetTag = new RegExp(`<[a-z]+\\b[^>]*\\bid="${target[1]}"[^>]*>`).exec(HTML);
+  assert.ok(targetTag, `the skip link points at #${target[1]}, which is on no element`);
+  assert.match(targetTag[0], /tabindex="-1"/,
+    `#${target[1]} cannot take focus, so the link only scrolls`);
+
+  // And it has to be past the furniture: landing on something above the navbar
+  // would leave every one of those nine stops still ahead of the visitor.
+  assert.ok(HTML.indexOf(targetTag[0]) > HTML.indexOf('<header'),
+    'the destination is above the header it is meant to skip');
+});
+
+test('the skip link is out of sight without being out of the tab order', () => {
+  // display: none and visibility: hidden are the two ways to hide this that also
+  // un-focus it, which would leave a link that is invisible AND unreachable: no
+  // visitor of any kind would ever find it, and nothing on screen would look wrong.
+  const rule = rules(CSS).find(r => r.selector === '.skip-link');
+  assert.ok(rule, 'styles.css needs a .skip-link rule');
+  assert.doesNotMatch(rule.body, /display:\s*none|visibility:\s*hidden/,
+    'both of these remove it from the tab order, which is the only place it lives');
+
+  const focused = rules(CSS).find(r => r.selector === '.skip-link:focus');
+  assert.ok(focused, 'the link must become visible when it is focused');
+
+  // Off-screen by one mechanism and back by the same one, compared as numbers so
+  // that a rule which moves it away and never brings it back cannot pass.
+  assert.ok(translateY(rule.body) < 0,
+    'the resting position must be off the top of the viewport');
+  assert.equal(translateY(focused.body), 0,
+    'focusing it must bring it into view; a focused link nobody can see is no better');
+
+  // The navbar is sticky at z-index 1000, and the link unfolds over the top of it.
+  assert.ok(zIndex('.skip-link') > zIndex('.navbar'),
+    'the link would appear behind the sticky header');
+});
 
 test('no breakpoint hides the navigation outright', () => {
   // The original: `.nav-links { display: none }` below 640px, with no disclosure
