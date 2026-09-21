@@ -50,6 +50,43 @@ test('every data-i18n attribute in index.html resolves in both languages', () =>
   assert.deepEqual(unresolved, [], 'data-i18n keys with no translation');
 });
 
+test('the text index.html ships is the text the zh-TW dictionary holds', () => {
+  // The static content of a data-i18n element is not decoration: it is what the
+  // page says between paint and app.js running, what it says forever with
+  // JavaScript off — the <noscript> notice promises "the prose is still readable"
+  // — and what a scraper that does not execute scripts reads.
+  //
+  // Nothing checked it, so five had drifted, and one had drifted badly: the footer
+  // still read 「企業級網路安全情報遙測、漏洞診斷與資安事件處置平台。」 while the
+  // dictionary had been corrected to 「前端資安示範專案…全部使用模擬資料」. The
+  // guard against advertising a platform in the footer reads the dictionary, so it
+  // passed the whole time. gaugeLbl had lost its 「（示範值，非真實檢測）」 and
+  // three footer links had lost words from their names.
+  //
+  // The dictionary is the source of truth, because it is what every other guard
+  // here reads and what the earlier corrections were made in.
+  const { app } = loadApp();
+  const offenders = [];
+  let examined = 0;
+
+  // Elements whose content is text rather than more elements. A nested element of
+  // the same tag would cut the match short — and would then be reported as a
+  // mismatch rather than passing quietly, which is the right way round.
+  for (const [, tag, key, content] of INDEX_HTML.matchAll(
+    /<([a-z0-9]+)\b[^>]*data-i18n="([^"]+)"[^>]*>([\s\S]*?)<\/\1>/g
+  )) {
+    examined++;
+    const expected = app.TRANSLATIONS['zh-TW'][key];
+    if (content.trim() !== expected) {
+      offenders.push(`<${tag} data-i18n="${key}">: ${JSON.stringify(content.trim())} vs ${JSON.stringify(expected)}`);
+    }
+  }
+
+  assert.ok(examined >= 80, `only ${examined} translated elements found; the sweep is broken`);
+  assert.deepEqual(offenders, [],
+    'the pre-JavaScript text disagrees with zh-TW; copy the dictionary value into index.html');
+});
+
 test('a language switch reaches text that lives in an attribute', () => {
   // setLanguage handled aria-label and nothing else, so `title="Toggle Theme"`
   // and the hero image's alt text were English in both languages. Beyond the

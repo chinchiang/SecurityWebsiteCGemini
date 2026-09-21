@@ -338,7 +338,7 @@
               <div class="results-container" id="headerResultsContainer" style="display: none;">
                 <div class="gauge-row">
                   <div>
-                    <span style="font-size: 0.85rem; color: var(--text-muted); display: block;" data-i18n="gaugeLbl">整體安全評級</span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); display: block;" data-i18n="gaugeLbl">整體安全評級（示範值，非真實檢測）</span>
                     <strong id="headerScoreLabel" style="font-size: 1.2rem; color: var(--accent-cyan);">A+ 安全極佳</strong>
                   </div>
                   <div class="gauge-score" id="headerScoreNumber" style="color: var(--accent-emerald);">94 / 100</div>
@@ -516,7 +516,12 @@
             <div class="logo-icon">🛡️</div>
             <div class="logo-text">Aegis<span>Guard</span></div>
           </div>
-          <p data-i18n="footerBrand">企業級網路安全情報遙測、漏洞診斷與資安事件處置平台。</p>
+          <!-- b10ef97 corrected this line in the dictionary and left the markup
+               saying 「企業級…資安事件處置平台。」, which is what the page said
+               until app.js ran and what it said forever with JavaScript off. The
+               platform guard reads the dictionary, so it never noticed. The static
+               text of every data-i18n element is now held to the zh-TW value. -->
+          <p data-i18n="footerBrand">前端資安示範專案：安全標頭評分、密碼熵值、CVE 查詢與應變劇本，全部使用模擬資料。</p>
         </div>
 
         <div class="footer-column">
@@ -532,9 +537,9 @@
         <div class="footer-column">
           <h5 data-i18n="footerCol2">國際權威機構</h5>
           <ul class="footer-links">
-            <li><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener" data-i18n="footerCISA">CISA KEV 漏洞目錄</a></li>
-            <li><a href="https://nvd.nist.gov" target="_blank" rel="noopener" data-i18n="footerNVD">NIST NVD 資料庫</a></li>
-            <li><a href="https://www.first.org" target="_blank" rel="noopener" data-i18n="footerFIRST">FIRST 應變小組聯盟</a></li>
+            <li><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener" data-i18n="footerCISA">CISA KEV 已遭利用漏洞目錄</a></li>
+            <li><a href="https://nvd.nist.gov" target="_blank" rel="noopener" data-i18n="footerNVD">NIST NVD 漏洞資料庫</a></li>
+            <li><a href="https://www.first.org" target="_blank" rel="noopener" data-i18n="footerFIRST">FIRST 事件應變小組聯盟</a></li>
           </ul>
         </div>
 
