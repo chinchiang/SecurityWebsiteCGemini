@@ -470,7 +470,7 @@ function initLanguageToggle() {
  * Attributes whose value is text a visitor reads, so a language switch has to
  * reach them. An element opts in with data-i18n-<attribute>="dictionaryKey".
  */
-const TRANSLATED_ATTRIBUTES = ['aria-label', 'title', 'alt'];
+const TRANSLATED_ATTRIBUTES = ['aria-label', 'title', 'alt', 'placeholder'];
 
 function setLanguage(lang) {
   currentLang = lang;
@@ -488,11 +488,12 @@ function setLanguage(lang) {
 
   // Text carried in an attribute rather than in a text node, which means there
   // is nothing to swap with innerHTML: the accessible name (aria-label), the
-  // tooltip (title) and an image's description (alt). Only aria-label used to be
-  // handled here, so `title="Toggle Theme"` and the hero image's alt stayed in
-  // English in both languages. One rule for all three — data-i18n-<attribute>
-  // sets <attribute> — so the next one is a markup change rather than another
-  // loop, and the list is a constant the guards can read.
+  // tooltip (title), an image's description (alt) and a field's hint
+  // (placeholder). Only aria-label used to be handled here; the six placeholders
+  // were each looked up by id below, and every other attribute was simply
+  // forgotten. One rule for all of them — data-i18n-<attribute> sets
+  // <attribute> — so the next one is a markup change rather than another entry in
+  // a list nobody remembers to extend, and the list is a constant the guards read.
   TRANSLATED_ATTRIBUTES.forEach(attribute => {
     document.querySelectorAll(`[data-i18n-${attribute}]`).forEach(el => {
       const key = el.getAttribute(`data-i18n-${attribute}`);
@@ -501,25 +502,6 @@ function setLanguage(lang) {
       }
     });
   });
-
-  // Update input placeholders
-  const domainInput = document.getElementById('domainInput');
-  if (domainInput) domainInput.placeholder = dictionary.p1Placeholder;
-
-  const passInput = document.getElementById('passInput');
-  if (passInput) passInput.placeholder = dictionary.p2Placeholder;
-
-  const phishingUrlInput = document.getElementById('phishingUrlInput');
-  if (phishingUrlInput) phishingUrlInput.placeholder = dictionary.p3Placeholder;
-
-  const darkwebEmailInput = document.getElementById('darkwebEmailInput');
-  if (darkwebEmailInput) darkwebEmailInput.placeholder = dictionary.p4Placeholder;
-
-  const cveSearchInput = document.getElementById('cveSearchInput');
-  if (cveSearchInput) cveSearchInput.placeholder = dictionary.cveSearchPh;
-
-  const reporterContact = document.getElementById('reporterContact');
-  if (reporterContact) reporterContact.placeholder = dictionary.modalContactPh;
 
   // Update ticker stream
   const tickerContainer = document.getElementById('threatTickerContent');

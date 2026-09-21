@@ -37,6 +37,19 @@ function isDescendantOf(node, ancestor) {
  */
 const SIMPLE_SELECTOR = /^(?:[A-Za-z][\w-]*)?(?:\.[A-Za-z][\w-]*|\[[\w-]+(?:="[^"]*")?\])*$/;
 
+/**
+ * Attributes a browser reflects into a same-named property, so that reading
+ * `el.placeholder` after setAttribute('placeholder', …) answers what the field
+ * actually shows.
+ *
+ * Deliberately short: reflecting an attribute the stub does not otherwise model
+ * would be inventing behaviour. But leaving out one that app.js writes is worse
+ * than either — the property keeps its stale value, so a test reads the old text
+ * out of an element whose DOM already holds the new one, and both halves look
+ * right in isolation.
+ */
+const REFLECTED_ATTRIBUTES = ['id', 'placeholder'];
+
 function matchesSimple(el, sel) {
   let rest = sel;
 
@@ -145,7 +158,7 @@ function createElement(env, tagName) {
 
     setAttribute(name, value) {
       this.attributes[name] = String(value);
-      if (name === 'id') this.id = String(value);
+      if (REFLECTED_ATTRIBUTES.includes(name)) this[name] = String(value);
     },
     getAttribute(name) {
       return Object.prototype.hasOwnProperty.call(this.attributes, name)

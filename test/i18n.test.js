@@ -52,12 +52,12 @@ test('every data-i18n attribute in index.html resolves in both languages', () =>
 
 test('a language switch reaches text that lives in an attribute', () => {
   // setLanguage handled aria-label and nothing else, so `title="Toggle Theme"`
-  // and the hero image's alt text were English in both languages. This walks
-  // app.js's own list rather than naming the attributes again: a fourth entry
-  // added without teaching the loop about it fails here.
+  // and the hero image's alt text were English in both languages. Beyond the
+  // list, this walks app.js's own array rather than naming the attributes again:
+  // an entry added without teaching the loop about it fails here.
   const { app, dom } = loadApp();
-  assert.deepEqual(app.TRANSLATED_ATTRIBUTES, ['aria-label', 'title', 'alt'],
-    'the three attributes on the page that carry readable text');
+  assert.deepEqual(app.TRANSLATED_ATTRIBUTES, ['aria-label', 'title', 'alt', 'placeholder'],
+    'the attributes on the page whose value is text a visitor reads');
 
   const elements = app.TRANSLATED_ATTRIBUTES.map(attribute => {
     const el = dom.createElement('span');
@@ -71,6 +71,46 @@ test('a language switch reaches text that lives in an attribute', () => {
       assert.equal(elements[i].getAttribute(attribute), app.TRANSLATIONS[lang].modalClose,
         `${attribute} kept its old value through a switch to ${lang}`);
     });
+  }
+});
+
+test('a field hint follows the language switch through the property the field reads', () => {
+  // The six placeholders were six getElementById calls inside setLanguage, each
+  // assigning el.placeholder — the very list the comment above the loop claimed
+  // nobody would have to remember to extend. They declare a key in the markup
+  // now, so the loop writes the attribute; a browser reflects that into the
+  // property, and dom-stub reflects it too rather than keeping a stale copy.
+  const { app, dom } = loadApp();
+  const input = dom.registerId('domainInput', dom.createElement('input'));
+  input.setAttribute('data-i18n-placeholder', 'p1Placeholder');
+  dom.registerI18nAttr('placeholder', input);
+
+  app.setLanguage('en');
+  assert.equal(input.getAttribute('placeholder'), app.TRANSLATIONS['en'].p1Placeholder);
+  assert.equal(input.placeholder, app.TRANSLATIONS['en'].p1Placeholder,
+    'the attribute was written but the property a form field reads was not');
+
+  app.setLanguage('zh-TW');
+  assert.equal(input.placeholder, app.TRANSLATIONS['zh-TW'].p1Placeholder,
+    'the hint stayed in English');
+});
+
+test('no translated attribute is written by hand outside the loop', () => {
+  // Six placeholders were wired one id at a time, and the seventh would have
+  // been too. A hand-written assignment is invisible to every guard here: it
+  // cannot be found in the markup, so it is neither checked for a key nor for
+  // what it claims. The loop is the only writer.
+  const { app, source } = loadApp();
+  const loop = 'el.setAttribute(attribute, dictionary[key]);';
+  assert.ok(source.includes(loop), 'the one line allowed to write these has moved');
+  const rest = source.replace(loop, '');
+
+  for (const attribute of app.TRANSLATED_ATTRIBUTES) {
+    const property = attribute.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    assert.doesNotMatch(rest, new RegExp(`setAttribute\\(\\s*['"\`]${attribute}['"\`]`),
+      `${attribute} is set by hand; declare data-i18n-${attribute} in the markup instead`);
+    assert.doesNotMatch(rest, new RegExp(`\\.${property}\\s*=[^=]`),
+      `.${property} is assigned by hand; declare data-i18n-${attribute} in the markup instead`);
   }
 });
 
@@ -94,7 +134,7 @@ test('every data-i18n-<attribute> in index.html resolves in both languages', () 
   // for the modal close button, the bare × glyph, i.e. none.
   const { app } = loadApp();
   const used = [...INDEX_HTML.matchAll(/data-i18n-([a-z][\w-]*)="([^"]+)"/g)];
-  assert.ok(used.length >= 4, `only ${used.length} translated attributes found; the sweep is broken`);
+  assert.ok(used.length >= 10, `only ${used.length} translated attributes found; the sweep is broken`);
 
   for (const [, attribute, key] of used) {
     // An attribute setLanguage does not iterate is markup that looks translated
@@ -129,12 +169,12 @@ test('an element with an i18n aria-label carries no conflicting text', () => {
 const CLAIMS_LIVE = /\blive\b|real-?time|monitoring|platform|即時|實時|平台/i;
 
 test('every name the page carries is translatable, and none of them claims a live service', () => {
-  // The whole page in one sweep rather than the four names that happened to be
-  // wrong: aria-label, title and alt are the attributes whose value a visitor
-  // reads, and three of the five on the page were hardcoded English that no
-  // language switch could reach. Both directions are checked here, because they
-  // are two halves of one pairing: a name must declare a key, and a declared key
-  // must have the zh-TW string as its pre-JavaScript fallback.
+  // The whole page in one sweep rather than the names that happened to be wrong:
+  // every attribute setLanguage translates is text a visitor reads, and three of
+  // the five accessible names on the page were hardcoded English that no language
+  // switch could reach. Both directions are checked here, because they are two
+  // halves of one pairing: a name must declare a key, and a declared key must
+  // have the zh-TW string as its pre-JavaScript fallback.
   const { app } = loadApp();
   let examined = 0;
 
@@ -166,7 +206,7 @@ test('every name the page carries is translatable, and none of them claims a liv
     }
   }
 
-  assert.ok(examined >= 6, `only ${examined} names examined; the sweep found less than the page carries`);
+  assert.ok(examined >= 12, `only ${examined} names examined; the sweep found less than the page carries`);
 });
 
 test('the English dictionary contains no Chinese text', () => {

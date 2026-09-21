@@ -319,7 +319,7 @@
                 <div class="form-group">
                   <label class="form-label" for="domainInput" data-i18n="p1Label">目標網域或 URL</label>
                   <div class="input-row">
-                    <input type="text" id="domainInput" class="form-input" placeholder="例如：secure-portal.company.com" required>
+                    <input type="text" id="domainInput" class="form-input" placeholder="例如：secure-portal.company.com" data-i18n-placeholder="p1Placeholder" required>
                     <button type="submit" class="btn btn-primary" id="runHeaderScanBtn" data-i18n="p1Btn">開始健檢 ⚡</button>
                   </div>
                 </div>
@@ -349,7 +349,7 @@
 
               <div class="form-group">
                 <label class="form-label" for="passInput" data-i18n="p2Label">輸入測試密碼 / 密鑰字串</label>
-                <input type="password" id="passInput" class="form-input" placeholder="請在此輸入密碼..." autocomplete="off">
+                <input type="password" id="passInput" class="form-input" placeholder="請在此輸入密碼..." data-i18n-placeholder="p2Placeholder" autocomplete="off">
               </div>
 
               <div class="entropy-meter">
@@ -396,7 +396,7 @@
                 <div class="form-group">
                   <label class="form-label" for="phishingUrlInput" data-i18n="p3Label">要檢測的可疑 URL</label>
                   <div class="input-row">
-                    <input type="text" id="phishingUrlInput" class="form-input" placeholder="例如：http://login-paypalls-update.com/signin" required>
+                    <input type="text" id="phishingUrlInput" class="form-input" placeholder="例如：http://login-paypalls-update.com/signin" data-i18n-placeholder="p3Placeholder" required>
                     <button type="submit" class="btn btn-primary" id="inspectUrlBtn" data-i18n="p3Btn">分析 URL 結構</button>
                   </div>
                 </div>
@@ -418,7 +418,7 @@
                 <div class="form-group">
                   <label class="form-label" for="darkwebEmailInput" data-i18n="p4Label">企業 Email 或 網域名稱</label>
                   <div class="input-row">
-                    <input type="email" id="darkwebEmailInput" class="form-input" placeholder="employee@company.com" required>
+                    <input type="email" id="darkwebEmailInput" class="form-input" placeholder="employee@company.com" data-i18n-placeholder="p4Placeholder" required>
                     <button type="submit" class="btn btn-primary" id="checkDarkwebBtn" data-i18n="p4Btn">查詢外洩紀錄</button>
                   </div>
                 </div>
@@ -447,7 +447,7 @@
 
         <div class="cve-toolbar">
           <div class="form-group" style="flex: 1; margin-bottom: 0;">
-            <input type="text" id="cveSearchInput" class="form-input" placeholder="搜尋 CVE 編號、軟體名稱 (如 Linux, Apache, Chrome) 或關鍵字...">
+            <input type="text" id="cveSearchInput" class="form-input" placeholder="搜尋 CVE 編號、軟體名稱 (如 Linux, Apache, Chrome) 或關鍵字..." data-i18n-placeholder="cveSearchPh">
           </div>
           <ul class="filter-pills">
             <li><button class="filter-btn active" data-severity="ALL" data-i18n="filterAll" type="button">全部等級</button></li>
@@ -586,7 +586,7 @@
 
         <div class="form-group">
           <label class="form-label" for="reporterContact" data-i18n="modalContactLabel">通報人電話 / Slack 帳號</label>
-          <input type="text" id="reporterContact" class="form-input" placeholder="@security-lead 或 +886 912-345-678" required>
+          <input type="text" id="reporterContact" class="form-input" placeholder="@security-lead 或 +886 912-345-678" data-i18n-placeholder="modalContactPh" required>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
