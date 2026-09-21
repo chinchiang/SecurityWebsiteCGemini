@@ -486,6 +486,48 @@ test('the toast container is announced to assistive technology', () => {
   assert.match(match[0], /aria-live="polite"/);
 });
 
+test('anything app.js reveals in place is announced when it appears', () => {
+  // WCAG 4.1.3. Three tools answer by unhiding a container below their form,
+  // 500-600ms after the submit, with focus still on the button. A sighted visitor
+  // sees the block appear; a screen reader said nothing about any of it, so the
+  // only evidence the check had run was the toast saying it had.
+  //
+  // Read out of app.js rather than listed here, so a fourth tool that answers the
+  // same way is held to the same rule without anyone remembering to add it.
+  const js = stripJsComments(JS);
+  const revealed = new Set();
+
+  for (const m of js.matchAll(/(\w+)\.style\.display\s*=\s*'block'/g)) {
+    // Resolved backwards from the reveal rather than from a name-to-id map: two
+    // render functions both call their container `results`, and one map would
+    // quietly answer with whichever was declared last.
+    const binding = `${m[1]} = document.getElementById('`;
+    const at = js.lastIndexOf(binding, m.index);
+    assert.notEqual(at, -1, `app.js reveals ${m[1]}, which resolves to no getElementById above it`);
+    revealed.add(js.slice(at + binding.length, js.indexOf("'", at + binding.length)));
+  }
+
+  assert.ok(revealed.size >= 3, `only ${revealed.size} revealed containers found; the sweep is broken`);
+
+  for (const id of revealed) {
+    const tag = new RegExp(`<[a-z]+\\b[^>]*\\bid="${id}"[^>]*>`).exec(MARKUP);
+    assert.ok(tag, `app.js reveals #${id}, which is on no element in index.html`);
+    assert.match(tag[0], /role="status"/,
+      `#${id} appears with no announcement; a screen reader is told nothing happened`);
+    assert.match(tag[0], /aria-live="polite"/,
+      `#${id} must not interrupt: assertive would talk over whatever is being read`);
+  }
+
+  // Deliberately out of scope, and worth saying so: #sha256HashOutput is rewritten
+  // on every keystroke in the password field. A live region there would read 64
+  // hex characters per character typed, which is why it is updated in place and
+  // left silent rather than being announced like a result.
+  assert.doesNotMatch(
+    /<span[^>]*id="sha256HashOutput"[^>]*>/.exec(MARKUP)[0], /aria-live/,
+    'the hash output is continuous, not a status message'
+  );
+});
+
 test('every canvas is either named or declared to carry nothing', () => {
   // A <canvas> has no implicit role and no fallback content, so one with no ARIA
   // is announced as nothing whatsoever — not even as an image that could not be

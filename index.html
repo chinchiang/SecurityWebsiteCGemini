@@ -343,7 +343,20 @@
                 </div>
               </form>
 
-              <div class="results-container" id="headerResultsContainer" style="display: none;">
+              <!-- role="status" on all three result containers (WCAG 4.1.3). The
+                   result of pressing 開始健檢 appears 600ms later, below the form,
+                   with focus left on the submit button: on screen that is obvious,
+                   and to a screen reader it was nothing at all. Focus is
+                   deliberately not moved there instead — it arrives after a delay,
+                   by which time the visitor may have tabbed on, and yanking focus
+                   out from under them is a worse fault than the silence.
+                   The reveal flips display from none, so the region enters the
+                   accessibility tree together with its first contents, which not
+                   every screen reader announces; the completion toast — an
+                   always-rendered live region — is what covers that first time.
+                   Every later re-scan and every language switch changes a region
+                   that is already there, which is the reliable case. -->
+              <div class="results-container" id="headerResultsContainer" style="display: none;" role="status" aria-live="polite">
                 <div class="gauge-row">
                   <div>
                     <span style="font-size: 0.85rem; color: var(--text-muted); display: block;" data-i18n="gaugeLbl">整體安全評級（示範值，非真實檢測）</span>
@@ -420,7 +433,7 @@
                 </div>
               </form>
 
-              <div id="phishingResults" style="display: none; margin-top: 1.5rem;" class="results-container">
+              <div id="phishingResults" style="display: none; margin-top: 1.5rem;" class="results-container" role="status" aria-live="polite">
                 <!-- Dynamically updated -->
               </div>
             </div>
@@ -442,7 +455,7 @@
                 </div>
               </form>
 
-              <div id="darkwebResults" style="display: none; margin-top: 1.5rem;" class="results-container">
+              <div id="darkwebResults" style="display: none; margin-top: 1.5rem;" class="results-container" role="status" aria-live="polite">
                 <!-- Dynamically updated -->
               </div>
             </div>
